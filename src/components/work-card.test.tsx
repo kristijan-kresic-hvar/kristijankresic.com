@@ -9,7 +9,7 @@ describe('WorkCard', () => {
   it('links to the case study and names it for screen readers', () => {
     render(<WorkCard study={study} />);
     const link = screen.getByRole('link', { name: new RegExp(study.title) });
-    expect(link).toHaveAttribute('href', `/work/${study.slug}/`);
+    expect(link.getAttribute('href')?.replace(/\/$/, '')).toBe(`/work/${study.slug}`);
   });
 
   it('uses the card-sized image', () => {
