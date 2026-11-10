@@ -12,9 +12,10 @@ describe('WorkCard', () => {
     expect(link.getAttribute('href')?.replace(/\/$/, '')).toBe(`/work/${study.slug}`);
   });
 
-  it('uses the card-sized image', () => {
+  it('uses the full-page capture for scrolling studies and the card crop otherwise', () => {
     render(<WorkCard study={study} />);
     const img = screen.getByRole('img', { name: study.image.alt });
-    expect(img.getAttribute('src')).toContain('-card.webp');
+    const src = decodeURIComponent(img.getAttribute('src') ?? '');
+    expect(src).toContain(study.scroll ? `${study.slug}-full.webp` : `${study.slug}-card.webp`);
   });
 });
