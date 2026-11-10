@@ -7,7 +7,8 @@ import { PROFILE } from '@/content/profile';
 import './globals.css';
 
 const geist = Geist({ subsets: ['latin', 'latin-ext'], variable: '--font-geist', display: 'swap' });
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap' });
+// Mono only sets small data (frame numbers, markers), so it is not worth a preload ahead of the LCP.
+const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap', preload: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://kristijankresic.com'),

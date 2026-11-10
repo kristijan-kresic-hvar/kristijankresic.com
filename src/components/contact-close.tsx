@@ -5,7 +5,7 @@ import { PROFILE } from '@/content/profile';
 
 /**
  * The last beat of every page: the address is the headline. Sized from its container so the whole
- * address always sits on one line (it measures about 14em wide).
+ * address always sits on one line (see `.contact-address` in globals.css).
  */
 export function ContactClose() {
   return (
@@ -18,7 +18,7 @@ export function ContactClose() {
         <div className="mt-8 overflow-x-clip [container-type:inline-size] sm:mt-10">
           <a
             href={`mailto:${PROFILE.email}`}
-            className="contact-address text-[6.2vw] leading-none font-semibold tracking-tight text-text-primary [font-size:calc(100cqw/14.3)]"
+            className="contact-address leading-none font-semibold tracking-tight text-text-primary"
           >
             {PROFILE.email}
           </a>

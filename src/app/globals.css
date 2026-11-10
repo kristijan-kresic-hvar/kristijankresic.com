@@ -428,3 +428,14 @@ a.frame:hover,
 a:hover .frame {
   border-color: var(--color-border-strong);
 }
+
+/* Lines that must span their container on one line. The divisor is the line's measured width in
+   em plus a little slack. The vw line is the fallback where container units are missing. */
+.namemark {
+  font-size: 12.8vw;
+  font-size: calc(100cqw / 6.85);
+}
+.contact-address {
+  font-size: 6vw;
+  font-size: calc(100cqw / 14.5);
+}

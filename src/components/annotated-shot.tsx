@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { getImageProps } from 'next/image';
 import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Annotation } from '@/content/work';
 
@@ -68,9 +68,15 @@ export function AnnotatedShot({
     return () => ro.disconnect();
   }, [annotations]);
 
+  // The LCP element on this page: fetched first, and phones get the half-size crop (same framing,
+  // so the marker positions still hold).
+  const { props } = getImageProps({ src, alt, width, height, loading: 'eager', fetchPriority: 'high', decoding: 'sync' });
   const frame = (
     <div className="overflow-hidden rounded-lg border border-border-default bg-bg-elev-1">
-      <Image src={src} alt={alt} width={width} height={height} priority sizes="(min-width: 1024px) 66vw, 100vw" className="w-full" />
+      <picture>
+        <source media="(max-width: 40rem)" srcSet={src.replace('.webp', '-card.webp')} />
+        <img {...props} alt={alt} className="w-full" />
+      </picture>
     </div>
   );
 

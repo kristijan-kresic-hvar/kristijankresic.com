@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Container } from '@/components/container';
+import { Facts } from '@/components/facts';
 import { PROFILE } from '@/content/profile';
 
 export const metadata: Metadata = {
@@ -18,91 +19,64 @@ const TIMELINE = [
 
 export default function About() {
   return (
-    <Container className="py-12 sm:py-20">
-      <div className="grid gap-10 lg:grid-cols-[1fr_280px]">
-        <div className="max-w-2xl">
-          <p className="font-mono text-xs uppercase tracking-wide text-accent">About</p>
-          <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">Frontend engineer from Hvar, working with teams anywhere.</h1>
-          <div className="mt-6 space-y-4 text-text-body">
-            <p>
-              I&apos;ve been building for the web since 2016 and shipping it professionally for {PROFILE.yearsProfessional} years. For
-              the last three and a half of those I was at Agilno, a product agency, embedded in six North American client teams
-              across insurance, HIPAA healthcare, telehealth and IoT.
-            </p>
-            <p>
-              The pattern repeats: join a team, own the frontend end-to-end, leave behind a foundation other people can build on.
-              On BioCirV that meant the component system, data layer and PR reviews for two other developers; on OnCallable it
-              meant editors shipping pages without a deploy; on Suello it meant a Bluetooth device layer that just works.
-            </p>
-            <p>
-              I use AI coding tools daily for the mechanical parts of the job. Architecture, security decisions and every merged
-              line are mine.
-            </p>
-            <p>
-              Based on Hvar, Croatia (CET). EU citizen. Open to remote roles across Europe or with US-East overlap, and hybrid in
-              Split or Zagreb. Available now.
-            </p>
-          </div>
-
-          <h2 className="mt-12 font-mono text-xs uppercase tracking-wide text-text-muted">Timeline</h2>
-          <ol className="mt-4 divide-y divide-border-subtle border-y border-border-subtle">
-            {TIMELINE.map((t) => (
-              <li key={t.when} className="grid gap-1 py-4 sm:grid-cols-[180px_1fr]">
-                <span className="font-mono text-xs text-text-muted">{t.when}</span>
-                <span>
-                  <span className="text-text-primary">{t.what}</span>
-                  <span className="block text-sm text-text-body">{t.note}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <aside className="space-y-6">
+    <Container className="pt-10 pb-20 sm:pt-16 lg:pb-28">
+      {/* One grid: the statement, the portrait running down beside it and into the text, the text set in from the edge. */}
+      <div className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
+        <h1 className="text-display leading-[1.04] font-semibold tracking-tighter lg:col-span-8 lg:pt-10">
+          Frontend engineer from Hvar, working with teams anywhere.
+        </h1>
+        <figure className="max-w-64 lg:col-span-4 lg:row-span-2 lg:max-w-none">
           <Image
             src="/images/headshot.webp"
             alt={`Portrait of ${PROFILE.name}`}
             width={800}
             height={800}
-            className="w-48 rounded-full border border-border-default lg:w-full"
+            priority
+            sizes="(min-width: 1024px) 30vw, 256px"
+            className="portrait aspect-[4/5] w-full rounded-md object-cover"
           />
-          <dl className="space-y-3 text-sm">
-            <div>
-              <dt className="font-mono text-xs uppercase tracking-wide text-text-muted">CV</dt>
-              <dd className="mt-1 flex gap-3">
-                <a href={PROFILE.cv.frontend} className="text-accent-text hover:underline">
-                  Frontend
-                </a>
-                <a href={PROFILE.cv.fullstack} className="text-accent-text hover:underline">
-                  Full-stack
-                </a>
-              </dd>
-            </div>
-            <div>
-              <dt className="font-mono text-xs uppercase tracking-wide text-text-muted">Elsewhere</dt>
-              <dd className="mt-1 flex gap-3">
-                <a href={PROFILE.github} className="text-text-primary hover:underline">
-                  GitHub
-                </a>
-                <a href={PROFILE.linkedin} className="text-text-primary hover:underline">
-                  LinkedIn
-                </a>
-              </dd>
-            </div>
-            <div>
-              <dt className="font-mono text-xs uppercase tracking-wide text-text-muted">Contact</dt>
-              <dd className="mt-1">
-                <a href={`mailto:${PROFILE.email}`} className="text-text-primary hover:underline">
-                  {PROFILE.email}
-                </a>
-                <br />
-                <a href={PROFILE.phoneHref} className="text-text-primary hover:underline">
-                  {PROFILE.phone}
-                </a>
-              </dd>
-            </div>
-          </dl>
-        </aside>
+          <figcaption className="mt-2.5 text-sm text-text-muted">{PROFILE.name}, Hvar</figcaption>
+        </figure>
+        <div className="max-w-reading space-y-5 text-text-body lg:col-span-6 lg:col-start-3">
+          <p className="text-lead text-text-secondary">
+            I&apos;ve been building for the web since {PROFILE.since} and shipping it professionally for {PROFILE.yearsProfessional}{' '}
+            years. For the last three and a half of those I was at Agilno, a product agency, embedded in six North American client
+            teams across insurance, HIPAA healthcare, telehealth and IoT.
+          </p>
+          <p>
+            The pattern repeats: join a team, own the frontend end-to-end, leave behind a foundation other people can build on. On
+            BioCirV that meant the component system, data layer and PR reviews for two other developers; on OnCallable it meant
+            editors shipping pages without a deploy; on Suello it meant a Bluetooth device layer that just works.
+          </p>
+          <p>
+            I use AI coding tools daily for the mechanical parts of the job. Architecture, security decisions and every merged line
+            are mine.
+          </p>
+          <p>
+            Based on Hvar, Croatia (CET). EU citizen. Open to remote roles across Europe or with US-East overlap, and hybrid in Split
+            or Zagreb. Available now.
+          </p>
+        </div>
       </div>
+
+      <section aria-labelledby="timeline-title" className="mt-20 grid gap-x-12 gap-y-8 lg:mt-28 lg:grid-cols-12">
+        <h2 id="timeline-title" className="text-title leading-[1.08] font-semibold lg:col-span-4">
+          Timeline
+        </h2>
+        <ol className="border-b border-border-default lg:col-span-8">
+          {TIMELINE.map((t) => (
+            <li key={t.when} className="grid gap-x-8 gap-y-1 border-t border-border-default py-4 sm:grid-cols-[11rem_1fr]">
+              <span className="text-sm leading-6 text-text-muted tabular-nums">{t.when}</span>
+              <span>
+                <span className="font-medium text-text-primary">{t.what}</span>
+                <span className="mt-0.5 block text-text-body">{t.note}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <Facts className="mt-20 lg:mt-28" />
     </Container>
   );
 }

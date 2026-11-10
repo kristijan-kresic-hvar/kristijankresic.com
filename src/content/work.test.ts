@@ -29,8 +29,13 @@ describe('work content', () => {
     }
   });
 
-  it('captions every featured study for the landing wall', () => {
-    for (const w of FEATURED) expect(w.short, w.slug).toBeTruthy();
+  it('captions every featured study and ships both of its wall images', () => {
+    for (const w of FEATURED) {
+      expect(w.short, w.slug).toBeTruthy();
+      for (const kind of ['wall', 'full']) {
+        expect(existsSync(path.join(process.cwd(), 'public/images/work', `${w.slug}-${kind}.webp`)), `${w.slug} ${kind}`).toBe(true);
+      }
+    }
   });
 
   it('places every hotspot inside the image', () => {

@@ -12,11 +12,13 @@ describe('WorkCard', () => {
     expect(link.getAttribute('href')?.replace(/\/$/, '')).toBe(`/work/${study.slug}`);
   });
 
-  it('uses the full-page capture for scrolling studies and the card crop otherwise', () => {
-    render(<WorkCard study={study} />);
+  it('ships a small crop by default and the full-page capture to wide pointer screens', () => {
+    const { container } = render(<WorkCard study={study} />);
     const img = screen.getByRole('img', { name: study.image.alt });
-    const src = decodeURIComponent(img.getAttribute('src') ?? '');
-    expect(src).toContain(study.scroll ? `${study.slug}-full.webp` : `${study.slug}-card.webp`);
+    expect(img.getAttribute('src')).toContain(`${study.slug}-wall.webp`);
+    const source = container.querySelector('source');
+    expect(source?.getAttribute('srcset')).toContain(`${study.slug}-full.webp`);
+    expect(source?.getAttribute('media')).toContain('hover: hover');
   });
 
   it('captions the tile with the client and its one-line summary', () => {

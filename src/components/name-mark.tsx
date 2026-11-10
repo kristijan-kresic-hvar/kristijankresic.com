@@ -4,7 +4,7 @@ const plain = PROFILE.name.normalize('NFD').replace(/\p{M}/gu, '');
 
 /**
  * The name at poster scale with only its diacritics in amber (see `.namemark` in globals.css).
- * Sized from its container so it always spans the page frame: the name measures about 6.45em wide.
+ * Sized from its container in globals.css so it always spans the page frame.
  */
 export function NameMark({ className = '' }: { className?: string }) {
   return (
@@ -12,7 +12,7 @@ export function NameMark({ className = '' }: { className?: string }) {
       <span
         role="img"
         aria-label={PROFILE.name}
-        className="namemark text-[13.6vw] leading-[0.82] font-semibold tracking-tighter [font-size:calc(100cqw/6.45)]"
+        className="namemark leading-[0.82] font-semibold tracking-tighter"
       >
         <span aria-hidden="true">{PROFILE.name}</span>
         <span aria-hidden="true">{plain}</span>

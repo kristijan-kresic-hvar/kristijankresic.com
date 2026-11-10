@@ -125,13 +125,13 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
                   className="frame block overflow-hidden rounded-md border border-border-default bg-bg-elev-1"
                 >
                   <Image
-                    src={s}
+                    src={s.replace('.webp', '-thumb.webp')}
                     alt=""
-                    width={1200}
-                    height={750}
+                    width={640}
+                    height={400}
                     loading="lazy"
                     sizes="(min-width: 640px) 33vw, 100vw"
-                    className="aspect-[16/10] w-full object-cover object-top"
+                    className="w-full"
                   />
                 </a>
               </li>
