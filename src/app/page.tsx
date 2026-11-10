@@ -37,7 +37,7 @@ export default function Home() {
         <Container className="relative grid gap-10 py-14 sm:py-20 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] lg:items-center lg:py-24">
           <div>
             <p className="reveal font-mono text-xs uppercase tracking-wide text-accent">Frontend engineer · available now</p>
-            <h1 className="reveal reveal-delay-1 mt-4 text-[clamp(36px,4.8vw,64px)] font-semibold leading-[1.04] tracking-tighter">
+            <h1 className="reveal reveal-delay-1 mt-4 text-[clamp(34px,4.3vw,58px)] font-semibold leading-[1.05] tracking-tighter">
               I ship the whole frontend,
               <br className="hidden sm:block" /> not just the components<span className="text-accent">.</span>
             </h1>
