@@ -20,8 +20,11 @@ describe('AnnotatedShot', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
     const callout = document.getElementById('callout-1')!;
     fireEvent.focus(callout);
-    expect(callout.className).toContain('border-accent');
-    expect(screen.getByRole('button', { name: '2. Filters' }).className).toContain('bg-accent');
+    expect(callout).toHaveAttribute('data-active', 'true');
+    expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'true');
+    expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'false');
+    fireEvent.blur(callout);
+    expect(callout).toHaveAttribute('data-active', 'false');
   });
 
   it('falls back to a plain image with no annotations', () => {

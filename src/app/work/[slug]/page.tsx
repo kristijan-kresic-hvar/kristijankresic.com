@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AnnotatedShot } from '@/components/annotated-shot';
 import { Container } from '@/components/container';
+import { ArrowLeft, ArrowRight, ArrowUpRight } from '@/components/icons';
 import { WORK, getCaseStudy } from '@/content/work';
-import { PROFILE } from '@/content/profile';
 
 type Params = { slug: string };
 
@@ -24,6 +24,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   };
 }
 
+const row = 'grid grid-cols-[4.5rem_1fr] gap-x-4 border-t border-border-default py-3';
+
 export default async function CaseStudyPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const study = getCaseStudy(slug);
@@ -35,49 +37,48 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
 
   return (
     <article>
-      <Container className="py-10 sm:py-14">
-        <Link href="/#work" className="font-mono text-xs uppercase tracking-wide text-text-muted hover:text-text-primary">
-          ← All work
+      <Container className="pt-8 sm:pt-12">
+        <Link
+          href="/#work"
+          className="inline-flex items-center gap-2 text-sm text-text-muted transition-colors duration-(--duration-instant) hover:text-text-primary"
+        >
+          <ArrowLeft /> All work
         </Link>
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-end">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-wide text-accent">
-              {study.client} · {study.period}
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold sm:text-5xl">{study.title}</h1>
-            <p className="mt-4 max-w-2xl text-lg text-text-body">{study.tagline}</p>
+        <header className="mt-8 grid gap-x-12 gap-y-10 lg:mt-14 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-8">
+            <h1 className="text-display leading-[1.04] font-semibold tracking-tighter">{study.title}</h1>
+            <p className="mt-5 max-w-[44ch] text-lead text-text-body">{study.tagline}</p>
           </div>
-          <dl className="grid grid-cols-2 gap-4 text-sm lg:grid-cols-1">
-            <div>
-              <dt className="font-mono text-xs uppercase tracking-wide text-text-muted">Role</dt>
-              <dd className="mt-1 text-text-secondary">{study.role}</dd>
+          <dl className="text-sm lg:col-span-4">
+            <div className={row}>
+              <dt className="text-text-muted">Role</dt>
+              <dd className="text-text-primary">{study.role}</dd>
             </div>
-            <div>
-              <dt className="font-mono text-xs uppercase tracking-wide text-text-muted">Client</dt>
-              <dd className="mt-1 text-text-secondary">
+            <div className={row}>
+              <dt className="text-text-muted">Client</dt>
+              <dd className="text-text-primary">
                 {study.context}, {study.location}
               </dd>
             </div>
+            <div className={row}>
+              <dt className="text-text-muted">Period</dt>
+              <dd className="text-text-primary tabular-nums">{study.period}</dd>
+            </div>
             {study.url && (
-              <div className="col-span-2 lg:col-span-1">
-                <dt className="font-mono text-xs uppercase tracking-wide text-text-muted">Live</dt>
-                <dd className="mt-1">
-                  <a href={study.url} className="text-accent-text hover:underline" rel="noopener">
-                    {study.url.replace(/^https?:\/\/(www\.)?/, '')}
+              <div className={`${row} border-b`}>
+                <dt className="text-text-muted">Live</dt>
+                <dd>
+                  <a href={study.url} rel="noopener" className="link inline-flex items-center gap-1.5 text-text-primary">
+                    {study.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')} <ArrowUpRight />
                   </a>
                 </dd>
               </div>
             )}
           </dl>
-        </div>
+        </header>
       </Container>
 
-      <Container>
-        {study.annotations.length > 0 && (
-          <p className="mb-4 font-mono text-xs uppercase tracking-wide text-text-muted">
-            Numbered: the decisions behind the screen · hover or tab through them
-          </p>
-        )}
+      <Container className="mt-12 lg:mt-16">
         <AnnotatedShot
           src={study.image.src}
           alt={study.image.alt}
@@ -87,62 +88,83 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
         />
       </Container>
 
-      <Container className="grid gap-12 py-12 sm:py-16 lg:grid-cols-[2fr_1fr]">
-        <div className="max-w-2xl">
-          <h2 className="text-2xl font-semibold">What I built</h2>
-          <p className="mt-4 text-text-body">{study.summary}</p>
-          <ul className="mt-6 space-y-3">
+      <Container className="grid gap-x-12 gap-y-8 py-20 lg:grid-cols-12 lg:py-28">
+        <h2 className="text-title leading-[1.08] font-semibold lg:col-span-4">What I built</h2>
+        <div className="lg:col-span-7 lg:col-start-6">
+          <p className="text-lead text-text-secondary">{study.summary}</p>
+          <ul className="mt-10">
             {study.highlights.map((h) => (
-              <li key={h} className="flex gap-3 text-text-body">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-                <span>{h}</span>
+              <li key={h} className="border-t border-border-default py-5 text-text-body">
+                {h}
               </li>
             ))}
+            <li className={`${row} border-b py-5`}>
+              <h3 className="text-sm font-normal tracking-normal text-text-muted">Stack</h3>
+              <p className="text-text-secondary">{study.stack.join(', ')}</p>
+            </li>
           </ul>
-          {study.outcome && <p className="mt-6 border-l-2 border-accent pl-4 text-text-secondary">{study.outcome}</p>}
         </div>
-        <aside className="space-y-6 text-sm">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-wide text-text-muted">Stack</p>
-            <ul className="mt-2 flex flex-wrap gap-2">
-              {study.stack.map((s) => (
-                <li key={s} className="rounded-full border border-border-default px-2.5 py-0.5 font-mono text-xs text-text-secondary">
-                  {s}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="font-mono text-xs uppercase tracking-wide text-text-muted">Want this on your product?</p>
-            <a href={`mailto:${PROFILE.email}`} className="mt-1 block text-text-primary hover:underline">
-              {PROFILE.email}
-            </a>
-          </div>
-          {next && (
-            <div>
-              <p className="font-mono text-xs uppercase tracking-wide text-text-muted">Next</p>
-              <Link href={`/work/${next.slug}/`} className="mt-1 block text-text-primary hover:underline">
-                {next.title} →
-              </Link>
-            </div>
-          )}
-        </aside>
+        {study.outcome && (
+          <p className="ruled mt-10 text-title leading-[1.12] font-semibold tracking-tight text-text-primary lg:col-span-10 lg:mt-16">
+            {study.outcome}
+          </p>
+        )}
       </Container>
 
       {screens.length > 0 && (
-        <Container className="pb-16 sm:pb-24">
-          <h2 className="font-mono text-xs uppercase tracking-wide text-text-muted">More screens</h2>
-          <ul className="mt-4 grid gap-4 sm:grid-cols-3">
+        <Container className="pb-20 lg:pb-28">
+          <h2 className="text-title leading-[1.08] font-semibold">More screens</h2>
+          <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:mt-10 lg:gap-4">
             {screens.map((s, i) => (
-              <li key={s} className="overflow-hidden rounded-lg border border-border-subtle bg-bg-elev-1">
-                <a href={s} target="_blank" rel="noopener" aria-label={`${study.title} screen ${i + 1}, opens full size`}>
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <Image src={s} alt="" width={1200} height={900} loading="lazy" className="h-full w-full object-cover object-top" />
-                  </div>
+              <li key={s} className={i === 0 ? 'col-span-2 sm:col-span-1' : ''}>
+                <a
+                  href={s}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`${study.title} screen ${i + 1}, opens full size`}
+                  className="frame block overflow-hidden rounded-md border border-border-default bg-bg-elev-1"
+                >
+                  <Image
+                    src={s}
+                    alt=""
+                    width={1200}
+                    height={750}
+                    loading="lazy"
+                    sizes="(min-width: 640px) 33vw, 100vw"
+                    className="aspect-[16/10] w-full object-cover object-top"
+                  />
                 </a>
               </li>
             ))}
           </ul>
+        </Container>
+      )}
+
+      {next && (
+        <Container>
+          <Link
+            href={`/work/${next.slug}/`}
+            className="next-study group grid items-center gap-x-12 gap-y-6 border-t border-border-default py-10 sm:grid-cols-12 lg:py-14"
+          >
+            <span className="sm:col-span-8">
+              <span className="block text-sm text-text-muted">Next project</span>
+              <span className="mt-2 flex items-baseline gap-4 text-display leading-[1.04] font-semibold tracking-tighter text-text-primary">
+                {next.title}
+                <ArrowRight className="size-[0.5em] shrink-0 text-accent transition-transform duration-(--duration-fast) ease-out group-hover:translate-x-1.5 motion-reduce:transition-none" />
+              </span>
+            </span>
+            <span className="frame block overflow-hidden rounded-md border border-border-default sm:col-span-4">
+              <Image
+                src={next.image.src.replace('.webp', '-card.webp')}
+                alt=""
+                width={800}
+                height={500}
+                loading="lazy"
+                sizes="(min-width: 640px) 33vw, 100vw"
+                className="w-full"
+              />
+            </span>
+          </Link>
         </Container>
       )}
     </article>

@@ -4,15 +4,18 @@ import Image from 'next/image';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Annotation } from '@/content/work';
 
-type Line = { x1: number; y1: number; x2: number; y2: number };
+type Line = { x1: number; y1: number; x2: number; y2: number; mx: number };
 
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
+const MARKER = 14; // marker radius in px; lines start and end at the marker's edge
+
 /**
- * Hero screenshot with numbered hotspots and pointing lines to the decision behind each one.
- * Desktop: image left, callouts right, SVG lines between them, measured from the DOM.
- * Narrow screens: hotspots on the image, numbered list below, no lines.
- * Hotspots and callouts are buttons: hover or focus either to highlight the pair.
+ * Hero screenshot marked up like a proof: numbered markers on the image, the decision behind each
+ * one listed beside it, and a leader line joining every pair.
+ * From 1024px: image left, list right, SVG lines measured from the DOM.
+ * Below that: markers on the image, numbered list underneath, no lines.
+ * Markers and list rows are buttons: hover or focus either one to light the pair.
  */
 export function AnnotatedShot({
   src,
@@ -29,10 +32,9 @@ export function AnnotatedShot({
 }) {
   const wrap = useRef<HTMLDivElement>(null);
   const img = useRef<HTMLDivElement>(null);
-  const labels = useRef<(HTMLButtonElement | null)[]>([]);
+  const labels = useRef<(HTMLSpanElement | null)[]>([]);
   const [lines, setLines] = useState<Line[]>([]);
   const [active, setActive] = useState<number | null>(null);
-  const [wide, setWide] = useState(false);
 
   useIsoLayoutEffect(() => {
     const el = wrap.current;
@@ -41,19 +43,19 @@ export function AnnotatedShot({
 
     function measure() {
       if (!el || !im) return;
-      const isWide = window.matchMedia('(min-width: 1024px)').matches;
-      setWide(isWide);
-      if (!isWide) return setLines([]);
+      if (!window.matchMedia('(min-width: 1024px)').matches) return setLines([]);
       const box = el.getBoundingClientRect();
       const ib = im.getBoundingClientRect();
       setLines(
         annotations.map((a, i) => {
           const lb = labels.current[i]?.getBoundingClientRect();
           return {
-            x1: ib.left - box.left + (a.x / 100) * ib.width,
+            x1: ib.left - box.left + (a.x / 100) * ib.width + MARKER,
             y1: ib.top - box.top + (a.y / 100) * ib.height,
             x2: lb ? lb.left - box.left : ib.right - box.left,
             y2: lb ? lb.top - box.top + lb.height / 2 : ib.top - box.top,
+            // Each line turns in the gutter at its own x so the vertical runs never stack.
+            mx: ib.right - box.left + 12 + i * 9,
           };
         }),
       );
@@ -66,83 +68,83 @@ export function AnnotatedShot({
     return () => ro.disconnect();
   }, [annotations]);
 
-  if (annotations.length === 0) {
-    return (
-      <div className="overflow-hidden rounded-xl border border-border-subtle bg-bg-elev-1">
-        <Image src={src} alt={alt} width={width} height={height} priority className="w-full" />
-      </div>
-    );
-  }
+  const frame = (
+    <div className="overflow-hidden rounded-lg border border-border-default bg-bg-elev-1">
+      <Image src={src} alt={alt} width={width} height={height} priority sizes="(min-width: 1024px) 66vw, 100vw" className="w-full" />
+    </div>
+  );
+
+  if (annotations.length === 0) return frame;
+
+  const pair = (i: number) => ({
+    onMouseEnter: () => setActive(i),
+    onMouseLeave: () => setActive(null),
+    onFocus: () => setActive(i),
+    onBlur: () => setActive(null),
+    'data-active': active === i,
+  });
 
   return (
-    <div ref={wrap} className="relative grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(260px,1fr)] lg:gap-12">
-      <div ref={img} className="relative self-start overflow-hidden rounded-xl border border-border-subtle bg-bg-elev-1">
-        <Image src={src} alt={alt} width={width} height={height} priority className="w-full" />
+    <div ref={wrap} className="relative grid gap-x-12 gap-y-8 lg:grid-cols-12">
+      <div ref={img} className="relative self-start lg:col-span-8">
+        {frame}
         {annotations.map((a, i) => (
           <button
             key={i}
             type="button"
             aria-label={`${i + 1}. ${a.title}`}
             aria-describedby={`callout-${i}`}
-            onMouseEnter={() => setActive(i)}
-            onMouseLeave={() => setActive(null)}
-            onFocus={() => setActive(i)}
-            onBlur={() => setActive(null)}
+            {...pair(i)}
             style={{ left: `${a.x}%`, top: `${a.y}%` }}
-            className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 font-mono text-xs font-semibold transition-transform ${
-              active === i ? 'scale-125 border-accent bg-accent text-bg-base' : 'border-accent bg-bg-base/90 text-accent'
-            } h-7 w-7`}
+            className="marker absolute z-10 -translate-x-1/2 -translate-y-1/2"
           >
             {i + 1}
-            <span
-              aria-hidden="true"
-              className={`absolute inset-0 -z-10 animate-ping rounded-full bg-accent/40 motion-reduce:hidden ${active === null ? '' : 'hidden'}`}
-              style={{ animationDuration: '2.4s', animationDelay: `${i * 0.4}s` }}
-            />
           </button>
         ))}
       </div>
 
-      <ol className="space-y-3 lg:space-y-5 lg:self-center">
-        {annotations.map((a, i) => (
-          <li key={i}>
-            <button
-              type="button"
-              id={`callout-${i}`}
-              ref={(n) => {
-                labels.current[i] = n;
-              }}
-              onMouseEnter={() => setActive(i)}
-              onMouseLeave={() => setActive(null)}
-              onFocus={() => setActive(i)}
-              onBlur={() => setActive(null)}
-              className={`w-full rounded-lg border p-4 text-left transition-colors ${
-                active === i ? 'border-accent bg-accent-subtle' : 'border-border-subtle bg-bg-elev-1'
-              }`}
-            >
-              <span className="flex items-baseline gap-3">
-                <span className="font-mono text-xs text-accent">{String(i + 1).padStart(2, '0')}</span>
-                <span className="font-semibold text-text-primary">{a.title}</span>
-              </span>
-              <span className="mt-1 block text-sm text-text-body">{a.text}</span>
-            </button>
-          </li>
-        ))}
-      </ol>
+      <div className="lg:col-span-4 lg:self-center">
+        <h2 className="text-lg font-semibold tracking-normal">The decisions behind this screen</h2>
+        <p className="mt-1 text-sm text-text-muted">Hover, tap or tab through the numbers.</p>
+        <ol className="mt-5 border-b border-border-default">
+          {annotations.map((a, i) => (
+            <li key={i}>
+              <button
+                type="button"
+                id={`callout-${i}`}
+                {...pair(i)}
+                className="callout grid w-full grid-cols-[2.5rem_1fr] border-t border-border-default py-4 text-left"
+              >
+                <span
+                  ref={(n) => {
+                    labels.current[i] = n;
+                  }}
+                  aria-hidden="true"
+                  className="marker marker-static"
+                >
+                  {i + 1}
+                </span>
+                <span>
+                  <span className="block font-semibold text-text-primary">{a.title}</span>
+                  <span className="mt-1 block text-sm text-text-body">{a.text}</span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </div>
 
-      {wide && lines.length > 0 && (
-        <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden="true">
-          {lines.map((l, i) => {
-            const mx = l.x2 - 24;
-            const d = `M ${l.x1} ${l.y1} L ${mx} ${l.y1} L ${mx} ${l.y2} L ${l.x2} ${l.y2}`;
-            const on = active === i;
-            return (
-              <g key={i}>
-                <path d={d} fill="none" stroke={on ? '#f59e0b' : '#3a3a3f'} strokeWidth={on ? 2 : 1.25} strokeDasharray={on ? undefined : '4 4'} />
-                <circle cx={l.x2} cy={l.y2} r={3} fill={on ? '#f59e0b' : '#3a3a3f'} />
-              </g>
-            );
-          })}
+      {lines.length > 0 && (
+        <svg className="pointer-events-none absolute inset-0 hidden h-full w-full overflow-visible lg:block" aria-hidden="true">
+          {lines.map((l, i) => (
+            <path
+              key={i}
+              d={`M ${l.x1} ${l.y1} H ${l.mx} V ${l.y2} H ${l.x2}`}
+              data-active={active === i}
+              className="leader"
+              pathLength={1}
+            />
+          ))}
         </svg>
       )}
     </div>
