@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Nav } from '@/components/nav';
+import { ContactClose } from '@/components/contact-close';
 import { Footer } from '@/components/footer';
 import { PROFILE } from '@/content/profile';
 import './globals.css';
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main id="main" className="flex-1">
           {children}
         </main>
+        <ContactClose />
         <Footer />
       </body>
     </html>

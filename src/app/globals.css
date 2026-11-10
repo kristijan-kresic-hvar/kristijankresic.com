@@ -27,10 +27,32 @@
   --color-accent-glow: rgba(245, 158, 11, 0.2);
   --color-accent-text: #fcd34d;
 
-  --text-display: clamp(44px, 7vw, 88px);
+  /* Sized by wrap math, not taste: the hero statement holds two lines from 768 to 1920 because the
+     page gutter scales on the same vw curve. Re-measure if the copy or the gutter changes. */
+  --text-display: clamp(2.25rem, 4.72vw, 5.75rem);
+  --text-title: clamp(1.75rem, 2.9vw, 3.5rem);
+  --text-lead: clamp(1.125rem, 1.4vw, 1.375rem);
   --tracking-tighter: -0.04em;
   --tracking-tight: -0.02em;
-  --tracking-wide: 0.08em;
+  --tracking-wide: 0.05em;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --container-reading: 680px;
+  --container-page: 1920px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root {
+  --gutter: clamp(1.25rem, 2.78vw, 3.5rem);
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
 }
 
 :root {
@@ -40,7 +62,8 @@
 html {
   background: var(--color-bg-base);
   color: var(--color-text-body);
-  scroll-behavior: smooth;
+  scrollbar-color: var(--color-border-strong) var(--color-bg-base);
+  caret-color: var(--color-accent);
 }
 
 body {
@@ -60,103 +83,245 @@ body {
   border-radius: 2px;
 }
 
-h1,
-h2,
-h3 {
+/* Element defaults sit in the base layer so utilities on the element can override them. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    color: var(--color-text-primary);
+    text-wrap: balance;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* Inline text links: a hairline that turns amber, never a colour block. */
+.link {
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color var(--duration-instant) var(--ease-standard), color var(--duration-instant) var(--ease-standard);
+}
+.link:hover {
   color: var(--color-text-primary);
-  text-wrap: balance;
-  letter-spacing: var(--tracking-tight);
+  text-decoration-color: var(--color-accent);
 }
 
-.grid-lines {
-  background-image: repeating-linear-gradient(to right, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 120px);
+/* The wordmark with its two diacritics in amber. Two stacked copies: the amber one carries the full
+   name, the light one on top drops the marks, so only š and ć's accents show through. Kerning is off
+   so both copies advance identically. */
+.namemark {
+  position: relative;
+  display: block;
+  white-space: nowrap;
+  font-kerning: none;
+  user-select: none;
+}
+.namemark > :first-child {
+  color: var(--color-accent);
+}
+.namemark > :last-child {
+  position: absolute;
+  inset: 0 auto auto 0;
+  color: var(--color-text-primary);
 }
 
-.glow {
-  background: radial-gradient(circle at 20% 80%, var(--color-accent-glow) 0%, rgba(245, 158, 11, 0.05) 40%, transparent 70%);
+/* Hero statement: sized so the longest line fits the five-column block from 1024 up, and the
+   full-width block below that. */
+.hero-statement {
+  font-size: var(--text-display);
+  line-height: 1.04;
+  letter-spacing: var(--tracking-tighter);
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .reveal {
-    animation: reveal 0.4s ease-out both;
-  }
-  .reveal-delay-1 {
-    animation-delay: 80ms;
-  }
-  .reveal-delay-2 {
-    animation-delay: 160ms;
-  }
-  .reveal-delay-3 {
-    animation-delay: 240ms;
-  }
-  @keyframes reveal {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
+@media (min-width: 64rem) {
+  .hero-statement {
+    font-size: clamp(2.375rem, 3.9vw, 4.75rem);
   }
 }
 
-/* Work card: the tall capture scrolls inside a 16:10 frame on hover. Container-query units make the
-   travel distance exact without JS: frame height = 62.5cqw. */
+/* Wall tile: hover or focus scrolls the full-page capture inside its frame. Container-query units
+   make the travel exact without JS: the frame is --shot-h tall, the image as tall as it is. */
 .shot {
   container-type: inline-size;
 }
 .shot-scroll {
   height: auto;
-  transform: translateY(0);
 }
 @media (prefers-reduced-motion: no-preference) and (hover: hover) {
   .shot-scroll {
-    transition: transform 6s linear;
+    transition: transform 0.7s var(--ease-out);
   }
-  .group:hover .shot-scroll {
-    transform: translateY(calc(-100% + 62.5cqw));
+  .group:hover .shot-scroll,
+  .group:focus-visible .shot-scroll {
+    transform: translateY(min(0px, calc(-100% + var(--shot-h, 62.5cqw))));
+    transition: transform 7s linear 0.15s;
   }
 }
 
-/* Ticker */
-.ticker {
-  overflow: hidden;
-  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+/* Index rows: the arrow is there for pointers and keyboards, absent at rest. */
+.strip-arrow {
+  opacity: 0;
+  translate: -0.375rem 0;
+  transition:
+    opacity var(--duration-instant) var(--ease-standard),
+    translate var(--duration-fast) var(--ease-out);
 }
-.ticker-track {
-  width: max-content;
+.group:hover .strip-arrow,
+.group:focus-visible .strip-arrow {
+  opacity: 1;
+  translate: 0 0;
 }
-@media (prefers-reduced-motion: no-preference) {
-  .ticker-track {
-    animation: ticker 60s linear infinite;
+.earlier {
+  transition: background-color var(--duration-instant) var(--ease-standard);
+}
+.earlier:hover {
+  background: var(--color-bg-elev-1);
+}
+
+.portrait {
+  filter: grayscale(1) contrast(1.06);
+}
+
+/* Buttons. Hover and press answer within --duration-instant. */
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-instant) var(--ease-standard),
+    border-color var(--duration-instant) var(--ease-standard),
+    color var(--duration-instant) var(--ease-standard);
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-bg-base);
+}
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+.btn-primary:active {
+  background: var(--color-accent-active);
+}
+.btn-secondary {
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+}
+.btn-secondary:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-bg-elev-1);
+}
+.btn-secondary:active {
+  background: var(--color-bg-elev-2);
+}
+.btn-secondary[data-state='copied'] {
+  border-color: var(--color-accent);
+}
+
+/* Nav hairline appears once the page has scrolled (progressive: without scroll timelines it is always on). */
+.site-nav {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+@supports (animation-timeline: scroll()) {
+  .site-nav {
+    animation: nav-rule linear both;
+    animation-timeline: scroll();
+    animation-range: 0 4rem;
   }
-  .ticker:hover .ticker-track {
-    animation-play-state: paused;
-  }
-  @keyframes ticker {
-    to {
-      transform: translateX(-50%);
+  @keyframes nav-rule {
+    from {
+      border-bottom-color: transparent;
     }
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .ticker-track {
-    flex-wrap: wrap;
-    width: auto;
-  }
-  .ticker-track > ul[aria-hidden='true'] {
-    display: none;
-  }
-  .ticker-track > ul {
-    flex-wrap: wrap;
-    row-gap: 8px;
-  }
+
+/* Contact address: one amber rule under the whole line, thickening on hover. */
+.contact-address {
+  display: inline-block;
+  white-space: nowrap;
+  padding-bottom: 0.14em;
+  background: linear-gradient(var(--color-accent), var(--color-accent)) left bottom / 100% 2px no-repeat;
+  transition: background-size var(--duration-fast) var(--ease-out), color var(--duration-instant) var(--ease-standard);
+}
+.contact-address:hover {
+  background-size: 100% 0.08em;
 }
 
-/* Browser frame around the hero screenshot */
+/* Annotated screenshot: markers, list rows and leader lines share one active state (amber). */
+.marker {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-bg-base);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background-color var(--duration-instant) var(--ease-standard),
+    color var(--duration-instant) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-out);
+}
+/* 44px touch target around the 28px marker */
+.marker:not(.marker-static)::before {
+  content: '';
+  position: absolute;
+  inset: -0.5rem;
+}
+.marker[data-active='true'],
+.callout[data-active='true'] .marker {
+  background: var(--color-accent);
+  color: var(--color-bg-base);
+}
+.marker:not(.marker-static)[data-active='true'] {
+  scale: 1.15;
+}
+.callout {
+  transition: border-color var(--duration-instant) var(--ease-standard);
+}
+.callout[data-active='true'] {
+  border-top-color: var(--color-accent);
+}
+.leader {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+  transition: stroke var(--duration-instant) var(--ease-standard);
+}
+.leader[data-active='true'] {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}
+
+/* A short amber rule above a statement set at title scale (case-study outcome, practice statement). */
+.ruled::before {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin-bottom: 1.25rem;
+  background: var(--color-accent);
+}
+
+/* Linked screenshots: the border answers the pointer, nothing moves. */
 .frame {
-  box-shadow:
-    0 0 0 1px var(--color-border-default),
-    0 30px 80px -30px rgba(0, 0, 0, 0.8);
+  transition: border-color var(--duration-instant) var(--ease-standard);
+}
+a.frame:hover,
+a:hover .frame {
+  border-color: var(--color-border-strong);
 }

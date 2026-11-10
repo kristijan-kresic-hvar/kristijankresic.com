@@ -14,7 +14,7 @@ export function LocalTime() {
     return () => window.clearInterval(id);
   }, []);
   return (
-    <span className="font-mono tabular-nums" suppressHydrationWarning>
+    <span className="tabular-nums" suppressHydrationWarning>
       {time ?? '--:--'} CET
     </span>
   );
