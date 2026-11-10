@@ -3,6 +3,8 @@ export type CaseStudy = {
   client: string;
   title: string;
   tagline: string;
+  /** One line for image captions on the landing wall. */
+  short?: string;
   period: string;
   role: string;
   context: string;
@@ -30,6 +32,7 @@ export const WORK: CaseStudy[] = [
     client: 'BioCirV',
     title: 'BioCirV Data Portal',
     tagline: 'A public biomass-discovery platform, built from scratch on Next.js 16 / React 19.',
+    short: 'Next.js 16 data portal, from scratch',
     period: 'Feb 2026 – Jul 2026',
     role: 'Frontend lead (via Agilno)',
     context: 'Public data platform for the bio-circular economy',
@@ -59,6 +62,7 @@ export const WORK: CaseStudy[] = [
     client: 'OnCallable',
     title: 'OnCallable',
     tagline: 'A static marketing site replatformed onto a CMS-driven Sanity architecture in about two weeks.',
+    short: 'Sanity replatform in two weeks',
     period: 'Jan 2026 – Jul 2026',
     role: 'Frontend developer (via Agilno)',
     context: 'Marketplace connecting customers with service professionals',
@@ -87,6 +91,7 @@ export const WORK: CaseStudy[] = [
     client: 'Suello',
     title: 'Suello companion app',
     tagline: 'A React Native app for a Bluetooth smart planter, built from scratch.',
+    short: 'React Native and a Bluetooth device layer',
     period: 'Apr 2025 – Nov 2025',
     role: 'Mobile developer (via Agilno)',
     context: 'IoT startup building a BLE-connected smart planter',
@@ -115,6 +120,7 @@ export const WORK: CaseStudy[] = [
     client: 'Vetster',
     title: 'Vetster',
     tagline: 'Vue.js features and Laravel backend work on a 24/7 pet-telehealth platform with 100k+ app users.',
+    short: 'Vue features and Laravel backend, 100k+ users',
     period: 'Jul 2024 – Apr 2025',
     role: 'Full-stack developer (via Agilno)',
     context: 'Pet telehealth marketplace',
@@ -143,6 +149,7 @@ export const WORK: CaseStudy[] = [
     client: 'Naitur',
     title: 'Naitur',
     tagline: 'The frontend of a US-regulated (HIPAA) psilocybin-therapy platform.',
+    short: 'HIPAA frontend, e-signature, magic links',
     period: 'Aug 2023 – Jul 2024',
     role: 'Frontend developer (via Agilno)',
     context: 'Platform for licensed psilocybin-therapy clinics and facilitators',
@@ -171,6 +178,7 @@ export const WORK: CaseStudy[] = [
     client: 'BuddyIns',
     title: 'BuddyIns',
     tagline: 'A Next.js frontend over a Django API with PayPal subscription payments.',
+    short: 'Next.js over Django, PayPal subscriptions',
     period: 'Jan 2023 – Jul 2023',
     role: 'Frontend developer (via Agilno)',
     context: 'US long-term-care insurance platform',

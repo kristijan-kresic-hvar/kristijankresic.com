@@ -18,4 +18,10 @@ describe('WorkCard', () => {
     const src = decodeURIComponent(img.getAttribute('src') ?? '');
     expect(src).toContain(study.scroll ? `${study.slug}-full.webp` : `${study.slug}-card.webp`);
   });
+
+  it('captions the tile with the client and its one-line summary', () => {
+    render(<WorkCard study={study} />);
+    expect(screen.getByText(study.client)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(study.short!))).toBeInTheDocument();
+  });
 });

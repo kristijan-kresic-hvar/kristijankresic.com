@@ -1,211 +1,136 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Container } from '@/components/container';
-import { Section } from '@/components/section';
+import { Facts } from '@/components/facts';
+import { ArrowRight } from '@/components/icons';
 import { WorkCard } from '@/components/work-card';
-import { CopyButton } from '@/components/copy-button';
-import { CursorGrid } from '@/components/cursor-grid';
-import { LocalTime } from '@/components/local-time';
-import { Ticker } from '@/components/ticker';
+import { WorkStrip } from '@/components/work-strip';
 import { PROFILE } from '@/content/profile';
 import { FEATURED, EARLIER } from '@/content/work';
 
-const TICKER = [
-  { client: 'BioCirV', built: 'Next.js 16 data portal, from scratch' },
-  { client: 'OnCallable', built: 'Sanity replatform in two weeks' },
-  { client: 'Suello', built: 'React Native + Bluetooth device layer' },
-  { client: 'Vetster', built: 'Vue features + Laravel backend, 100k+ users' },
-  { client: 'Naitur', built: 'HIPAA frontend, e-signature, magic links' },
-  { client: 'BuddyIns', built: 'Next.js over Django, PayPal subscriptions' },
+// How an engagement runs: what happens, then the evidence for it.
+const PRACTICE = [
+  { h: 'Inside the team', p: 'Embedded in the client’s standups, Figma and repo from week one. Six teams, same pattern.' },
+  { h: 'The whole frontend', p: 'Architecture, data layer, component system, forms, accessibility, performance, delivery.' },
+  { h: 'A foundation that stays', p: 'On BioCirV two other developers built on my component system while I reviewed their PRs.' },
+  { h: 'AI for the mechanical work', p: 'Claude Code and Cursor for scaffolding and research; every architecture call and merged line is mine.' },
 ];
 
-const PROCESS = [
-  { n: '01', h: 'Join the team, not the ticket queue', p: 'Embedded in the client’s standups, Figma and repo from week one. Six teams, same pattern.' },
-  { n: '02', h: 'Own the frontend end-to-end', p: 'Architecture, data layer, component system, forms, accessibility, performance, delivery.' },
-  { n: '03', h: 'Leave a foundation', p: 'On BioCirV two other developers built on my component system while I reviewed their PRs.' },
-  { n: '04', h: 'AI for the mechanical work', p: 'Claude Code and Cursor for scaffolding and research; every architecture call and merged line is mine.' },
+const STACK = [
+  { label: 'Frontend', items: PROFILE.stack.slice(0, 6) },
+  { label: 'Mobile, backend, CMS', items: PROFILE.stack.slice(6, 11) },
+  { label: 'Testing and delivery', items: PROFILE.stack.slice(11) },
 ];
+
+const row = 'grid gap-x-8 gap-y-1 border-t border-border-default py-4 sm:grid-cols-[13rem_1fr]';
 
 export default function Home() {
-  const [lead, ...rest] = FEATURED;
+  // The wall: two columns of unequal tiles, the second starting lower. Order is recency, read in rows.
+  const left = FEATURED.filter((_, i) => i % 2 === 0);
+  const right = FEATURED.filter((_, i) => i % 2 === 1);
+
   return (
     <>
-      {/* Hero: everything a recruiter needs above the fold, one playful layer behind it. */}
-      <section className="relative overflow-hidden border-b border-border-subtle">
-        <CursorGrid />
-        <div className="glow pointer-events-none absolute inset-0" aria-hidden="true" />
-        <Container className="relative grid gap-10 py-14 sm:py-20 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] lg:items-center lg:py-24">
-          <div>
-            <p className="reveal font-mono text-xs uppercase tracking-wide text-accent">Frontend engineer · available now</p>
-            <h1 className="reveal reveal-delay-1 mt-4 text-[clamp(34px,4.3vw,58px)] font-semibold leading-[1.05] tracking-tighter">
-              I ship the whole frontend,
-              <br className="hidden sm:block" /> not just the components<span className="text-accent">.</span>
-            </h1>
-            <p className="reveal reveal-delay-2 mt-6 max-w-xl text-lg text-text-body">
-              React · Next.js · TypeScript · React Native. {PROFILE.yearsProfessional} years shipping production web and mobile for
-              North American clients: most recently a public data portal on Next.js 16 / React 19 and a Bluetooth-connected
-              mobile app, both from an empty repo.
-            </p>
-            <div className="reveal reveal-delay-3 mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                href="/#work"
-                className="rounded-md bg-accent px-5 py-2.5 font-medium text-bg-base transition-colors hover:bg-accent-hover"
-              >
-                See the work
-              </Link>
-              <a
-                href={PROFILE.cv.frontend}
-                className="rounded-md border border-border-default px-5 py-2.5 font-medium text-text-primary transition-colors hover:border-accent"
-              >
-                CV (PDF)
-              </a>
-            </div>
-          </div>
+      {/* Hero. The statement and the facts stay pinned to the bottom-left while all six projects pass. */}
+      <section className="mx-auto grid max-w-page gap-x-12 px-(--gutter) lg:grid-cols-12 lg:pr-0">
+        <div className="pt-8 pb-10 sm:pt-12 lg:sticky lg:bottom-0 lg:col-span-5 lg:self-end lg:pt-10">
+          <h1 className="hero-statement font-semibold text-text-muted">
+            <span className="text-text-primary">Frontend engineer.</span>
+            <br />
+            Six client products, <br className="max-lg:hidden" />
+            built inside the <br className="max-lg:hidden" />
+            client&rsquo;s&nbsp;team.
+          </h1>
+          <Facts rows className="mt-8 lg:mt-10" />
+        </div>
 
-          {/* Recruiter card */}
-          <aside
-            aria-label="Contact and availability"
-            className="reveal reveal-delay-2 relative rounded-2xl border border-border-default bg-bg-elev-1/90 p-5 backdrop-blur sm:p-6"
-          >
-            <div className="flex items-center gap-4">
-              <Image
-                src="/images/headshot.webp"
-                alt={`Portrait of ${PROFILE.name}`}
-                width={800}
-                height={800}
-                priority
-                className="h-16 w-16 rounded-full border border-border-default"
-              />
-              <div>
-                <p className="font-semibold text-text-primary">{PROFILE.name}</p>
-                <p className="text-sm text-text-body">{PROFILE.headline} · {PROFILE.stackLine}</p>
-              </div>
-            </div>
-            <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <div>
-                <dt className="font-mono text-[11px] uppercase tracking-wide text-text-muted">Status</dt>
-                <dd className="mt-0.5 flex items-center gap-2 text-text-primary">
-                  <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
-                    <span className="absolute inset-0 animate-ping rounded-full motion-reduce:hidden" style={{ background: '#34d399', opacity: 0.5 }} />
-                    <span className="relative inline-block h-2.5 w-2.5 rounded-full" style={{ background: '#34d399' }} />
-                  </span>
-                  Available now
-                </dd>
-              </div>
-              <div>
-                <dt className="font-mono text-[11px] uppercase tracking-wide text-text-muted">Local time</dt>
-                <dd className="mt-0.5 text-text-primary">
-                  <LocalTime />
-                </dd>
-              </div>
-              <div>
-                <dt className="font-mono text-[11px] uppercase tracking-wide text-text-muted">Based</dt>
-                <dd className="mt-0.5 text-text-primary">Hvar, Croatia · EU citizen</dd>
-              </div>
-              <div>
-                <dt className="font-mono text-[11px] uppercase tracking-wide text-text-muted">Works</dt>
-                <dd className="mt-0.5 text-text-primary">Remote EU / US-East · hybrid Split, Zagreb</dd>
-              </div>
-            </dl>
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              <a
-                href={`mailto:${PROFILE.email}`}
-                className="rounded-md bg-accent px-3.5 py-2 text-sm font-medium text-bg-base transition-colors hover:bg-accent-hover"
-              >
-                Email me
-              </a>
-              <CopyButton value={PROFILE.email} label="Copy email" />
-              <a href={PROFILE.phoneHref} className="font-mono text-xs text-text-secondary hover:text-text-primary">
-                {PROFILE.phone}
-              </a>
-            </div>
-            <div className="mt-4 flex gap-4 border-t border-border-subtle pt-4 font-mono text-xs">
-              <a href={PROFILE.cv.frontend} className="text-text-secondary hover:text-text-primary">
-                Frontend CV ↓
-              </a>
-              <a href={PROFILE.cv.fullstack} className="text-text-secondary hover:text-text-primary">
-                Full-stack CV ↓
-              </a>
-              <a href={PROFILE.github} className="ml-auto text-text-secondary hover:text-text-primary">
-                GitHub
-              </a>
-              <a href={PROFILE.linkedin} className="text-text-secondary hover:text-text-primary">
-                LinkedIn
-              </a>
-            </div>
-          </aside>
+        <div className="grid grid-cols-2 items-start gap-3 pb-16 sm:gap-4 lg:col-span-7 lg:pt-6 lg:pb-24">
+          <div className="grid gap-5 sm:gap-7">
+            {left.map((study, i) => (
+              <WorkCard key={study.slug} study={study} tall={i === 1} priority={i === 0} />
+            ))}
+          </div>
+          <div className="mt-10 grid gap-5 sm:mt-16 sm:gap-7 lg:mt-28">
+            {right.map((study, i) => (
+              <WorkCard key={study.slug} study={study} tall={i === 0} priority={i === 0} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="work" aria-labelledby="work-title" className="scroll-mt-20 border-t border-border-subtle pt-20 pb-10 lg:pt-28">
+        <Container>
+          <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 pb-10 lg:pb-14">
+            <h2 id="work-title" className="text-display leading-none font-semibold tracking-tighter">
+              Work index
+            </h2>
+            <p className="font-mono text-xs text-text-muted">
+              {FEATURED.length} clients · {FEATURED.reduce((n, s) => n + s.screens, 0)} frames · 2023–2026
+            </p>
+          </div>
+          {FEATURED.map((study, i) => (
+            <WorkStrip key={study.slug} study={study} index={i} />
+          ))}
+
+          <h3 className="border-t border-border-default pt-12 text-2xl font-semibold lg:pt-16">Earlier work</h3>
+          <ul className="mt-6 border-b border-border-default">
+            {EARLIER.map((study) => (
+              <li key={study.slug}>
+                <Link
+                  href={`/work/${study.slug}/`}
+                  className="earlier group grid gap-x-12 gap-y-1 border-t border-border-default py-4 sm:grid-cols-12 sm:items-baseline"
+                >
+                  <span className="font-medium text-text-primary sm:col-span-4">{study.title}</span>
+                  <span className="text-text-body sm:col-span-6">{study.tagline}</span>
+                  <span className="text-sm text-text-muted tabular-nums sm:col-span-2 sm:text-right">{study.period}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 
-      <Ticker items={TICKER} />
-
-      <Section id="work" eyebrow="Selected work" title="Six client products, built inside the client's team.">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {lead && <WorkCard study={lead} large priority />}
-          {rest.map((study, i) => (
-            <WorkCard key={study.slug} study={study} priority={i < 1} />
-          ))}
-        </div>
-        <p className="mt-6 font-mono text-xs text-text-muted">
-          Hover a card to scroll the full page. Open a study for the decisions behind each screen.
-        </p>
-        <h3 className="mt-16 font-mono text-xs uppercase tracking-wide text-text-muted">Earlier work</h3>
-        <ul className="mt-4 divide-y divide-border-subtle border-y border-border-subtle">
-          {EARLIER.map((study) => (
-            <li key={study.slug}>
-              <Link
-                href={`/work/${study.slug}/`}
-                className="flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between hover:text-text-primary"
-              >
-                <span>
-                  <span className="font-medium text-text-primary">{study.title}</span>
-                  <span className="text-text-muted"> · {study.tagline}</span>
-                </span>
-                <span className="font-mono text-xs text-text-muted">{study.period}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section eyebrow="How an engagement runs" title="Embedded, async, end-to-end." className="border-t border-border-subtle bg-bg-elev-1">
-        <ol className="grid gap-px overflow-hidden rounded-xl border border-border-subtle bg-border-subtle md:grid-cols-4">
-          {PROCESS.map((s) => (
-            <li key={s.n} className="bg-bg-base p-6">
-              <p className="font-mono text-xs text-accent">{s.n}</p>
-              <h3 className="mt-3 text-lg font-semibold">{s.h}</h3>
-              <p className="mt-2 text-sm text-text-body">{s.p}</p>
-            </li>
-          ))}
-        </ol>
-        <ul className="mt-10 flex flex-wrap gap-2" aria-label="Stack">
-          {PROFILE.stack.map((s) => (
-            <li key={s} className="rounded-full border border-border-default px-3 py-1 font-mono text-xs text-text-secondary">
-              {s}
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <section id="contact" className="border-t border-border-subtle py-16 sm:py-24">
-        <Container className="rounded-2xl border border-border-default bg-bg-elev-1 p-8 sm:p-12">
-          <p className="font-mono text-xs uppercase tracking-wide text-accent">Available now</p>
-          <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">Hiring a frontend engineer?</h2>
-          <p className="mt-4 max-w-xl text-text-body">
-            Remote across the EU or with US-East overlap, or hybrid in Split or Zagreb. EU citizen, no visa needed. Email is the
-            fastest way to reach me; I reply the same day.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <a
-              href={`mailto:${PROFILE.email}`}
-              className="rounded-md bg-accent px-5 py-2.5 font-medium text-bg-base transition-colors hover:bg-accent-hover"
-            >
-              {PROFILE.email}
-            </a>
-            <CopyButton value={PROFILE.email} label="Copy email" />
-            <a href={PROFILE.phoneHref} className="font-mono text-sm text-text-secondary hover:text-text-primary">
-              {PROFILE.phone}
-            </a>
+      <section aria-labelledby="practice-title" className="py-20 lg:py-32">
+        <Container className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
+          <figure className="max-w-56 lg:col-span-3 lg:max-w-none">
+            <Image
+              src="/images/headshot.webp"
+              alt={`Portrait of ${PROFILE.name}`}
+              width={800}
+              height={800}
+              loading="lazy"
+              sizes="(min-width: 1024px) 22vw, 224px"
+              className="portrait aspect-[4/5] w-full rounded-md object-cover"
+            />
+            <figcaption className="mt-2.5 text-sm text-text-muted">{PROFILE.name}, Hvar</figcaption>
+          </figure>
+          <div className="lg:col-span-8 lg:col-start-5">
+            <h2 id="practice-title" className="ruled text-title leading-[1.1] font-semibold tracking-tight text-text-muted">
+              <span className="text-text-primary">
+                I join the client&rsquo;s team, own the frontend end to end and leave a foundation other people build on.
+              </span>{' '}
+              Six teams so far, across insurance, HIPAA healthcare, telehealth and IoT.
+            </h2>
+            <dl className="mt-12 lg:mt-16">
+              {PRACTICE.map((s) => (
+                <div key={s.h} className={row}>
+                  <dt className="font-medium text-text-primary">{s.h}</dt>
+                  <dd className="max-w-[60ch] text-text-body">{s.p}</dd>
+                </div>
+              ))}
+            </dl>
+            <h3 className="mt-12 text-lg font-semibold tracking-normal lg:mt-16">Stack</h3>
+            <dl className="mt-4 border-b border-border-default">
+              {STACK.map((g) => (
+                <div key={g.label} className={row}>
+                  <dt className="text-text-muted">{g.label}</dt>
+                  <dd className="text-text-secondary">{g.items.join(', ')}</dd>
+                </div>
+              ))}
+            </dl>
+            <Link href="/about/" className="link mt-8 inline-flex items-center gap-2 text-text-primary">
+              More about me <ArrowRight />
+            </Link>
           </div>
         </Container>
       </section>

@@ -24,8 +24,13 @@ describe('work content', () => {
       if (w.scroll) expect(existsSync(hero.replace('.webp', '-full.webp')), `${w.slug} full`).toBe(true);
       for (let i = 1; i <= w.screens; i++) {
         expect(existsSync(path.join(process.cwd(), 'public/images/work', `${w.slug}-screen-${i}.webp`)), `${w.slug} screen ${i}`).toBe(true);
+        expect(existsSync(path.join(process.cwd(), 'public/images/work', `${w.slug}-screen-${i}-thumb.webp`)), `${w.slug} thumb ${i}`).toBe(true);
       }
     }
+  });
+
+  it('captions every featured study for the landing wall', () => {
+    for (const w of FEATURED) expect(w.short, w.slug).toBeTruthy();
   });
 
   it('places every hotspot inside the image', () => {
