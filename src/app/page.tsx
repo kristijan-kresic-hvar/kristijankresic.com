@@ -37,7 +37,7 @@ export default function Home() {
         <Container className="relative grid gap-10 py-14 sm:py-20 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] lg:items-center lg:py-24">
           <div>
             <p className="reveal font-mono text-xs uppercase tracking-wide text-accent">Frontend engineer · available now</p>
-            <h1 className="reveal reveal-delay-1 mt-4 text-[clamp(38px,6vw,76px)] font-semibold leading-[1.02] tracking-tighter">
+            <h1 className="reveal reveal-delay-1 mt-4 text-[clamp(36px,4.8vw,64px)] font-semibold leading-[1.04] tracking-tighter">
               I ship the whole frontend,
               <br className="hidden sm:block" /> not just the components<span className="text-accent">.</span>
             </h1>
@@ -85,9 +85,9 @@ export default function Home() {
               <div>
                 <dt className="font-mono text-[11px] uppercase tracking-wide text-text-muted">Status</dt>
                 <dd className="mt-0.5 flex items-center gap-2 text-text-primary">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60 motion-reduce:hidden" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+                  <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
+                    <span className="absolute inset-0 animate-ping rounded-full motion-reduce:hidden" style={{ background: '#34d399', opacity: 0.5 }} />
+                    <span className="relative inline-block h-2.5 w-2.5 rounded-full" style={{ background: '#34d399' }} />
                   </span>
                   Available now
                 </dd>

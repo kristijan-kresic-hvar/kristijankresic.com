@@ -76,7 +76,7 @@ export function AnnotatedShot({
 
   return (
     <div ref={wrap} className="relative grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(260px,1fr)] lg:gap-12">
-      <div ref={img} className="relative overflow-hidden rounded-xl border border-border-subtle bg-bg-elev-1">
+      <div ref={img} className="relative self-start overflow-hidden rounded-xl border border-border-subtle bg-bg-elev-1">
         <Image src={src} alt={alt} width={width} height={height} priority className="w-full" />
         {annotations.map((a, i) => (
           <button
