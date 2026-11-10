@@ -6,9 +6,10 @@ import { WORK } from '@/content/work';
 describe('WorkStrip', () => {
   const study = WORK[0]!;
 
-  it('is one link to the case study, named by title and tagline', () => {
+  it('is one link to the case study, named by what it shows', () => {
     render(<WorkStrip study={study} index={0} />);
-    const link = screen.getByRole('link', { name: `${study.title}: ${study.tagline}` });
+    const link = screen.getByRole('link', { name: new RegExp(`^${study.title}`) });
+    expect(link).toHaveAccessibleName(expect.stringContaining(study.tagline));
     expect(link.getAttribute('href')?.replace(/\/$/, '')).toBe(`/work/${study.slug}`);
     expect(screen.getByRole('heading', { name: study.title })).toBeInTheDocument();
   });

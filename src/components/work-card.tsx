@@ -9,10 +9,10 @@ import type { CaseStudy } from '@/content/work';
  * tells the stylesheet how tall the frame is in container-width units. No annotations here:
  * those live on the case-study page.
  */
-export function WorkCard({ study, tall = false, priority = false }: { study: CaseStudy; tall?: boolean; priority?: boolean }) {
+export function WorkCard({ study, tall = false, eager = false }: { study: CaseStudy; tall?: boolean; eager?: boolean }) {
   const src = study.scroll ? `/images/work/${study.slug}-full.webp` : study.image.src.replace('.webp', '-card.webp');
   return (
-    <Link href={`/work/${study.slug}/`} className="group block" aria-label={`${study.title}: ${study.tagline}`}>
+    <Link href={`/work/${study.slug}/`} className="group block">
       <div
         className={`shot frame overflow-hidden rounded-md border border-border-default bg-bg-elev-1 ${tall ? 'aspect-[4/5]' : 'aspect-[16/10]'}`}
         style={{ '--shot-h': tall ? '125cqw' : '62.5cqw' } as CSSProperties}
@@ -22,7 +22,7 @@ export function WorkCard({ study, tall = false, priority = false }: { study: Cas
           alt={study.image.alt}
           width={800}
           height={study.scroll ? 1600 : 500}
-          priority={priority}
+          loading={eager ? 'eager' : 'lazy'}
           sizes="(min-width: 1024px) 28vw, 46vw"
           className={`w-full ${study.scroll ? 'shot-scroll' : 'h-full object-cover object-top'}`}
         />

@@ -13,7 +13,6 @@ export function WorkStrip({ study, index }: { study: CaseStudy; index: number })
   return (
     <Link
       href={`/work/${study.slug}/`}
-      aria-label={`${study.title}: ${study.tagline}`}
       className="group grid gap-x-12 gap-y-6 border-t border-border-default py-8 lg:grid-cols-12 lg:py-10"
     >
       <div className="lg:col-span-4">

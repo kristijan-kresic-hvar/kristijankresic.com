@@ -33,7 +33,7 @@ export default function Home() {
     <>
       {/* Hero. The statement and the facts stay pinned to the bottom-left while all six projects pass. */}
       <section className="mx-auto grid max-w-page gap-x-12 px-(--gutter) lg:grid-cols-12 lg:pr-0">
-        <div className="pt-8 pb-10 sm:pt-12 lg:sticky lg:bottom-0 lg:col-span-5 lg:self-end lg:pt-10">
+        <div className="hero-pin pt-8 pb-10 sm:pt-12 lg:col-span-5 lg:pt-10">
           <h1 className="hero-statement font-semibold text-text-muted">
             <span className="text-text-primary">Frontend engineer.</span>
             <br />
@@ -45,14 +45,14 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 items-start gap-3 pb-16 sm:gap-4 lg:col-span-7 lg:pt-6 lg:pb-24">
-          <div className="grid gap-5 sm:gap-7">
+          <div className="wall-col grid gap-5 sm:gap-7">
             {left.map((study, i) => (
-              <WorkCard key={study.slug} study={study} tall={i === 1} priority={i === 0} />
+              <WorkCard key={study.slug} study={study} tall={i === 1} eager={i === 0} />
             ))}
           </div>
-          <div className="mt-10 grid gap-5 sm:mt-16 sm:gap-7 lg:mt-28">
+          <div className="wall-col wall-col-b grid gap-5 sm:gap-7">
             {right.map((study, i) => (
-              <WorkCard key={study.slug} study={study} tall={i === 0} priority={i === 0} />
+              <WorkCard key={study.slug} study={study} tall={i === 0} eager={i === 0} />
             ))}
           </div>
         </div>
@@ -81,8 +81,8 @@ export default function Home() {
                   className="earlier group grid gap-x-12 gap-y-1 border-t border-border-default py-4 sm:grid-cols-12 sm:items-baseline"
                 >
                   <span className="font-medium text-text-primary sm:col-span-4">{study.title}</span>
-                  <span className="text-text-body sm:col-span-6">{study.tagline}</span>
-                  <span className="text-sm text-text-muted tabular-nums sm:col-span-2 sm:text-right">{study.period}</span>
+                  <span className="text-text-body sm:col-span-5 lg:col-span-6">{study.tagline}</span>
+                  <span className="text-sm whitespace-nowrap text-text-muted tabular-nums sm:col-span-3 sm:text-right lg:col-span-2">{study.period}</span>
                 </Link>
               </li>
             ))}

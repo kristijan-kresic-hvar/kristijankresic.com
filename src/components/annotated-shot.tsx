@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Annotation } from '@/content/work';
 
 type Line = { x1: number; y1: number; x2: number; y2: number; mx: number };
@@ -136,15 +136,19 @@ export function AnnotatedShot({
 
       {lines.length > 0 && (
         <svg className="pointer-events-none absolute inset-0 hidden h-full w-full overflow-visible lg:block" aria-hidden="true">
-          {lines.map((l, i) => (
-            <path
-              key={i}
-              d={`M ${l.x1} ${l.y1} H ${l.mx} V ${l.y2} H ${l.x2}`}
-              data-active={active === i}
-              className="leader"
-              pathLength={1}
-            />
-          ))}
+          {lines.map((l, i) => {
+            // Real length, so the draw-in can dash the whole path without normalising it.
+            const len = Math.abs(l.mx - l.x1) + Math.abs(l.y2 - l.y1) + Math.abs(l.x2 - l.mx);
+            return (
+              <path
+                key={i}
+                d={`M ${l.x1} ${l.y1} H ${l.mx} V ${l.y2} H ${l.x2}`}
+                data-active={active === i}
+                className="leader"
+                style={{ '--i': i, '--len': len } as CSSProperties}
+              />
+            );
+          })}
         </svg>
       )}
     </div>

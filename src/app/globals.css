@@ -120,6 +120,7 @@ body {
   white-space: nowrap;
   font-kerning: none;
   user-select: none;
+  margin-left: -0.055em; /* optical: pull the K's side bearing onto the page edge */
 }
 .namemark > :first-child {
   color: var(--color-accent);
@@ -133,13 +134,28 @@ body {
 /* Hero statement: sized so the longest line fits the five-column block from 1024 up, and the
    full-width block below that. */
 .hero-statement {
-  font-size: var(--text-display);
+  font-size: clamp(1.75rem, 9.6vw, 2.25rem); /* four lines from 320 to 423, three above */
   line-height: 1.04;
   letter-spacing: var(--tracking-tighter);
+}
+@media (min-width: 48rem) {
+  .hero-statement {
+    font-size: var(--text-display);
+  }
 }
 @media (min-width: 64rem) {
   .hero-statement {
     font-size: clamp(2.375rem, 3.9vw, 4.75rem);
+  }
+}
+
+/* The statement and facts stay at the bottom-left of the screen while the wall scrolls past. Only on
+   wide screens tall enough to hold the whole block; otherwise it scrolls with the page. */
+@media (min-width: 64rem) and (min-height: 42rem) {
+  .hero-pin {
+    position: sticky;
+    bottom: 0;
+    align-self: end;
   }
 }
 
@@ -245,16 +261,25 @@ body {
   }
 }
 
-/* Contact address: one amber rule under the whole line, thickening on hover. */
+/* Contact address: one amber rule under the whole line. It thickens on hover and, where scroll
+   timelines exist, draws from the left as the address arrives. */
 .contact-address {
+  position: relative;
   display: inline-block;
   white-space: nowrap;
   padding-bottom: 0.14em;
-  background: linear-gradient(var(--color-accent), var(--color-accent)) left bottom / 100% 2px no-repeat;
-  transition: background-size var(--duration-fast) var(--ease-out), color var(--duration-instant) var(--ease-standard);
 }
-.contact-address:hover {
-  background-size: 100% 0.08em;
+.contact-address::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: var(--color-accent);
+  transform-origin: left;
+  transition: height var(--duration-fast) var(--ease-out);
+}
+.contact-address:hover::after {
+  height: 0.08em;
 }
 
 /* Annotated screenshot: markers, list rows and leader lines share one active state (amber). */
@@ -305,6 +330,84 @@ body {
 .leader[data-active='true'] {
   stroke: var(--color-accent);
   stroke-width: 1.5;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Motion. Three authored moments, all CSS, all behind prefers-reduced-motion:
+   1. the wall settles on arrival and its two columns slide into line as the hero scrolls away;
+   2. leader lines draw from marker to decision, which is what explains the pairing;
+   3. the rule under the contact address draws as the address arrives.
+   Everything else is feedback at --duration-instant. Nothing here hides content: without these
+   rules the page is the same page, already in its final state.
+   --------------------------------------------------------------------------------------------- */
+.wall-col-b {
+  margin-top: 2.5rem;
+}
+@media (min-width: 40rem) {
+  .wall-col-b {
+    margin-top: 4rem;
+  }
+}
+@media (min-width: 64rem) {
+  .wall-col-b {
+    margin-top: 7rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @media (min-width: 64rem) {
+    .wall-col {
+      animation: wall-rise 0.8s var(--ease-out) both;
+    }
+    .wall-col-b {
+      animation-delay: 90ms;
+    }
+    @supports (animation-timeline: scroll()) {
+      /* The lower column starts 7rem down and catches up over the first 55vh of scroll. */
+      .wall-col-b {
+        margin-top: 0;
+        animation:
+          wall-rise 0.8s var(--ease-out) 90ms both,
+          wall-settle linear both;
+        animation-timeline: auto, scroll(root block);
+        animation-range: normal, 0 55vh;
+      }
+    }
+  }
+
+  .leader {
+    stroke-dasharray: var(--len);
+    animation: leader-draw 0.7s var(--ease-out) calc(var(--i, 0) * 90ms + 200ms) both;
+  }
+
+  @supports (animation-timeline: view()) {
+    .contact-address::after {
+      animation: rule-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 60% cover 32%;
+    }
+  }
+}
+
+@keyframes wall-rise {
+  from {
+    transform: translateY(2rem);
+  }
+}
+@keyframes wall-settle {
+  from {
+    translate: 0 7rem;
+  }
+}
+@keyframes leader-draw {
+  from {
+    stroke-dashoffset: var(--len);
+  }
+}
+@keyframes rule-draw {
+  from {
+    transform: scaleX(0);
+  }
 }
 
 /* A short amber rule above a statement set at title scale (case-study outcome, practice statement). */
