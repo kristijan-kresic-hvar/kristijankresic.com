@@ -21,6 +21,19 @@ describe('work content', () => {
       const card = hero.replace('.webp', '-card.webp');
       expect(existsSync(hero), `${w.slug} hero`).toBe(true);
       expect(existsSync(card), `${w.slug} card`).toBe(true);
+      if (w.scroll) expect(existsSync(hero.replace('.webp', '-full.webp')), `${w.slug} full`).toBe(true);
+      for (let i = 1; i <= w.screens; i++) {
+        expect(existsSync(path.join(process.cwd(), 'public/images/work', `${w.slug}-screen-${i}.webp`)), `${w.slug} screen ${i}`).toBe(true);
+      }
+    }
+  });
+
+  it('places every hotspot inside the image', () => {
+    for (const w of WORK) for (const a of w.annotations) {
+      expect(a.x, `${w.slug} ${a.title}`).toBeGreaterThan(0);
+      expect(a.x).toBeLessThan(100);
+      expect(a.y).toBeGreaterThan(0);
+      expect(a.y).toBeLessThan(100);
     }
   });
 

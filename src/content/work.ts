@@ -13,8 +13,16 @@ export type CaseStudy = {
   highlights: string[];
   outcome?: string;
   image: { src: string; alt: string; width: number; height: number };
+  /** Hotspots on the hero image, in percent of width/height, with the decision or feature they point at. */
+  annotations: Annotation[];
+  /** Extra screens for the case-study page: /images/work/<slug>-screen-N.webp */
+  screens: number;
+  /** Whether a tall /images/work/<slug>-full.webp exists for the hover-scroll card. */
+  scroll: boolean;
   featured: boolean;
 };
+
+export type Annotation = { x: number; y: number; title: string; text: string };
 
 export const WORK: CaseStudy[] = [
   {
@@ -37,6 +45,13 @@ export const WORK: CaseStudy[] = [
     ],
     outcome: 'Shipped as the public face of the platform; the foundation is still what the team ships on.',
     image: { src: '/images/work/biocirv.webp', alt: 'BioCirV Data Portal discovery page with biomass cards and filters', width: 1600, height: 1000 },
+    annotations: [
+      { x: 50, y: 47, title: 'Search over a Django REST API', text: 'Debounced autocomplete; the query lives in the URL, so every search is a shareable link and TanStack Query serves repeats from cache.' },
+      { x: 26, y: 75, title: 'Faceted filters as URL state', text: 'Filter combinations are serialised into the address bar and restored on load; no global store, no stale results after navigation.' },
+      { x: 50, y: 88, title: 'The component system others built on', text: 'Typed cards, forms (React Hook Form + Zod) and tables that two other developers extended; I reviewed their pull requests.' },
+    ],
+    screens: 3,
+    scroll: true,
     featured: true,
   },
   {
@@ -58,6 +73,13 @@ export const WORK: CaseStudy[] = [
       'Zero developer deploys for content since launch.',
     ],
     image: { src: '/images/work/oncallable.webp', alt: 'OnCallable marketing site home page', width: 1600, height: 1000 },
+    annotations: [
+      { x: 20, y: 38, title: 'Every word is a Sanity document', text: 'Headlines, sections and CTAs are editable content with a page-builder schema; editors publish without a developer deploy.' },
+      { x: 76, y: 55, title: 'Sections you can reorder and A/B test', text: 'Each block is a schema type with variants, so marketing runs experiments, popups and redirects from the CMS.' },
+      { x: 22, y: 63, title: 'Forms defined in the CMS', text: 'Lead capture reads its fields and destination from Sanity; adding a form is content, not code.' },
+    ],
+    screens: 3,
+    scroll: true,
     featured: true,
   },
   {
@@ -79,6 +101,13 @@ export const WORK: CaseStudy[] = [
       'Onboarding with custom animations that explain pairing without a manual.',
     ],
     image: { src: '/images/work/suello.webp', alt: 'Suello app home screen showing a connected planter', width: 1600, height: 1000 },
+    annotations: [
+      { x: 50, y: 23, title: 'Reminders from device state', text: 'Soil-moisture readings arrive over Bluetooth Low Energy; watering prompts are computed on the phone, offline-safe.' },
+      { x: 50, y: 42, title: 'Live planter status', text: 'The "Doing well" badge is driven by sensor characteristics subscribed through the BLE layer I built from scratch.' },
+      { x: 48, y: 66, title: 'Connection and battery that survive real life', text: 'Reconnect and retry logic handles drops and app backgrounding so pairing and onboarding feel instant.' },
+    ],
+    screens: 3,
+    scroll: true,
     featured: true,
   },
   {
@@ -100,6 +129,13 @@ export const WORK: CaseStudy[] = [
       'Worked inside an established codebase with code review and staged releases.',
     ],
     image: { src: '/images/work/vetster.webp', alt: 'Vetster find-a-vet page', width: 1600, height: 1000 },
+    annotations: [
+      { x: 16, y: 50, title: 'Vet-side flows in Vue.js', text: 'Onboarding, profile and account-settings screens shipped inside an established Vue codebase with staged releases.' },
+      { x: 62, y: 57, title: 'Profile data from Laravel', text: 'Controllers and migrations I wrote back the vet profile fields shown here; PostgreSQL underneath.' },
+      { x: 25, y: 29, title: '100k+ users, zero downtime changes', text: 'Every change went through code review and staged rollout on a 24/7 video-consultation platform.' },
+    ],
+    screens: 3,
+    scroll: true,
     featured: true,
   },
   {
@@ -120,7 +156,14 @@ export const WORK: CaseStudy[] = [
       'JWT magic-link auth and multi-party e-signature flows for consent documents.',
       'Clinical forms (standard scales), response views, data tables and CSV export.',
     ],
-    image: { src: '/images/work/naitur.webp', alt: 'Naitur client dashboard', width: 1600, height: 1000 },
+    image: { src: '/images/work/naitur.webp', alt: 'Naitur journey dashboard with phased activities', width: 1600, height: 1000 },
+    annotations: [
+      { x: 25, y: 30, title: 'Phased journey pipeline', text: 'Screening → Facilitation → Integration as typed data tables with status chips; clinics track every client step.' },
+      { x: 22, y: 41, title: 'Multi-party e-signature', text: 'Consent documents move through signer roles with pending/complete states, all on HIPAA-compliant infrastructure.' },
+      { x: 76, y: 54, title: 'Scheduling and magic-link auth', text: 'Sessions sync to calendars; users sign in with JWT magic links instead of passwords.' },
+    ],
+    screens: 3,
+    scroll: true,
     featured: true,
   },
   {
@@ -140,7 +183,14 @@ export const WORK: CaseStudy[] = [
       'PayPal subscription checkout integrated end-to-end with the Django backend.',
       'Auth flows, CRUD screens and data tables with export for agents.',
     ],
-    image: { src: '/images/work/buddyins.webp', alt: 'BuddyIns dashboard', width: 1600, height: 1000 },
+    image: { src: '/images/work/buddyins.webp', alt: 'BuddyIns agent dashboard with activity feed', width: 1600, height: 1000 },
+    annotations: [
+      { x: 9, y: 19, title: 'Benefit Buddy plan builder', text: 'CRUD screens over the Django REST API for building and sharing long-term-care plans.' },
+      { x: 45, y: 22, title: 'Activity feed and tables', text: 'Data tables with sorting and CSV export so agents can work their book outside the app.' },
+      { x: 14, y: 95, title: 'PayPal subscriptions gate the tools', text: 'Subscription checkout integrated end-to-end; the tier on the account unlocks sales tools.' },
+    ],
+    screens: 3,
+    scroll: true,
     featured: true,
   },
   {
@@ -158,6 +208,9 @@ export const WORK: CaseStudy[] = [
       'Two CMS-driven React applications: a used-car listing platform with vehicle data and damage reports, and a careers portal.',
     highlights: ['Vehicle listing, vehicle-data and damage-report screens from CMS content.', 'Careers portal frontend with CMS-managed content.'],
     image: { src: '/images/work/carcatcher.webp', alt: 'car-catcher.de vehicle listing', width: 1600, height: 1000 },
+    annotations: [],
+    screens: 3,
+    scroll: false,
     featured: false,
   },
   {
@@ -174,6 +227,9 @@ export const WORK: CaseStudy[] = [
     summary: 'Rebuilt the multilingual marketing site of Agrivi on WordPress with a custom theme.',
     highlights: ['Custom WordPress theme, multilingual content, performance pass.'],
     image: { src: '/images/work/agrivi.webp', alt: 'Agrivi marketing site', width: 1600, height: 1000 },
+    annotations: [],
+    screens: 0,
+    scroll: false,
     featured: false,
   },
   {
@@ -190,6 +246,9 @@ export const WORK: CaseStudy[] = [
     summary: 'Designed and built the restaurant’s site from scratch as a custom WordPress theme, with reservations and a photo-led layout.',
     highlights: ['The owner reported inquiries up about 200% after launch.'],
     image: { src: '/images/work/robinson.webp', alt: 'Robinson Restaurant website', width: 1600, height: 1000 },
+    annotations: [],
+    screens: 0,
+    scroll: false,
     featured: false,
   },
 ];

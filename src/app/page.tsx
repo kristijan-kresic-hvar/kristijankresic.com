@@ -4,85 +4,151 @@ import { Container } from '@/components/container';
 import { Section } from '@/components/section';
 import { WorkCard } from '@/components/work-card';
 import { CopyButton } from '@/components/copy-button';
+import { CursorGrid } from '@/components/cursor-grid';
+import { LocalTime } from '@/components/local-time';
+import { Ticker } from '@/components/ticker';
 import { PROFILE } from '@/content/profile';
 import { FEATURED, EARLIER } from '@/content/work';
 
-const PROOF = [
-  { value: `${PROFILE.yearsProfessional} yrs`, label: 'professional, building for the web since ' + PROFILE.since },
-  { value: '6', label: 'North American client products shipped at Agilno' },
-  { value: '100k+', label: 'app users on the telehealth platform I shipped features for' },
-  { value: 'Now', label: 'available — remote EU or hybrid Split / Zagreb' },
+const TICKER = [
+  { client: 'BioCirV', built: 'Next.js 16 data portal, from scratch' },
+  { client: 'OnCallable', built: 'Sanity replatform in two weeks' },
+  { client: 'Suello', built: 'React Native + Bluetooth device layer' },
+  { client: 'Vetster', built: 'Vue features + Laravel backend, 100k+ users' },
+  { client: 'Naitur', built: 'HIPAA frontend, e-signature, magic links' },
+  { client: 'BuddyIns', built: 'Next.js over Django, PayPal subscriptions' },
+];
+
+const PROCESS = [
+  { n: '01', h: 'Join the team, not the ticket queue', p: 'Embedded in the client’s standups, Figma and repo from week one. Six teams, same pattern.' },
+  { n: '02', h: 'Own the frontend end-to-end', p: 'Architecture, data layer, component system, forms, accessibility, performance, delivery.' },
+  { n: '03', h: 'Leave a foundation', p: 'On BioCirV two other developers built on my component system while I reviewed their PRs.' },
+  { n: '04', h: 'AI for the mechanical work', p: 'Claude Code and Cursor for scaffolding and research; every architecture call and merged line is mine.' },
 ];
 
 export default function Home() {
+  const [lead, ...rest] = FEATURED;
   return (
     <>
-      <section className="grid-lines relative overflow-hidden border-b border-border-subtle">
+      {/* Hero: everything a recruiter needs above the fold, one playful layer behind it. */}
+      <section className="relative overflow-hidden border-b border-border-subtle">
+        <CursorGrid />
         <div className="glow pointer-events-none absolute inset-0" aria-hidden="true" />
-        <Container className="relative grid gap-10 py-16 sm:py-24 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+        <Container className="relative grid gap-10 py-14 sm:py-20 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] lg:items-center lg:py-24">
           <div>
-            <p className="reveal font-mono text-xs uppercase tracking-wide text-text-muted">
-              {PROFILE.location} · EU citizen · {PROFILE.availability.split(' · ')[0]}
-            </p>
-            <h1 className="reveal reveal-delay-1 mt-4 text-display font-semibold leading-[1.02] tracking-tighter">
-              Frontend engineer
-              <br />
-              <span className="text-text-secondary">
-                React · Next.js · TypeScript<span className="text-accent">.</span>
-              </span>
+            <p className="reveal font-mono text-xs uppercase tracking-wide text-accent">Frontend engineer · available now</p>
+            <h1 className="reveal reveal-delay-1 mt-4 text-[clamp(38px,6vw,76px)] font-semibold leading-[1.02] tracking-tighter">
+              I ship the whole frontend,
+              <br className="hidden sm:block" /> not just the components<span className="text-accent">.</span>
             </h1>
             <p className="reveal reveal-delay-2 mt-6 max-w-xl text-lg text-text-body">
-              I ship production web and mobile products end-to-end: architecture, data layer, component system, forms,
-              accessibility, performance and delivery. Most recently a public data portal on Next.js 16 / React 19 and a
-              React Native app with a Bluetooth device layer.
+              React · Next.js · TypeScript · React Native. {PROFILE.yearsProfessional} years shipping production web and mobile for
+              North American clients: most recently a public data portal on Next.js 16 / React 19 and a Bluetooth-connected
+              mobile app, both from an empty repo.
             </p>
             <div className="reveal reveal-delay-3 mt-8 flex flex-wrap items-center gap-3">
-              <a
-                href={`mailto:${PROFILE.email}`}
+              <Link
+                href="/#work"
                 className="rounded-md bg-accent px-5 py-2.5 font-medium text-bg-base transition-colors hover:bg-accent-hover"
               >
-                Email me
-              </a>
+                See the work
+              </Link>
               <a
                 href={PROFILE.cv.frontend}
                 className="rounded-md border border-border-default px-5 py-2.5 font-medium text-text-primary transition-colors hover:border-accent"
               >
-                Download CV
+                CV (PDF)
               </a>
-              <CopyButton value={PROFILE.email} label="Copy email" />
             </div>
           </div>
-          <div className="reveal reveal-delay-2 relative mx-auto w-56 sm:w-64 lg:w-full lg:max-w-xs">
-            <div className="absolute -inset-3 rounded-full bg-accent-glow blur-2xl" aria-hidden="true" />
-            <Image
-              src="/images/headshot.webp"
-              alt={`Portrait of ${PROFILE.name}`}
-              width={800}
-              height={800}
-              priority
-              className="relative rounded-full border border-border-default"
-            />
-          </div>
+
+          {/* Recruiter card */}
+          <aside
+            aria-label="Contact and availability"
+            className="reveal reveal-delay-2 relative rounded-2xl border border-border-default bg-bg-elev-1/90 p-5 backdrop-blur sm:p-6"
+          >
+            <div className="flex items-center gap-4">
+              <Image
+                src="/images/headshot.webp"
+                alt={`Portrait of ${PROFILE.name}`}
+                width={800}
+                height={800}
+                priority
+                className="h-16 w-16 rounded-full border border-border-default"
+              />
+              <div>
+                <p className="font-semibold text-text-primary">{PROFILE.name}</p>
+                <p className="text-sm text-text-body">{PROFILE.headline} · {PROFILE.stackLine}</p>
+              </div>
+            </div>
+            <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+              <div>
+                <dt className="font-mono text-[11px] uppercase tracking-wide text-text-muted">Status</dt>
+                <dd className="mt-0.5 flex items-center gap-2 text-text-primary">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60 motion-reduce:hidden" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+                  </span>
+                  Available now
+                </dd>
+              </div>
+              <div>
+                <dt className="font-mono text-[11px] uppercase tracking-wide text-text-muted">Local time</dt>
+                <dd className="mt-0.5 text-text-primary">
+                  <LocalTime />
+                </dd>
+              </div>
+              <div>
+                <dt className="font-mono text-[11px] uppercase tracking-wide text-text-muted">Based</dt>
+                <dd className="mt-0.5 text-text-primary">Hvar, Croatia · EU citizen</dd>
+              </div>
+              <div>
+                <dt className="font-mono text-[11px] uppercase tracking-wide text-text-muted">Works</dt>
+                <dd className="mt-0.5 text-text-primary">Remote EU / US-East · hybrid Split, Zagreb</dd>
+              </div>
+            </dl>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <a
+                href={`mailto:${PROFILE.email}`}
+                className="rounded-md bg-accent px-3.5 py-2 text-sm font-medium text-bg-base transition-colors hover:bg-accent-hover"
+              >
+                Email me
+              </a>
+              <CopyButton value={PROFILE.email} label="Copy email" />
+              <a href={PROFILE.phoneHref} className="font-mono text-xs text-text-secondary hover:text-text-primary">
+                {PROFILE.phone}
+              </a>
+            </div>
+            <div className="mt-4 flex gap-4 border-t border-border-subtle pt-4 font-mono text-xs">
+              <a href={PROFILE.cv.frontend} className="text-text-secondary hover:text-text-primary">
+                Frontend CV ↓
+              </a>
+              <a href={PROFILE.cv.fullstack} className="text-text-secondary hover:text-text-primary">
+                Full-stack CV ↓
+              </a>
+              <a href={PROFILE.github} className="ml-auto text-text-secondary hover:text-text-primary">
+                GitHub
+              </a>
+              <a href={PROFILE.linkedin} className="text-text-secondary hover:text-text-primary">
+                LinkedIn
+              </a>
+            </div>
+          </aside>
         </Container>
       </section>
 
-      <section aria-label="Proof points" className="border-b border-border-subtle bg-bg-elev-1">
-        <Container className="grid gap-6 py-8 sm:grid-cols-2 lg:grid-cols-4">
-          {PROOF.map((p) => (
-            <div key={p.label}>
-              <p className="text-3xl font-semibold text-text-primary">{p.value}</p>
-              <p className="mt-1 text-sm text-text-muted">{p.label}</p>
-            </div>
-          ))}
-        </Container>
-      </section>
+      <Ticker items={TICKER} />
 
       <Section id="work" eyebrow="Selected work" title="Six client products, built inside the client's team.">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURED.map((study, i) => (
-            <WorkCard key={study.slug} study={study} priority={i < 3} />
+          {lead && <WorkCard study={lead} large priority />}
+          {rest.map((study, i) => (
+            <WorkCard key={study.slug} study={study} priority={i < 1} />
           ))}
         </div>
+        <p className="mt-6 font-mono text-xs text-text-muted">
+          Hover a card to scroll the full page. Open a study for the decisions behind each screen.
+        </p>
         <h3 className="mt-16 font-mono text-xs uppercase tracking-wide text-text-muted">Earlier work</h3>
         <ul className="mt-4 divide-y divide-border-subtle border-y border-border-subtle">
           {EARLIER.map((study) => (
@@ -102,28 +168,16 @@ export default function Home() {
         </ul>
       </Section>
 
-      <Section eyebrow="How I work" title="Embedded, async, end-to-end." className="border-t border-border-subtle bg-bg-elev-1">
-        <div className="grid gap-8 md:grid-cols-3">
-          {[
-            {
-              h: 'Own the frontend, not a ticket',
-              p: 'Architecture, data layer, component system, forms and delivery. On BioCirV I set the foundation two other developers built on and reviewed their PRs.',
-            },
-            {
-              h: 'Figma to production without a hand-off gap',
-              p: 'I work directly with designers and ship the real thing: responsive, accessible, measured with Lighthouse and Core Web Vitals.',
-            },
-            {
-              h: 'AI for the mechanical work, judgement stays mine',
-              p: 'Claude Code and Cursor for scaffolding, research and review. Architecture, security decisions and every merged line are my own.',
-            },
-          ].map((item) => (
-            <div key={item.h} className="rounded-xl border border-border-subtle bg-bg-base p-6">
-              <h3 className="text-lg font-semibold">{item.h}</h3>
-              <p className="mt-2 text-sm text-text-body">{item.p}</p>
-            </div>
+      <Section eyebrow="How an engagement runs" title="Embedded, async, end-to-end." className="border-t border-border-subtle bg-bg-elev-1">
+        <ol className="grid gap-px overflow-hidden rounded-xl border border-border-subtle bg-border-subtle md:grid-cols-4">
+          {PROCESS.map((s) => (
+            <li key={s.n} className="bg-bg-base p-6">
+              <p className="font-mono text-xs text-accent">{s.n}</p>
+              <h3 className="mt-3 text-lg font-semibold">{s.h}</h3>
+              <p className="mt-2 text-sm text-text-body">{s.p}</p>
+            </li>
           ))}
-        </div>
+        </ol>
         <ul className="mt-10 flex flex-wrap gap-2" aria-label="Stack">
           {PROFILE.stack.map((s) => (
             <li key={s} className="rounded-full border border-border-default px-3 py-1 font-mono text-xs text-text-secondary">
@@ -139,7 +193,7 @@ export default function Home() {
           <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">Hiring a frontend engineer?</h2>
           <p className="mt-4 max-w-xl text-text-body">
             Remote across the EU or with US-East overlap, or hybrid in Split or Zagreb. EU citizen, no visa needed. Email is the
-            fastest way to reach me.
+            fastest way to reach me; I reply the same day.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <a

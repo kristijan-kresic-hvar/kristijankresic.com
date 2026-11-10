@@ -100,3 +100,63 @@ h3 {
     }
   }
 }
+
+/* Work card: the tall capture scrolls inside a 16:10 frame on hover. Container-query units make the
+   travel distance exact without JS: frame height = 62.5cqw. */
+.shot {
+  container-type: inline-size;
+}
+.shot-scroll {
+  height: auto;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .shot-scroll {
+    transition: transform 6s linear;
+  }
+  .group:hover .shot-scroll {
+    transform: translateY(calc(-100% + 62.5cqw));
+  }
+}
+
+/* Ticker */
+.ticker {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+.ticker-track {
+  width: max-content;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ticker-track {
+    animation: ticker 60s linear infinite;
+  }
+  .ticker:hover .ticker-track {
+    animation-play-state: paused;
+  }
+  @keyframes ticker {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    flex-wrap: wrap;
+    width: auto;
+  }
+  .ticker-track > ul[aria-hidden='true'] {
+    display: none;
+  }
+  .ticker-track > ul {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+}
+
+/* Browser frame around the hero screenshot */
+.frame {
+  box-shadow:
+    0 0 0 1px var(--color-border-default),
+    0 30px 80px -30px rgba(0, 0, 0, 0.8);
+}
