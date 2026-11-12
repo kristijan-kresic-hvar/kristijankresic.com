@@ -1,0 +1,448 @@
+/* Hero (stage). Tokens come from globals.css. The markup is the finished hero; the opening
+   and every pointer effect sit on top of it and are off under prefers-reduced-motion. */
+
+/* The opening's frame counter: which of the six plates the centred tile is showing. */
+@property --flick {
+  syntax: '<integer>';
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ---- grid ------------------------------------------------------------------------------------
+   Phones and tablets: statement, fact sheet, then the six projects (each once, with its plate).
+   From 1024: twelve columns. Statement and index hold columns 1 to 4, the plate 5 to 12, and the
+   fact sheet sits on the same columns underneath, so every edge lines up with another one. */
+.hero {
+  --hero-gap: clamp(1.5rem, 2.5vw, 3rem);
+  --depth: 10px;
+  position: relative;
+  isolation: isolate; /* a background layer can sit at z-index -1 without leaving the hero */
+  display: grid;
+  gap: 2rem var(--hero-gap);
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding: 2rem var(--gutter) 3.5rem;
+  overflow-x: clip;
+}
+.hero-facts {
+  order: 1;
+}
+.stage-index {
+  order: 2;
+}
+.stage {
+  display: none;
+}
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .stage-index {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--hero-gap);
+  }
+}
+@media (min-width: 64rem) {
+  .hero {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto 1fr auto;
+    padding-block: 1.5rem 2rem;
+  }
+  .stage-statement {
+    grid-area: 1 / 1 / auto / span 4;
+  }
+  .stage-index {
+    grid-area: 2 / 1 / auto / span 4;
+    align-self: end;
+  }
+  .stage {
+    display: block;
+    grid-area: 1 / 5 / span 2 / -1;
+  }
+  .hero-facts {
+    grid-area: 3 / 1 / auto / -1;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--hero-gap);
+  }
+  .hero-facts > * {
+    grid-row: 1;
+  }
+  .hero-facts > :nth-child(1) {
+    grid-column: 1 / span 2; /* status */
+  }
+  .hero-facts > :nth-child(3) {
+    grid-column: 3 / span 2; /* base */
+  }
+  .hero-facts > :nth-child(2) {
+    grid-column: 5 / span 3; /* stack, on the plate's left edge */
+  }
+  .hero-facts > :nth-child(4) {
+    grid-column: 8 / span 2; /* CVs */
+  }
+  .hero-facts > :nth-child(5) {
+    grid-column: 10 / span 3; /* contact, out to the plate's right edge */
+  }
+}
+
+/* ---- statement -------------------------------------------------------------------------------
+   Every word is a box that cannot break and every letter is its own span, so the opening can set
+   the line word by word and the pointer can add weight letter by letter. Once the script has
+   locked each letter's width ([data-locked]) a heavier letter overflows its box evenly on both
+   sides and nothing around it moves. */
+.stage-statement {
+  font-size: clamp(1.875rem, 8.6vw, 2.75rem);
+  font-weight: 560;
+  line-height: 1.06;
+  letter-spacing: var(--tracking-tighter);
+  color: var(--color-text-muted);
+}
+@media (min-width: 64rem) {
+  .stage-statement {
+    font-size: clamp(1.75rem, 2.9vw, 3.25rem);
+  }
+}
+.stage-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.stage-word[data-lead='true'] {
+  color: var(--color-text-primary);
+}
+.stage-statement[data-locked] .stage-word > span {
+  display: inline-flex;
+  justify-content: center;
+}
+
+/* ---- index ----------------------------------------------------------------------------------- */
+.stage-index li {
+  border-top: 1px solid var(--color-border-default);
+}
+.stage-item {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr;
+  column-gap: 0.75rem;
+  align-items: baseline;
+  padding-block: 0.7rem;
+  color: var(--color-text-primary);
+  transition: color var(--duration-instant) var(--ease-standard);
+}
+.stage-n {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+.stage-name {
+  font-size: clamp(1.25rem, 1.75vw, 1.875rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: var(--tracking-tight);
+}
+.stage-short {
+  grid-column: 2;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+.stage-thumb {
+  display: block;
+  grid-column: 1 / -1;
+  margin-block: 0.7rem 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+@media (min-width: 64rem) {
+  .stage-index li:last-child {
+    border-bottom: 1px solid var(--color-border-default);
+  }
+  .stage-item {
+    grid-template-columns: 1.75rem auto 1fr;
+    color: var(--color-text-muted);
+  }
+  .stage-item:hover,
+  .stage-item[data-active='true'] {
+    color: var(--color-text-primary);
+  }
+  .stage-item[data-active='true'] .stage-n {
+    color: var(--color-accent);
+  }
+  /* One line beside the name, for the active project only, once the column is wide enough. */
+  .stage-short {
+    display: none;
+    grid-column: 3;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+  }
+  .stage-item[data-active='true'] .stage-short {
+    opacity: 1;
+  }
+  .stage-thumb {
+    display: none;
+  }
+}
+@media (min-width: 80rem) {
+  .stage-short {
+    display: block;
+  }
+}
+
+/* ---- the plate -------------------------------------------------------------------------------
+   A board with thickness in a perspective box. `.stage` is the bed it rests on and stays put.
+   `.stage-tilt` leans into the pointer, `.stage-turn` turns the board over, and the six project
+   images wait on it: one on the front ([data-face='a']), one on the back ('b'), the rest hidden.
+   The script only ever changes which image is on the side facing away. */
+.stage {
+  position: relative;
+  perspective: 1600px;
+  border-radius: 3px;
+  background: var(--color-bg-elev-1);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-subtle),
+    0 2rem 4rem -1.5rem color-mix(in srgb, var(--color-bg-base) 90%, transparent);
+}
+/* At least 16:10 from its own width, taller when the statement and index need the room. */
+.stage::before {
+  content: '';
+  display: block;
+  padding-bottom: 62.5%;
+}
+.stage-tilt,
+.stage-turn {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.stage-tilt {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+.stage-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--color-bg-elev-1);
+  backface-visibility: hidden;
+  visibility: hidden;
+  transform: translateZ(calc(var(--depth) / 2));
+}
+.stage-face[data-face] {
+  visibility: visible;
+}
+.stage-face[data-face='b'] {
+  --band: 75deg; /* this side is upside down until the board turns, so its band leans the other way */
+  transform: rotateX(180deg) translateZ(calc(var(--depth) / 2));
+}
+.stage-face picture {
+  display: contents;
+}
+.stage-face img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+/* Light. The plate rests slightly in shade; a band of light follows the pointer across it
+   (--lx, --lit) by lifting the shade and adding a little gloss, and a board that is turning
+   away from the viewer goes darker (--shade). */
+.stage-face::before,
+.stage-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.stage-face::before {
+  background: var(--color-bg-base);
+  opacity: calc(0.08 + 0.16 * var(--lit, 0) + 0.6 * var(--shade, 0));
+  mask-image: linear-gradient(
+    var(--band, 105deg),
+    #000 calc(var(--lx, 50%) - 26%),
+    rgb(0 0 0 / calc(1 - var(--lit, 0))) var(--lx, 50%),
+    #000 calc(var(--lx, 50%) + 26%)
+  );
+}
+.stage-face::after {
+  background: linear-gradient(
+    var(--band, 105deg),
+    transparent calc(var(--lx, 50%) - 15%),
+    color-mix(in srgb, var(--color-text-primary) 18%, transparent) var(--lx, 50%),
+    transparent calc(var(--lx, 50%) + 15%)
+  );
+  opacity: var(--lit, 0);
+  mix-blend-mode: screen;
+}
+/* The board's top and bottom edges: what you see when it is edge-on mid-turn. */
+.stage-edge {
+  position: absolute;
+  inset-inline: 2px;
+  height: var(--depth);
+}
+.stage-edge[data-edge='top'] {
+  top: 0;
+  background: var(--color-border-strong);
+  transform-origin: 50% 0;
+  transform: translateZ(calc(var(--depth) / -2)) rotateX(90deg);
+}
+.stage-edge[data-edge='bottom'] {
+  bottom: 0;
+  background: var(--color-bg-elev-3);
+  transform-origin: 50% 100%;
+  transform: translateZ(calc(var(--depth) / -2)) rotateX(-90deg);
+}
+/* Which project is up, on a tab that floats above the board so it shifts against it on a lean. */
+.stage-caption {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  transform: translateZ(48px);
+  transition: border-color var(--duration-instant) var(--ease-standard);
+}
+.stage-caption svg {
+  transition: translate var(--duration-fast) var(--ease-out);
+}
+.stage:hover .stage-caption,
+.stage:focus-visible .stage-caption {
+  border-color: var(--color-accent);
+}
+.stage:hover .stage-caption svg {
+  translate: 2px -2px;
+}
+
+/* ---- opening ---------------------------------------------------------------------------------
+   Plays only while the hero carries data-opening="play", which opening.ts sets once per session and clears
+   within two seconds or on the first click, key or scroll. Timeline (ms):
+     0 to 840      the plate, shrunk to a tile in the middle of the screen, shows the six projects
+                   in turn with a counter under it; the statement sets itself word by word
+     840 to 1740   the tile travels to the stage, growing, and turns over once to land on project 01
+     1150 to 1900  index, caption and fact sheet arrive
+   Every rule is an animation with a backwards fill, so dropping the attribute at any moment leaves
+   the finished hero. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero[data-opening='play'] {
+    animation: open-flick 840ms steps(6, jump-none) both;
+  }
+  .hero[data-opening='play'] .stage-word {
+    animation: open-word 600ms var(--ease-out) calc(80ms + var(--w) * 110ms) backwards;
+  }
+  .hero[data-opening='play'] .stage-index li,
+  .hero[data-opening='play'] .hero-facts > * {
+    animation: open-rise 500ms var(--ease-out) calc(1150ms + var(--i, 2) * 45ms) backwards;
+  }
+  .hero[data-opening='play'] .stage-caption {
+    animation: open-fade 400ms var(--ease-standard) 1500ms backwards;
+  }
+  .hero[data-opening='play'] .stage {
+    animation: open-bed 500ms var(--ease-standard) 1400ms backwards;
+  }
+  .hero[data-opening='play'] .stage-tilt {
+    animation: open-grow 900ms cubic-bezier(0.65, 0, 0.1, 1) 840ms backwards;
+  }
+  .hero[data-opening='play'] .stage-turn {
+    animation: open-turn 900ms cubic-bezier(0.5, 0, 0.15, 1) 840ms both;
+  }
+  /* During the count every image is on the front and only the one being counted shows. */
+  .hero[data-opening='play'] .stage-face {
+    visibility: visible;
+    opacity: calc(1 - min(1, max(var(--flick) - var(--i), var(--i) - var(--flick))));
+  }
+  /* Project 01 then moves to the back, so the turn that ends the opening lands on it. */
+  .hero[data-opening='play'] .stage-face[data-face='a'] {
+    animation: open-first 1740ms step-end both;
+  }
+  @media (min-width: 64rem) {
+    .hero[data-opening='play']::after {
+      content: counter(flick, decimal-leading-zero) ' / 06';
+      counter-reset: flick calc(var(--flick) + 1);
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      translate: -50% calc(var(--open-h, 5rem) + 0.75rem);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      animation: open-count 1000ms var(--ease-standard) both;
+    }
+  }
+}
+@keyframes open-flick {
+  from {
+    --flick: 0;
+  }
+  to {
+    --flick: 5;
+  }
+}
+@keyframes open-word {
+  from {
+    opacity: 0;
+    translate: 0 60%;
+    clip-path: inset(0 -0.2em 60% -0.2em);
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    translate: 0 0;
+    clip-path: inset(-0.2em);
+  }
+}
+@keyframes open-rise {
+  from {
+    opacity: 0;
+    translate: 0 0.75rem;
+  }
+}
+@keyframes open-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes open-bed {
+  from {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+@keyframes open-grow {
+  from {
+    transform: translate(var(--open-x, 0px), var(--open-y, 0px)) scale(var(--open-s, 1));
+  }
+}
+@keyframes open-turn {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-180deg);
+  }
+}
+@keyframes open-first {
+  from {
+    opacity: calc(1 - min(1, var(--flick)));
+  }
+  48.3%,
+  to {
+    opacity: 1;
+    transform: rotateX(180deg) translateZ(calc(var(--depth) / 2));
+  }
+}
+@keyframes open-count {
+  from,
+  84% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

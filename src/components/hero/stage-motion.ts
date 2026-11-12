@@ -1,0 +1,156 @@
+import { approach, sink, stepFlip, tiltFor, weightAt, WEIGHT, type Spring } from './motion';
+
+type Letter = { el: HTMLElement; x: number; y: number; weight: number };
+
+/**
+ * Runs everything in the hero that moves after the opening, on one animation frame loop that
+ * stops as soon as nothing is moving: the plate turning over, the plate leaning into the pointer
+ * with a band of light across it, and the statement's letters gaining weight near the pointer.
+ * Returns null under reduced motion. The lean and the type need a fine pointer; the turn does not.
+ * `flip` is owned by the caller: set `flip.target` and call `kick()` to turn the plate.
+ */
+export function runStageMotion(
+  stage: HTMLElement,
+  statement: HTMLElement,
+  flip: Spring & { target: number },
+): { kick: () => void; stop: () => void } | null {
+  const tilt = stage.querySelector<HTMLElement>('.stage-tilt');
+  const turn = stage.querySelector<HTMLElement>('.stage-turn');
+  if (!tilt || !turn || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+
+  let raf = 0;
+  let last = 0;
+  /** Pointer over the plate: -1 to 1 from its centre, and percent across it. */
+  let over: { nx: number; ny: number; px: number } | null = null;
+  const lean = { rx: 0, ry: 0, lx: 50, lit: 0 };
+  /** Pointer near the statement, in page coordinates. */
+  let near: { x: number; y: number } | null = null;
+  let letters: Letter[] = [];
+  let radius = 0;
+
+  const turnPlate = (dt: number) => {
+    if (flip.x === flip.target && flip.v === 0) return false;
+    Object.assign(flip, stepFlip(flip, flip.target, dt));
+    const depth = sink(flip.x);
+    turn.style.transform = `translateZ(${((-depth * turn.offsetHeight) / 2).toFixed(1)}px) rotateX(${(-flip.x * 180).toFixed(2)}deg)`;
+    turn.style.setProperty('--shade', depth.toFixed(3));
+    return true;
+  };
+
+  const leanPlate = (dt: number) => {
+    const aim = over ? { ...tiltFor(over.nx, over.ny), lx: over.px, lit: 1 } : { rx: 0, ry: 0, lx: lean.lx, lit: 0 };
+    const gap = Math.abs(aim.rx - lean.rx) + Math.abs(aim.ry - lean.ry) + Math.abs(aim.lx - lean.lx) / 20 + Math.abs(aim.lit - lean.lit);
+    if (gap === 0) return false;
+    if (gap < 0.01) Object.assign(lean, aim);
+    else {
+      lean.rx = approach(lean.rx, aim.rx, dt, 9);
+      lean.ry = approach(lean.ry, aim.ry, dt, 9);
+      lean.lx = approach(lean.lx, aim.lx, dt, 12);
+      lean.lit = approach(lean.lit, aim.lit, dt, 7);
+    }
+    tilt.style.setProperty('--rx', `${lean.rx.toFixed(3)}deg`);
+    tilt.style.setProperty('--ry', `${lean.ry.toFixed(3)}deg`);
+    tilt.style.setProperty('--lx', `${lean.lx.toFixed(2)}%`);
+    tilt.style.setProperty('--lit', lean.lit.toFixed(3));
+    return true;
+  };
+
+  function weighLetters(dt: number) {
+    let moving = false;
+    for (const letter of letters) {
+      const target = near ? weightAt(Math.hypot(near.x - letter.x, near.y - letter.y), radius) : WEIGHT.rest;
+      if (letter.weight === target) continue;
+      const weight = approach(letter.weight, target, dt, 10);
+      letter.weight = Math.abs(target - weight) < 1 ? target : weight;
+      letter.el.style.fontWeight = letter.weight === WEIGHT.rest ? '' : letter.weight.toFixed(0);
+      moving = true;
+    }
+    return moving;
+  }
+
+  function frame(now: number) {
+    const dt = last ? Math.min(0.034, (now - last) / 1000) : 1 / 60;
+    last = now;
+    const moving = [turnPlate(dt), leanPlate(dt), weighLetters(dt)].some(Boolean);
+    raf = moving ? requestAnimationFrame(frame) : 0;
+    if (!moving) last = 0;
+  }
+  const kick = () => {
+    raf ||= requestAnimationFrame(frame);
+  };
+
+  /**
+   * Gives every letter a fixed box as wide as its own advance at rest weight (kerning included),
+   * so a heavier letter overflows its box instead of pushing its neighbours: no reflow.
+   */
+  function lockLetters() {
+    const size = parseFloat(getComputedStyle(statement).fontSize);
+    const boxes: [HTMLElement, number][] = [];
+    for (const word of statement.querySelectorAll<HTMLElement>('.stage-word')) {
+      const els = Array.from(word.children) as HTMLElement[];
+      const edges = [...els.map((el) => el.getBoundingClientRect().left), word.getBoundingClientRect().right];
+      els.forEach((el, i) => boxes.push([el, ((edges[i + 1] ?? 0) - (edges[i] ?? 0)) / size]));
+    }
+    for (const [el, em] of boxes) el.style.width = `${em.toFixed(4)}em`;
+    statement.dataset.locked = 'true';
+    radius = size * 4;
+    letters = boxes.map(([el]) => ({ el, x: 0, y: 0, weight: WEIGHT.rest }));
+  }
+
+  function placeLetters() {
+    radius = parseFloat(getComputedStyle(statement).fontSize) * 4;
+    for (const letter of letters) {
+      const box = letter.el.getBoundingClientRect();
+      letter.x = box.left + box.width / 2 + scrollX;
+      letter.y = box.top + box.height / 2 + scrollY;
+    }
+  }
+
+  function onWindowMove(e: PointerEvent) {
+    const box = statement.getBoundingClientRect();
+    const inside =
+      e.clientX > box.left - radius && e.clientX < box.right + radius && e.clientY > box.top - radius && e.clientY < box.bottom + radius;
+    if (!inside && !near) return;
+    if (inside && !near) placeLetters();
+    near = inside ? { x: e.pageX, y: e.pageY } : null;
+    kick();
+  }
+  function onWindowLeave() {
+    near = null;
+    kick();
+  }
+  function onStageMove(e: PointerEvent) {
+    const box = stage.getBoundingClientRect();
+    const x = (e.clientX - box.left) / box.width;
+    if (!over) lean.lx = x * 100; // the light comes on where the pointer is, it does not sweep in
+    over = { nx: x * 2 - 1, ny: ((e.clientY - box.top) / box.height) * 2 - 1, px: x * 100 };
+    kick();
+  }
+  function onStageLeave() {
+    over = null;
+    kick();
+  }
+
+  let stopped = false;
+  if (matchMedia('(pointer: fine)').matches) {
+    void document.fonts.ready.then(() => {
+      if (!stopped) lockLetters();
+    });
+    addEventListener('pointermove', onWindowMove, { passive: true });
+    document.documentElement.addEventListener('pointerleave', onWindowLeave);
+    stage.addEventListener('pointermove', onStageMove, { passive: true });
+    stage.addEventListener('pointerleave', onStageLeave);
+  }
+
+  return {
+    kick,
+    stop() {
+      stopped = true;
+      cancelAnimationFrame(raf);
+      removeEventListener('pointermove', onWindowMove);
+      document.documentElement.removeEventListener('pointerleave', onWindowLeave);
+      stage.removeEventListener('pointermove', onStageMove);
+      stage.removeEventListener('pointerleave', onStageLeave);
+    },
+  };
+}
