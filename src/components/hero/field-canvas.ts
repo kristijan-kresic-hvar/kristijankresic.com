@@ -1,10 +1,12 @@
 import { approach } from './motion';
-import { contours, depthAt, rgba, SPACING, type Shoal } from './field';
+import { contours, depthAt, INDEX_EVERY, rgba, SPACING, type Shoal } from './field';
 
 /** Pixels between grid points. Lines are straight within a cell, so this is their smoothness. */
 const STEP = 18;
-/** Line opacity: behind text, in open ground, and the most it reaches right at the pointer. */
-const ALPHA = { quiet: 0.07, open: 0.2, peak: 0.5 } as const;
+/** Line opacity: behind text, in open ground, on an index contour, and the most it reaches right at the pointer. */
+const ALPHA = { quiet: 0.1, open: 0.28, index: 0.5, peak: 0.6 } as const;
+/** Milliseconds between frames. The chart drifts a few pixels a second, so 30 frames a second is plenty. */
+const FRAME = 30;
 /** Radius in pixels of the brighter patch around the pointer. */
 const GLOW = 240;
 /** Text the field keeps quiet behind, padded by `PAD` pixels. */
@@ -62,11 +64,12 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement): () => vo
     if (!ctx) return;
     for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) values[j * cols + i] = depthAt(i * STEP, j * STEP, clock, shoal);
     const open = new Path2D();
+    const index = new Path2D();
     const hush = new Path2D();
-    contours(values, cols, rows, STEP, SPACING, (x1, y1, x2, y2) => {
+    contours(values, cols, rows, STEP, SPACING, (x1, y1, x2, y2, line) => {
       const mx = (x1 + x2) / 2;
       const my = (y1 + y2) / 2;
-      const path = quiet.some((q) => mx > q.l && mx < q.r && my > q.t && my < q.b) ? hush : open;
+      const path = quiet.some((q) => mx > q.l && mx < q.r && my > q.t && my < q.b) ? hush : line % INDEX_EVERY === 0 ? index : open;
       path.moveTo(x1, y1);
       path.lineTo(x2, y2);
     });
@@ -81,11 +84,15 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement): () => vo
       ctx.strokeStyle = glow;
     } else ctx.strokeStyle = rgba(accent, ALPHA.open);
     ctx.stroke(open);
-    canvas.dataset.on = '';
+    ctx.strokeStyle = rgba(accent, ALPHA.index);
+    ctx.stroke(index);
+    if (canvas.dataset.on === undefined) canvas.dataset.on = ''; // once: the CSS fades the canvas in from here
   }
 
   function frame(now: number) {
-    const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
+    raf = requestAnimationFrame(frame);
+    if (last && now - last < FRAME) return;
+    const dt = last ? Math.min(0.1, (now - last) / 1000) : FRAME / 1000;
     last = now;
     clock += dt;
     if (aim) {
@@ -96,7 +103,6 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement): () => vo
     const amount = approach(shoal.amount, aim ? 1 : 0, dt, 3);
     shoal.amount = amount < 0.001 ? 0 : amount;
     draw();
-    raf = requestAnimationFrame(frame);
   }
 
   function run() {

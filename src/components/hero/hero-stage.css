@@ -9,7 +9,8 @@
 }
 
 /* ---- grid ------------------------------------------------------------------------------------
-   Phones and tablets: statement, fact sheet, then the six projects (each once, with its plate).
+   Phones: statement, the six projects as a rail of plates you swipe, then the fact sheet, all in
+   the first screen. Tablets: statement, fact sheet, then the six projects in two columns.
    From 1024: twelve columns. Statement and index hold columns 1 to 4, the plate 5 to 12, and the
    fact sheet sits on the same columns underneath, so every edge lines up with another one. */
 .hero {
@@ -24,17 +25,54 @@
   padding: 2rem var(--gutter) 3.5rem;
   overflow-x: clip;
 }
-.hero-facts {
-  order: 1;
-}
-.stage-index {
-  order: 2;
-}
 .stage {
   display: none;
 }
-@media (min-width: 40rem) and (max-width: 63.99rem) {
+@media (max-width: 39.99rem) {
+  .hero {
+    row-gap: 1.25rem;
+    padding-top: 1.5rem;
+  }
+  /* The rail runs out to both screen edges, so the next plate is cut by the edge of the screen. */
   .stage-index {
+    display: flex;
+    gap: 0.75rem;
+    margin: -0.5rem calc(-1 * var(--gutter));
+    padding: 0.5rem var(--gutter); /* the block padding is room for the plates' leaning corners */
+    overflow: auto hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .stage-index li {
+    flex: 0 0 86%;
+    scroll-snap-align: start;
+  }
+  /* The fact sheet, tightened so it ends inside the first screen under the rail. */
+  .hero-facts {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  .hero-facts > * {
+    grid-template-columns: 3.5rem 1fr;
+    column-gap: 0.5rem;
+    padding-block: 0.4375rem;
+  }
+  .hero-facts dt {
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+  }
+  .hero-facts a {
+    line-height: 1.5rem;
+  }
+}
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .hero-facts {
+    order: 1;
+  }
+  .stage-index {
+    order: 2;
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: var(--hero-gap);
@@ -122,8 +160,9 @@
   color: var(--color-text-muted);
 }
 @media (min-width: 64rem) {
+  /* Sized against the four columns: the first sentence holds a line of its own, the rest takes three. */
   .stage-statement {
-    font-size: clamp(1.75rem, 2.9vw, 3.25rem);
+    font-size: clamp(1.75rem, 3.25vw, 3.9rem);
   }
 }
 .stage-word {
@@ -176,13 +215,38 @@
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
 }
+/* On the rail the plate leads and its name sits under it. */
+@media (max-width: 39.99rem) {
+  .stage-index li {
+    border-top: 0;
+  }
+  .stage-item {
+    padding-block: 0;
+  }
+  /* The same leaning board as the desktop stage, held still. */
+  .stage-thumb {
+    order: -1;
+    margin-block: 0 0.625rem;
+    border-color: var(--color-border-strong);
+    border-radius: 3px;
+    transform: perspective(700px) rotateX(3deg) rotateY(9deg);
+    transform-origin: 0 50%;
+  }
+  .stage-name {
+    font-size: 1.125rem;
+  }
+}
 @media (min-width: 64rem) {
   .stage-index li:last-child {
     border-bottom: 1px solid var(--color-border-default);
   }
   .stage-item {
     grid-template-columns: 1.75rem auto 1fr;
+    padding-block: 0.6rem;
     color: var(--color-text-muted);
+  }
+  .stage-name {
+    font-size: clamp(1.125rem, 1.5vw, 1.75rem);
   }
   .stage-item:hover,
   .stage-item[data-active='true'] {
@@ -216,18 +280,20 @@
 }
 
 /* ---- the plate -------------------------------------------------------------------------------
-   A board with thickness in a perspective box. `.stage` is the bed it rests on and stays put.
-   `.stage-tilt` leans into the pointer, `.stage-turn` turns the board over, and the six project
-   images wait on it: one on the front ([data-face='a']), one on the back ('b'), the rest hidden.
-   The script only ever changes which image is on the side facing away. */
+   A board with thickness in a perspective box, lying on two more boards that sit a little askew
+   and throw the shadow. `.stage` holds the pose (lean and light, the same numbers as REST in
+   motion.ts) and the script moves it with the pointer. `.stage-tilt` leans, `.stage-turn` turns
+   the board over, and the six project images wait on it: one on the front ([data-face='a']), one
+   on the back ('b'), the rest hidden. The script only ever changes which image is on the side
+   facing away. */
 .stage {
+  --rx: 2.5deg;
+  --ry: 4.5deg;
+  --lx: 30%;
+  --lit: 0.6;
   position: relative;
-  perspective: 1600px;
-  border-radius: 3px;
-  background: var(--color-bg-elev-1);
-  box-shadow:
-    inset 0 0 0 1px var(--color-border-subtle),
-    0 2rem 4rem -1.5rem color-mix(in srgb, var(--color-bg-base) 90%, transparent);
+  --back: max(-54px, -2.8vw); /* in step with the perspective, which follows the grid */
+  perspective: clamp(800px, 76vw, 1460px);
 }
 /* At least 16:10 from its own width, taller when the statement and index need the room. */
 .stage::before {
@@ -235,14 +301,34 @@
   display: block;
   padding-bottom: 62.5%;
 }
+.stage-deck,
 .stage-tilt,
 .stage-turn {
   position: absolute;
   inset: 0;
+}
+.stage-tilt,
+.stage-turn {
   transform-style: preserve-3d;
 }
+/* Set back a little, so the edge leaning toward the viewer lands on the grid line instead of past it. */
 .stage-tilt {
-  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform: translateZ(var(--back)) rotateX(var(--rx)) rotateY(var(--ry));
+}
+/* No depth of their own: they are painted under the plate in source order, so the plate can sink
+   as it turns without cutting through them. */
+.stage-deck {
+  border-radius: 3px;
+  background: var(--color-bg-elev-1);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-default),
+    1.5rem 3rem 4rem -0.5rem var(--color-bg-base);
+  transform: translateZ(var(--back)) rotateX(var(--rx)) rotateY(var(--ry)) rotate(1.5deg) translate(6px, 4px);
+}
+.stage-deck + .stage-deck {
+  background: var(--color-bg-elev-3);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  transform: translateZ(var(--back)) rotateX(var(--rx)) rotateY(var(--ry)) rotate(-1deg);
 }
 .stage-face {
   position: absolute;
@@ -269,9 +355,9 @@
   height: 100%;
   aspect-ratio: auto;
 }
-/* Light. The plate rests slightly in shade; a band of light follows the pointer across it
-   (--lx, --lit) by lifting the shade and adding a little gloss, and a board that is turning
-   away from the viewer goes darker (--shade). */
+/* Light. The plate sits in shade with a band of light across it (--lx, --lit), made by lifting
+   the shade and adding a little gloss. The band follows the pointer and brightens under it, and
+   a board that is turning away from the viewer goes darker (--shade). */
 .stage-face::before,
 .stage-face::after {
   content: '';
@@ -281,22 +367,22 @@
 }
 .stage-face::before {
   background: var(--color-bg-base);
-  opacity: calc(0.08 + 0.16 * var(--lit, 0) + 0.6 * var(--shade, 0));
+  opacity: calc(0.08 + 0.16 * var(--lit) + 0.6 * var(--shade, 0));
   mask-image: linear-gradient(
     var(--band, 105deg),
-    #000 calc(var(--lx, 50%) - 26%),
-    rgb(0 0 0 / calc(1 - var(--lit, 0))) var(--lx, 50%),
-    #000 calc(var(--lx, 50%) + 26%)
+    #000 calc(var(--lx) - 26%),
+    rgb(0 0 0 / calc(1 - var(--lit))) var(--lx),
+    #000 calc(var(--lx) + 26%)
   );
 }
 .stage-face::after {
   background: linear-gradient(
     var(--band, 105deg),
-    transparent calc(var(--lx, 50%) - 15%),
-    color-mix(in srgb, var(--color-text-primary) 18%, transparent) var(--lx, 50%),
-    transparent calc(var(--lx, 50%) + 15%)
+    transparent calc(var(--lx) - 15%),
+    color-mix(in srgb, var(--color-text-primary) 18%, transparent) var(--lx),
+    transparent calc(var(--lx) + 15%)
   );
-  opacity: var(--lit, 0);
+  opacity: var(--lit);
   mix-blend-mode: screen;
 }
 /* The board's top and bottom edges: what you see when it is edge-on mid-turn. */
@@ -348,36 +434,38 @@
 
 /* ---- opening ---------------------------------------------------------------------------------
    Plays only while the hero carries data-opening="play", which opening.ts sets once per session and clears
-   within two seconds or on the first click, key or scroll. Timeline (ms):
-     0 to 840      the plate, shrunk to a tile in the middle of the screen, shows the six projects
+   after 1600ms or on the first click, key or scroll. Timeline (ms, at full length):
+     0 to 720      the plate, shrunk to a tile in the middle of the screen, shows the six projects
                    in turn with a counter under it; the statement sets itself word by word
-     840 to 1740   the tile travels to the stage, growing, and turns over once to land on project 01
-     1150 to 1900  index, caption and fact sheet arrive
-   Phones and tablets have no stage: there the statement sets itself and the fact sheet follows.
-   Every rule is an animation with a backwards fill, so dropping the attribute at any moment leaves
-   the finished hero. */
+     720 to 1520   the tile travels to the stage, growing, and turns over once to land on project 01
+     940 to 1580   index, the boards under the plate, caption and fact sheet arrive
+   Phones and tablets have no stage: there the statement sets itself, then the projects and the
+   fact sheet follow. Every rule is an animation with a backwards fill, so dropping the attribute
+   at any moment leaves the finished hero. */
 @media (prefers-reduced-motion: no-preference) {
+  /* --t is one millisecond of the timeline, shorter when the page arrived late (opening.ts). */
   .hero[data-opening='play'] {
-    animation: open-flick 840ms steps(6, jump-none) both;
+    --t: calc(1ms * var(--open-k, 1));
+    animation: open-flick calc(720 * var(--t)) steps(6, jump-none) both;
   }
   .hero[data-opening='play'] .stage-word {
-    animation: open-word 600ms var(--ease-out) calc(80ms + var(--w) * 110ms) backwards;
+    animation: open-word calc(520 * var(--t)) var(--ease-out) calc((60 + var(--w) * 85) * var(--t)) backwards;
   }
   .hero[data-opening='play'] .stage-index li,
   .hero[data-opening='play'] .hero-facts > * {
-    animation: open-rise 500ms var(--ease-out) calc(1150ms + var(--i, 2) * 45ms) backwards;
+    animation: open-rise calc(440 * var(--t)) var(--ease-out) calc((940 + var(--i, 2) * 40) * var(--t)) backwards;
   }
   .hero[data-opening='play'] .stage-caption {
-    animation: open-fade 400ms var(--ease-standard) 1500ms backwards;
+    animation: open-fade calc(320 * var(--t)) var(--ease-standard) calc(1260 * var(--t)) backwards;
   }
-  .hero[data-opening='play'] .stage {
-    animation: open-bed 500ms var(--ease-standard) 1400ms backwards;
+  .hero[data-opening='play'] .stage-deck {
+    animation: open-fade calc(420 * var(--t)) var(--ease-standard) calc(1160 * var(--t)) backwards;
   }
   .hero[data-opening='play'] .stage-tilt {
-    animation: open-grow 900ms cubic-bezier(0.65, 0, 0.1, 1) 840ms backwards;
+    animation: open-grow calc(800 * var(--t)) cubic-bezier(0.65, 0, 0.1, 1) calc(720 * var(--t)) backwards;
   }
   .hero[data-opening='play'] .stage-turn {
-    animation: open-turn 900ms cubic-bezier(0.5, 0, 0.15, 1) 840ms both;
+    animation: open-turn calc(800 * var(--t)) cubic-bezier(0.5, 0, 0.15, 1) calc(720 * var(--t)) both;
   }
   /* During the count every image is on the front and only the one being counted shows. The rest
      stay a hair above transparent so the browser has them decoded before their turn comes. */
@@ -385,14 +473,17 @@
     visibility: visible;
     opacity: calc(1 - 0.998 * min(1, max(var(--flick) - var(--i), var(--i) - var(--flick))));
   }
-  /* Project 01 then moves to the back, so the turn that ends the opening lands on it. */
+  /* When the count ends project 01 moves to the back, so the turn that ends the opening lands on it. */
   .hero[data-opening='play'] .stage-face[data-face='a'] {
-    animation: open-first 1740ms step-end both;
+    animation: open-first calc(720 * var(--t)) step-end both;
   }
-  /* Below the desktop grid there is no stage, so the fact sheet follows the statement row by row. */
+  /* Below the desktop grid there is no stage: the projects and the fact sheet follow the statement. */
   @media (max-width: 63.99rem) {
+    .hero[data-opening='play'] .stage-index li {
+      animation-delay: calc((700 + var(--i) * 40) * var(--t));
+    }
     .hero[data-opening='play'] .hero-facts > * {
-      animation-delay: calc(350ms + var(--row, 0) * 120ms);
+      animation-delay: calc((300 + var(--row, 0) * 90) * var(--t));
     }
     .hero[data-opening='play'] .hero-facts > :nth-child(2) {
       --row: 1;
@@ -407,6 +498,19 @@
       --row: 4;
     }
   }
+  /* On the rail the plates come in from the side, ahead of the fact sheet. The link moves, not
+     the list item: the item is the snap point, and moving it would scroll the rail. */
+  @media (max-width: 39.99rem) {
+    .hero[data-opening='play'] .stage-index li {
+      animation: none;
+    }
+    .hero[data-opening='play'] .stage-item {
+      animation: open-rail calc(600 * var(--t)) var(--ease-out) calc((250 + var(--i) * 60) * var(--t)) backwards;
+    }
+    .hero[data-opening='play'] .hero-facts > * {
+      animation-delay: calc((550 + var(--row, 0) * 90) * var(--t));
+    }
+  }
   @media (min-width: 64rem) {
     .hero[data-opening='play']::after {
       content: counter(flick, decimal-leading-zero) ' / 06';
@@ -418,7 +522,7 @@
       font-family: var(--font-mono);
       font-size: 0.75rem;
       color: var(--color-text-muted);
-      animation: open-count 1000ms var(--ease-standard) both;
+      animation: open-count calc(860 * var(--t)) var(--ease-standard) both;
     }
   }
 }
@@ -450,15 +554,15 @@
     translate: 0 0.75rem;
   }
 }
+@keyframes open-rail {
+  from {
+    opacity: 0;
+    translate: 3rem 0;
+  }
+}
 @keyframes open-fade {
   from {
     opacity: 0;
-  }
-}
-@keyframes open-bed {
-  from {
-    background-color: transparent;
-    box-shadow: none;
   }
 }
 @keyframes open-grow {
@@ -478,7 +582,6 @@
   from {
     opacity: calc(1 - 0.998 * min(1, var(--flick)));
   }
-  48.3%,
   to {
     opacity: 1;
     transform: rotateX(180deg) translateZ(calc(var(--depth) / 2));

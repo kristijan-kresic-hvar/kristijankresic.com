@@ -38,16 +38,16 @@ describe('contours', () => {
   };
 
   it('draws one line through a cell, crossing each edge where the height meets the level', () => {
-    // Left column at 0, right at 1: the 0.5 line runs straight down the middle.
-    expect(run([0, 1, 0, 1], 2, 2)).toEqual([[5, 0, 5, 10]]);
+    // Left column at 0, right at 1: the 0.5 line (line number 1) runs straight down the middle.
+    expect(run([0, 1, 0, 1], 2, 2)).toEqual([[5, 0, 5, 10, 1]]);
   });
 
   it('draws nothing in a flat cell or one with every corner on the same side', () => {
     expect(run([0.2, 0.3, 0.1, 0.4], 2, 2)).toEqual([]);
   });
 
-  it('draws one line per level crossed', () => {
-    expect(run([0, 1.2, 0, 1.2], 2, 2)).toHaveLength(2);
+  it('draws one line per level crossed and numbers each by its height', () => {
+    expect(run([0, 1.2, 0, 1.2], 2, 2).map((s) => s[4])).toEqual([1, 2]);
   });
 
   it('splits a saddle cell into two lines', () => {

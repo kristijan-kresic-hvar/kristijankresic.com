@@ -6,11 +6,17 @@ export const TILT = { x: 4, y: 5.5 } as const;
 /** Weight of the statement at rest and right under the pointer (Geist's axis runs 100 to 900). */
 export const WEIGHT = { rest: 560, peak: 840 } as const;
 
-/** Flip spring: reaches the new face in about 320ms, overshoots under three degrees, still by 600ms. */
-const STIFFNESS = 169;
-const DAMPING = 20.8;
-/** Below this distance and speed (in half-turns) the plate counts as still. About 0.3 degrees. */
-const STILL = 0.0017;
+/** Where the plate rests with no pointer on it: leaned back and away, a band of light across it. */
+export const REST = { rx: 2.5, ry: 4.5, lx: 30, lit: 0.6 } as const;
+
+/**
+ * Flip spring: natural frequency in radians a second and damping ratio. It reaches the new face
+ * in about 280ms, overshoots under three degrees and is still inside 600ms.
+ */
+const OMEGA = 15;
+const ZETA = 0.8;
+/** Below this distance and a tenth of this speed (in half-turns) the plate counts as still. About half a degree. */
+const STILL = 0.003;
 
 export type Spring = { x: number; v: number };
 
@@ -36,10 +42,21 @@ export function tiltFor(nx: number, ny: number): { rx: number; ry: number } {
   return { rx: -clamp(ny) * TILT.x, ry: clamp(nx) * TILT.y };
 }
 
-/** One step of the flip spring toward `target`, in half-turns. Snaps to the target once it is still. */
+/**
+ * The flip spring `dt` seconds on, toward `target`, in half-turns. This is the spring's exact
+ * solution, not a numeric step, so the turn takes the same wall-clock time at any frame rate.
+ * Snaps to the target once it is still.
+ */
 export function stepFlip(s: Spring, target: number, dt: number): Spring {
-  const v = s.v + (STIFFNESS * (target - s.x) - DAMPING * s.v) * dt;
-  const x = s.x + v * dt;
+  const decay = ZETA * OMEGA;
+  const swing = OMEGA * Math.sqrt(1 - ZETA ** 2);
+  const a = s.x - target;
+  const b = (s.v + decay * a) / swing;
+  const fade = Math.exp(-decay * dt);
+  const cos = Math.cos(swing * dt);
+  const sin = Math.sin(swing * dt);
+  const x = target + fade * (a * cos + b * sin);
+  const v = fade * ((b * swing - decay * a) * cos - (a * swing + decay * b) * sin);
   return Math.abs(target - x) < STILL && Math.abs(v) < STILL * 10 ? { x: target, v: 0 } : { x, v };
 }
 

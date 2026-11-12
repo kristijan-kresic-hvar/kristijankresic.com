@@ -6,7 +6,7 @@ import { Facts } from '@/components/facts';
 import { ArrowUpRight } from '@/components/icons';
 import { Plate, plateMorph } from '@/components/plate';
 import type { CaseStudy } from '@/content/work';
-import { OPENING_KEY, OPENING_MS, startOpening } from './opening';
+import { OPENING_DEADLINE, OPENING_KEY, OPENING_MS, startOpening } from './opening';
 import { retarget, type Spring } from './motion';
 import { runStageMotion } from './stage-motion';
 import { runField } from './field-canvas';
@@ -24,8 +24,9 @@ const two = (n: number) => String(n).padStart(2, '0');
 
 /**
  * Hero as a stage. One project plate holds most of the screen and the index beside it chooses
- * which of the six it shows. The plate is a board with two faces: choosing a project puts it on
- * the far face and turns the board over. Server HTML is the finished hero; the opening sequence,
+ * which of the six it shows. The plate is a board with two faces, lying on two more boards:
+ * choosing a project puts it on the far face and turns the board over. On phones the index is a
+ * rail of the six plates instead. Server HTML is the finished hero; the opening sequence,
  * the tilt and the reactive type are added on top by script and CSS, and none of them run under
  * reduced motion.
  */
@@ -119,6 +120,8 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
 
       {current && (
         <Link ref={stage} href={`/work/${current.slug}/`} aria-label={`${current.title}: open the case study`} className="stage">
+          <span className="stage-deck" />
+          <span className="stage-deck" />
           <div className="stage-tilt">
             <div className="stage-turn">
               {studies.map((study, i) => (
@@ -152,7 +155,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
       {fromServer && (
         <script
           suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: `(${startOpening.toString()})(${JSON.stringify(OPENING_KEY)},${OPENING_MS})` }}
+          dangerouslySetInnerHTML={{ __html: `(${startOpening.toString()})(${JSON.stringify(OPENING_KEY)},${OPENING_MS},${OPENING_DEADLINE})` }}
         />
       )}
     </section>

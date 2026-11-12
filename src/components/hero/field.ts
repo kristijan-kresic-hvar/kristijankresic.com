@@ -12,6 +12,8 @@ const DRIFT = { x: 0.012, z: 0.05 } as const;
 export const SHOAL = { height: 0.32, spread: 100 } as const;
 /** Height between two contour lines. */
 export const SPACING = 0.055;
+/** Every nth line is an index contour, drawn heavier, as on a printed chart. */
+export const INDEX_EVERY = 4;
 
 function hash(x: number, y: number, z: number): number {
   let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(z, 1440662683)) | 0;
@@ -49,7 +51,8 @@ export function depthAt(x: number, y: number, t: number, shoal: Shoal): number {
 
 /**
  * Marching squares over a grid of heights (`cols` by `rows` points, row by row, `step` pixels
- * apart): calls `emit` with each piece of contour line, one line every `spacing` of height.
+ * apart): calls `emit` with each piece of contour line, one line every `spacing` of height, and
+ * with the line's number (its height in spacings).
  */
 export function contours(
   values: ArrayLike<number>,
@@ -57,7 +60,7 @@ export function contours(
   rows: number,
   step: number,
   spacing: number,
-  emit: (x1: number, y1: number, x2: number, y2: number) => void,
+  emit: (x1: number, y1: number, x2: number, y2: number, line: number) => void,
 ): void {
   const pts: number[] = [];
   for (let j = 0; j < rows - 1; j++) {
@@ -82,16 +85,16 @@ export function contours(
         cross(b, c, x + step, y, x + step, y + step); // right
         cross(d, c, x, y + step, x + step, y + step); // bottom
         cross(a, d, x, y, x, y + step); // left
-        if (pts.length === 4) emit(pts[0] ?? 0, pts[1] ?? 0, pts[2] ?? 0, pts[3] ?? 0);
+        if (pts.length === 4) emit(pts[0] ?? 0, pts[1] ?? 0, pts[2] ?? 0, pts[3] ?? 0, k);
         else if (pts.length === 8) {
           // Saddle: the centre decides which pair of opposite corners the lines cut off.
           const [tx = 0, ty = 0, rx = 0, ry = 0, bx = 0, by = 0, lx = 0, ly = 0] = pts;
           if ((a + b + c + d) / 4 < level === a < level) {
-            emit(tx, ty, rx, ry);
-            emit(bx, by, lx, ly);
+            emit(tx, ty, rx, ry, k);
+            emit(bx, by, lx, ly, k);
           } else {
-            emit(tx, ty, lx, ly);
-            emit(rx, ry, bx, by);
+            emit(tx, ty, lx, ly, k);
+            emit(rx, ry, bx, by, k);
           }
         }
       }

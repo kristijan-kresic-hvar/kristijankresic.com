@@ -1,4 +1,4 @@
-import { approach, sink, stepFlip, tiltFor, weightAt, WEIGHT, type Spring } from './motion';
+import { approach, REST, sink, stepFlip, tiltFor, weightAt, WEIGHT, type Spring } from './motion';
 
 type Letter = { el: HTMLElement; x: number; y: number; weight: number };
 
@@ -14,15 +14,14 @@ export function runStageMotion(
   statement: HTMLElement,
   flip: Spring & { target: number },
 ): { kick: () => void; stop: () => void } | null {
-  const tilt = stage.querySelector<HTMLElement>('.stage-tilt');
   const turn = stage.querySelector<HTMLElement>('.stage-turn');
-  if (!tilt || !turn || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  if (!turn || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
 
   let raf = 0;
   let last = 0;
   /** Pointer over the plate: -1 to 1 from its centre, and percent across it. */
   let over: { nx: number; ny: number; px: number } | null = null;
-  const lean = { rx: 0, ry: 0, lx: 50, lit: 0 };
+  const lean: { rx: number; ry: number; lx: number; lit: number } = { ...REST };
   /** Pointer near the statement, in page coordinates. */
   let near: { x: number; y: number } | null = null;
   let letters: Letter[] = [];
@@ -38,7 +37,7 @@ export function runStageMotion(
   };
 
   const leanPlate = (dt: number) => {
-    const aim = over ? { ...tiltFor(over.nx, over.ny), lx: over.px, lit: 1 } : { rx: 0, ry: 0, lx: lean.lx, lit: 0 };
+    const aim = over ? { ...tiltFor(over.nx, over.ny), lx: over.px, lit: 1 } : REST;
     const gap = Math.abs(aim.rx - lean.rx) + Math.abs(aim.ry - lean.ry) + Math.abs(aim.lx - lean.lx) / 20 + Math.abs(aim.lit - lean.lit);
     if (gap === 0) return false;
     if (gap < 0.01) Object.assign(lean, aim);
@@ -48,10 +47,11 @@ export function runStageMotion(
       lean.lx = approach(lean.lx, aim.lx, dt, 12);
       lean.lit = approach(lean.lit, aim.lit, dt, 7);
     }
-    tilt.style.setProperty('--rx', `${lean.rx.toFixed(3)}deg`);
-    tilt.style.setProperty('--ry', `${lean.ry.toFixed(3)}deg`);
-    tilt.style.setProperty('--lx', `${lean.lx.toFixed(2)}%`);
-    tilt.style.setProperty('--lit', lean.lit.toFixed(3));
+    // On the stage, not the plate: the boards under the plate lean with it.
+    stage.style.setProperty('--rx', `${lean.rx.toFixed(3)}deg`);
+    stage.style.setProperty('--ry', `${lean.ry.toFixed(3)}deg`);
+    stage.style.setProperty('--lx', `${lean.lx.toFixed(2)}%`);
+    stage.style.setProperty('--lit', lean.lit.toFixed(3));
     return true;
   };
 
@@ -69,14 +69,16 @@ export function runStageMotion(
   }
 
   function frame(now: number) {
-    const dt = last ? Math.min(0.034, (now - last) / 1000) : 1 / 60;
+    // Real elapsed time, uncapped: every motion here is exact in time, so slow frames skip ahead instead of running long.
+    const dt = Math.max(0, (now - last) / 1000);
     last = now;
     const moving = [turnPlate(dt), leanPlate(dt), weighLetters(dt)].some(Boolean);
     raf = moving ? requestAnimationFrame(frame) : 0;
-    if (!moving) last = 0;
   }
   const kick = () => {
-    raf ||= requestAnimationFrame(frame);
+    if (raf) return;
+    last = performance.now();
+    raf = requestAnimationFrame(frame);
   };
 
   /**
@@ -122,7 +124,6 @@ export function runStageMotion(
   function onStageMove(e: PointerEvent) {
     const box = stage.getBoundingClientRect();
     const x = (e.clientX - box.left) / box.width;
-    if (!over) lean.lx = x * 100; // the light comes on where the pointer is, it does not sweep in
     over = { nx: x * 2 - 1, ny: ((e.clientY - box.top) / box.height) * 2 - 1, px: x * 100 };
     kick();
   }

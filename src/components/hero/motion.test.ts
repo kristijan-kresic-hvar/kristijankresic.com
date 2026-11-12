@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { approach, falloff, retarget, sink, stepFlip, tiltFor, TILT, WEIGHT, weightAt, type Spring } from './motion';
+import { approach, falloff, REST, retarget, sink, stepFlip, tiltFor, TILT, WEIGHT, weightAt, type Spring } from './motion';
 
 const FRAME = 1 / 60;
 
@@ -39,14 +39,20 @@ describe('tiltFor', () => {
     expect(tiltFor(40, -40)).toEqual({ rx: TILT.x, ry: TILT.y });
     expect(Math.max(TILT.x, TILT.y)).toBeLessThanOrEqual(6);
   });
+
+  it('rests at a lean inside the same limits, so the pointer never adds to it', () => {
+    expect(Math.abs(REST.rx)).toBeLessThanOrEqual(TILT.x);
+    expect(Math.abs(REST.ry)).toBeLessThanOrEqual(TILT.y);
+    expect(Math.abs(REST.rx) + Math.abs(REST.ry)).toBeGreaterThan(0);
+  });
 });
 
-/** Runs the flip spring for `ms` at 60 frames a second. */
-function run(start: Spring, target: number, ms: number) {
+/** Runs the flip spring for `ms`, at 60 frames a second unless told otherwise. */
+function run(start: Spring, target: number, ms: number, frame = FRAME) {
   let s = start;
   let peak = s.x;
-  for (let t = 0; t < ms; t += FRAME * 1000) {
-    s = stepFlip(s, target, FRAME);
+  for (let t = 0; t < ms; t += frame * 1000) {
+    s = stepFlip(s, target, frame);
     peak = Math.max(peak, s.x);
   }
   return { ...s, peak };
@@ -57,6 +63,21 @@ describe('stepFlip', () => {
     const end = run({ x: 0, v: 0 }, 1, 700);
     expect(end.x).toBe(1);
     expect(end.v).toBe(0);
+  });
+
+  it('is still within 700ms of wall-clock time when frames are slow', () => {
+    for (const fps of [30, 15, 10]) {
+      const end = run({ x: 0, v: 0 }, 1, 700, 1 / fps);
+      expect(end.x).toBe(1);
+      expect(end.v).toBe(0);
+    }
+  });
+
+  it('is in the same place after the same time whatever the frame rate', () => {
+    const smooth = run({ x: 0, v: 0 }, 1, 300, 1 / 60);
+    const slow = run({ x: 0, v: 0 }, 1, 300, 1 / 10);
+    expect(slow.x).toBeCloseTo(smooth.x, 6);
+    expect(slow.v).toBeCloseTo(smooth.v, 6);
   });
 
   it('settles with a small overshoot, not a bounce', () => {
