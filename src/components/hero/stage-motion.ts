@@ -22,7 +22,8 @@ export function runStageMotion(stage: HTMLElement, statement: HTMLElement): (() 
   let radius = 0;
 
   const leanPlate = (dt: number) => {
-    const aim = over ? { ...tiltFor(over.nx, over.ny), lx: over.px, lit: 1 } : REST;
+    // Under the pointer the band follows it and brightens only a little over its rest strength: at full strength it read as a glare.
+    const aim = over ? { ...tiltFor(over.nx, over.ny), lx: over.px, lit: 0.7 } : REST;
     const gap = Math.abs(aim.rx - lean.rx) + Math.abs(aim.ry - lean.ry) + Math.abs(aim.lx - lean.lx) / 20 + Math.abs(aim.lit - lean.lit);
     if (gap === 0) return false;
     if (gap < 0.01) Object.assign(lean, aim);
