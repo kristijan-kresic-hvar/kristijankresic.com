@@ -1,10 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Container } from '@/components/container';
-import { Facts } from '@/components/facts';
+import { HeroStage } from '@/components/hero/hero-stage';
 import { ArrowRight } from '@/components/icons';
-import { WorkCard } from '@/components/work-card';
-import { WorkStrip } from '@/components/work-strip';
 import { PROFILE } from '@/content/profile';
 import { FEATURED, EARLIER } from '@/content/work';
 
@@ -25,54 +23,13 @@ const STACK = [
 const row = 'grid gap-x-8 gap-y-1 border-t border-border-default py-4 sm:grid-cols-[13rem_1fr]';
 
 export default function Home() {
-  // The wall: two columns of unequal tiles, the second starting lower. Order is recency, read in rows.
-  const left = FEATURED.filter((_, i) => i % 2 === 0);
-  const right = FEATURED.filter((_, i) => i % 2 === 1);
-
   return (
     <>
-      {/* Hero. The statement and the facts stay pinned to the bottom-left while all six projects pass. */}
-      <section className="mx-auto grid max-w-page gap-x-12 px-(--gutter) lg:grid-cols-12 lg:pr-0">
-        <div className="hero-pin pt-8 pb-10 sm:pt-12 lg:col-span-5 lg:pt-10">
-          <h1 className="hero-statement font-semibold text-text-muted">
-            <span className="text-text-primary">Frontend engineer.</span>
-            <br />
-            Six client products, <br className="max-lg:hidden" />
-            built inside the <br className="max-lg:hidden" />
-            client&rsquo;s&nbsp;team.
-          </h1>
-          <Facts rows className="mt-8 lg:mt-10" />
-        </div>
+      <HeroStage studies={FEATURED} />
 
-        <div className="grid grid-cols-2 items-start gap-3 pb-16 sm:gap-4 lg:col-span-7 lg:pt-6 lg:pb-24">
-          <div className="wall-col grid gap-5 sm:gap-7">
-            {left.map((study, i) => (
-              <WorkCard key={study.slug} study={study} tall={i === 1} eager={i === 0} />
-            ))}
-          </div>
-          <div className="wall-col wall-col-b grid gap-5 sm:gap-7">
-            {right.map((study, i) => (
-              <WorkCard key={study.slug} study={study} tall={i === 0} eager={i === 0} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="work" aria-labelledby="work-title" className="scroll-mt-20 border-t border-border-subtle pt-20 pb-10 lg:pt-28">
+      <section id="work" aria-labelledby="earlier-title" className="scroll-mt-20 border-t border-border-subtle py-16 lg:py-20">
         <Container>
-          <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 pb-10 lg:pb-14">
-            <h2 id="work-title" className="text-display leading-none font-semibold tracking-tighter">
-              Work index
-            </h2>
-            <p className="font-mono text-xs text-text-muted">
-              {FEATURED.length} clients · {FEATURED.reduce((n, s) => n + s.screens, 0)} frames · 2023–2026
-            </p>
-          </div>
-          {FEATURED.map((study, i) => (
-            <WorkStrip key={study.slug} study={study} index={i} />
-          ))}
-
-          <h3 className="border-t border-border-default pt-12 text-2xl font-semibold lg:pt-16">Earlier work</h3>
+          <h2 id="earlier-title" className="text-2xl font-semibold">Earlier work</h2>
           <ul className="mt-6 border-b border-border-default">
             {EARLIER.map((study) => (
               <li key={study.slug}>

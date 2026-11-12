@@ -149,48 +149,6 @@ body {
   }
 }
 
-/* The statement and facts stay at the bottom-left of the screen while the wall scrolls past. Only on
-   wide screens tall enough to hold the whole block; otherwise it scrolls with the page. */
-@media (min-width: 64rem) and (min-height: 42rem) {
-  .hero-pin {
-    position: sticky;
-    bottom: 0;
-    align-self: end;
-  }
-}
-
-/* Wall tile: hover or focus scrolls the full-page capture inside its frame. Container-query units
-   make the travel exact without JS: the frame is --shot-h tall, the image as tall as it is. */
-.shot {
-  container-type: inline-size;
-}
-.shot-scroll {
-  height: auto;
-}
-@media (prefers-reduced-motion: no-preference) and (hover: hover) {
-  .shot-scroll {
-    transition: transform 0.7s var(--ease-out);
-  }
-  .group:hover .shot-scroll,
-  .group:focus-visible .shot-scroll {
-    transform: translateY(min(0px, calc(-100% + var(--shot-h, 62.5cqw))));
-    transition: transform 7s linear 0.15s;
-  }
-}
-
-/* Index rows: the arrow is there for pointers and keyboards, absent at rest. */
-.strip-arrow {
-  opacity: 0;
-  translate: -0.375rem 0;
-  transition:
-    opacity var(--duration-instant) var(--ease-standard),
-    translate var(--duration-fast) var(--ease-out);
-}
-.group:hover .strip-arrow,
-.group:focus-visible .strip-arrow {
-  opacity: 1;
-  translate: 0 0;
-}
 .earlier {
   transition: background-color var(--duration-instant) var(--ease-standard);
 }
@@ -333,48 +291,13 @@ body {
 }
 
 /* ---------------------------------------------------------------------------------------------
-   Motion. Three authored moments, all CSS, all behind prefers-reduced-motion:
-   1. the wall settles on arrival and its two columns slide into line as the hero scrolls away;
-   2. leader lines draw from marker to decision, which is what explains the pairing;
-   3. the rule under the contact address draws as the address arrives.
+   Motion outside the hero, all CSS, all behind prefers-reduced-motion:
+   1. leader lines draw from marker to decision, which is what explains the pairing;
+   2. the rule under the contact address draws as the address arrives.
    Everything else is feedback at --duration-instant. Nothing here hides content: without these
    rules the page is the same page, already in its final state.
    --------------------------------------------------------------------------------------------- */
-.wall-col-b {
-  margin-top: 2.5rem;
-}
-@media (min-width: 40rem) {
-  .wall-col-b {
-    margin-top: 4rem;
-  }
-}
-@media (min-width: 64rem) {
-  .wall-col-b {
-    margin-top: 7rem;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
-  @media (min-width: 64rem) {
-    .wall-col {
-      animation: wall-rise 0.8s var(--ease-out) both;
-    }
-    .wall-col-b {
-      animation-delay: 90ms;
-    }
-    @supports (animation-timeline: scroll()) {
-      /* The lower column starts 7rem down and catches up over the first 55vh of scroll. */
-      .wall-col-b {
-        margin-top: 0;
-        animation:
-          wall-rise 0.8s var(--ease-out) 90ms both,
-          wall-settle linear both;
-        animation-timeline: auto, scroll(root block);
-        animation-range: normal, 0 55vh;
-      }
-    }
-  }
-
   .leader {
     stroke-dasharray: var(--len);
     animation: leader-draw 0.7s var(--ease-out) calc(var(--i, 0) * 90ms + 200ms) both;
@@ -389,16 +312,6 @@ body {
   }
 }
 
-@keyframes wall-rise {
-  from {
-    transform: translateY(2rem);
-  }
-}
-@keyframes wall-settle {
-  from {
-    translate: 0 7rem;
-  }
-}
 @keyframes leader-draw {
   from {
     stroke-dashoffset: var(--len);
