@@ -336,6 +336,7 @@
   border-radius: 3px;
   background: var(--color-bg-elev-1);
   visibility: hidden;
+  isolation: isolate; /* keeps the light's z-index and blend inside this face */
 }
 .stage-face[data-face] {
   visibility: visible;
@@ -380,6 +381,7 @@
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1; /* above the image even while it is animating, or the plate brightens for the length of the dissolve */
   pointer-events: none;
 }
 .stage-face::before {
