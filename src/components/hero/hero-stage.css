@@ -54,6 +54,12 @@
     flex: 0 0 86%;
     scroll-snap-align: start;
   }
+  /* While a mouse is dragging the rail (rail-drag.ts): it follows the hand, then snaps on release. */
+  .stage-index[data-dragging] {
+    scroll-snap-type: none;
+    cursor: grabbing;
+    user-select: none;
+  }
   /* The fact sheet, tightened so it ends inside the first screen under the rail. */
   .hero-facts {
     font-size: 0.875rem;
@@ -429,79 +435,94 @@
 }
 
 /* ---- opening ---------------------------------------------------------------------------------
-   Plays only while the hero carries data-opening="play", which opening.ts sets once per session and clears
-   after 1600ms or on the first click, key or scroll. Timeline (ms, at full length):
+   Plays only while the hero carries data-opening="play", which opening.ts sets once per session and
+   clears on the first click, key or scroll. The statement sets itself word by word from the start
+   and everything else is held back until opening.ts sets data-plates, which it does at once when
+   the plate images are already loaded.
+   data-plates="count", the full sequence (ms from that moment):
      0 to 720      the plate, shrunk to a tile in the middle of the screen, counts down through the
-                   six projects to 01 with a counter under it; the statement sets itself word by word
+                   six projects to 01 with a counter under it
      720 to 1520   the tile travels to the stage, growing
      940 to 1580   index, the boards under the plate, caption and fact sheet arrive
+   data-plates="late", when the images took too long: no count, the same parts just arrive.
    Phones and tablets have no stage: there the statement sets itself, then the projects and the
-   fact sheet follow. Every rule is an animation with a backwards fill, so dropping the attribute
+   fact sheet follow. Every rule is an animation with a backwards fill, so dropping the attributes
    at any moment leaves the finished hero. */
 @media (prefers-reduced-motion: no-preference) {
-  /* --t is one millisecond of the timeline, shorter when the page arrived late (opening.ts). */
   .hero[data-opening='play'] {
-    --t: calc(1ms * var(--open-k, 1));
-    animation: open-flick calc(720 * var(--t)) steps(6, jump-none) both;
+    --t: 1ms; /* one millisecond of the timeline */
   }
   .hero[data-opening='play'] .stage-word {
     animation: open-word calc(520 * var(--t)) var(--ease-out) calc((60 + var(--w) * 85) * var(--t)) backwards;
   }
-  .hero[data-opening='play'] .stage-index li,
-  .hero[data-opening='play'] .hero-facts > * {
+  /* Opacity, not visibility: the plate that is up sets its own visibility and would show through. */
+  .hero[data-opening='play']:not([data-plates]) :is(.stage-index li, .hero-facts > *, .stage) {
+    opacity: 0;
+  }
+  .hero[data-plates='late'] :is(.stage-index li, .hero-facts > *) {
+    animation: open-rise calc(440 * var(--t)) var(--ease-out) calc(var(--i, 2) * 40 * var(--t)) backwards;
+  }
+  .hero[data-plates='late'] .stage {
+    animation: open-fade calc(420 * var(--t)) var(--ease-standard) backwards;
+  }
+  .hero[data-plates='count'] {
+    animation: open-flick calc(720 * var(--t)) steps(6, jump-none) both;
+  }
+  .hero[data-plates='count'] .stage-index li,
+  .hero[data-plates='count'] .hero-facts > * {
     animation: open-rise calc(440 * var(--t)) var(--ease-out) calc((940 + var(--i, 2) * 40) * var(--t)) backwards;
   }
-  .hero[data-opening='play'] .stage-caption {
+  .hero[data-plates='count'] .stage-caption {
     animation: open-fade calc(320 * var(--t)) var(--ease-standard) calc(1260 * var(--t)) backwards;
   }
-  .hero[data-opening='play'] .stage-deck {
+  .hero[data-plates='count'] .stage-deck {
     animation: open-fade calc(420 * var(--t)) var(--ease-standard) calc(1160 * var(--t)) backwards;
   }
-  .hero[data-opening='play'] .stage-tilt {
+  .hero[data-plates='count'] .stage-tilt {
     animation: open-grow calc(800 * var(--t)) cubic-bezier(0.65, 0, 0.1, 1) calc(720 * var(--t)) backwards;
   }
   /* During the count only the one being counted shows. The rest
      stay a hair above transparent so the browser has them decoded before their turn comes. */
-  .hero[data-opening='play'] .stage-face {
+  .hero[data-plates='count'] .stage-face {
     visibility: visible;
     opacity: calc(1 - 0.998 * min(1, max(var(--flick) - var(--i), var(--i) - var(--flick))));
   }
   /* Below the desktop grid there is no stage: the projects and the fact sheet follow the statement. */
   @media (max-width: 63.99rem) {
-    .hero[data-opening='play'] .stage-index li {
+    .hero[data-plates='count'] .stage-index li {
       animation-delay: calc((700 + var(--i) * 40) * var(--t));
     }
-    .hero[data-opening='play'] .hero-facts > * {
+    .hero[data-plates='count'] .hero-facts > * {
       animation-delay: calc((300 + var(--row, 0) * 90) * var(--t));
     }
-    .hero[data-opening='play'] .hero-facts > :nth-child(2) {
+    .hero[data-plates='count'] .hero-facts > :nth-child(2) {
       --row: 1;
     }
-    .hero[data-opening='play'] .hero-facts > :nth-child(3) {
+    .hero[data-plates='count'] .hero-facts > :nth-child(3) {
       --row: 2;
     }
-    .hero[data-opening='play'] .hero-facts > :nth-child(4) {
+    .hero[data-plates='count'] .hero-facts > :nth-child(4) {
       --row: 3;
     }
-    .hero[data-opening='play'] .hero-facts > :nth-child(5) {
+    .hero[data-plates='count'] .hero-facts > :nth-child(5) {
       --row: 4;
     }
   }
   /* On the rail the plates come in from the side, ahead of the fact sheet. The link moves, not
      the list item: the item is the snap point, and moving it would scroll the rail. */
   @media (max-width: 39.99rem) {
-    .hero[data-opening='play'] .stage-index li {
+    .hero[data-plates='count'] .stage-index li {
       animation: none;
     }
-    .hero[data-opening='play'] .stage-item {
+    .hero[data-plates='count'] .stage-item {
       animation: open-rail calc(600 * var(--t)) var(--ease-out) calc((250 + var(--i) * 60) * var(--t)) backwards;
     }
-    .hero[data-opening='play'] .hero-facts > * {
+    .hero[data-plates='count'] .hero-facts > * {
       animation-delay: calc((550 + var(--row, 0) * 90) * var(--t));
     }
   }
   @media (min-width: 64rem) {
-    .hero[data-opening='play']::after {
+    .hero[data-plates='count']::after {
       content: counter(flick, decimal-leading-zero) ' / 06';
       counter-reset: flick calc(var(--flick) + 1);
       position: fixed;

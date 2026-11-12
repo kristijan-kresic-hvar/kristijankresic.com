@@ -1,8 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { OPENING_DEADLINE, OPENING_KEY, OPENING_MS, startOpening } from './opening';
+import { OPENING_KEY, OPENING_MS, OPENING_WAIT, startOpening } from './opening';
 
 const hero = () => document.querySelector<HTMLElement>('.hero');
 const state = () => hero()?.dataset.opening;
+const plates = () => hero()?.dataset.plates;
+
+/** Gives the fixture a stage on screen with one plate image that is still loading; returns how to finish or fail the load. */
+function loadingPlate() {
+  const tilt = document.querySelector('.stage-tilt');
+  if (!tilt) throw new Error('fixture has no plate');
+  vi.spyOn(tilt, 'getBoundingClientRect').mockReturnValue({ left: 500, top: 90, width: 900, height: 560 } as DOMRect);
+  tilt.innerHTML = '<div class="stage-face"><img></div>';
+  const img = tilt.querySelector('img');
+  if (!img) throw new Error('fixture has no image');
+  let settle: { loaded: () => void; failed: () => void } | undefined;
+  Object.defineProperty(img, 'complete', { value: false });
+  img.decode = () =>
+    new Promise<void>((loaded, failed) => {
+      settle = { loaded, failed: () => { failed(new Error('broken image')); } };
+    });
+  return { loaded: () => settle?.loaded(), failed: () => settle?.failed() };
+}
 
 function reducedMotion(on: boolean) {
   vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({ matches: on && query.includes('reduce'), media: query }) as MediaQueryList);
@@ -22,22 +40,22 @@ afterEach(() => {
 
 describe('startOpening', () => {
   it('plays on the first visit of a session and records it', () => {
-    startOpening(OPENING_KEY, OPENING_MS);
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
     expect(state()).toBe('play');
     expect(sessionStorage.getItem(OPENING_KEY)).not.toBeNull();
   });
 
   it('does not play again in the same session', () => {
-    startOpening(OPENING_KEY, OPENING_MS);
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
     vi.runAllTimers();
     document.body.innerHTML = '<section class="hero"></section>'; // back on the landing page later
-    startOpening(OPENING_KEY, OPENING_MS);
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
     expect(state()).toBeUndefined();
   });
 
   it('does not play under reduced motion, and leaves the session unmarked', () => {
     reducedMotion(true);
-    startOpening(OPENING_KEY, OPENING_MS);
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
     expect(state()).toBeUndefined();
     expect(sessionStorage.getItem(OPENING_KEY)).toBeNull();
   });
@@ -46,58 +64,63 @@ describe('startOpening', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new DOMException('denied', 'SecurityError');
     });
-    startOpening(OPENING_KEY, OPENING_MS);
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
     expect(state()).toBeUndefined();
   });
 
-  it('ends by itself inside two seconds, with room left for the page to load first', () => {
-    startOpening(OPENING_KEY, OPENING_MS);
+  it('runs the full sequence at once when nothing has to load, and ends by itself', () => {
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
+    expect(plates()).toBe('count');
     vi.advanceTimersByTime(OPENING_MS - 1);
     expect(state()).toBe('play');
     vi.advanceTimersByTime(1);
     expect(state()).toBe('done');
-    expect(OPENING_MS).toBeLessThanOrEqual(1700);
+    expect(plates()).toBeUndefined();
   });
 
-  it('plays at full length when the page arrived in time to finish by the deadline', () => {
-    vi.advanceTimersByTime(OPENING_DEADLINE - OPENING_MS); // the page took this long to arrive
-    startOpening(OPENING_KEY, OPENING_MS, OPENING_DEADLINE);
-    expect(hero()?.style.getPropertyValue('--open-k')).toBe('1');
-    vi.advanceTimersByTime(OPENING_MS - 1);
+  it('holds the count until the plate images are loaded, then runs it at full length', async () => {
+    const plate = loadingPlate();
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
+    await vi.advanceTimersByTimeAsync(OPENING_WAIT - 1);
+    expect([state(), plates()]).toEqual(['play', undefined]);
+    plate.loaded();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(plates()).toBe('count');
+    await vi.advanceTimersByTimeAsync(OPENING_MS - 1);
     expect(state()).toBe('play');
-    vi.advanceTimersByTime(1);
-    expect(state()).toBe('done');
-    expect(OPENING_DEADLINE).toBeLessThanOrEqual(1750); // the timer runs late on a busy main thread, so leave slack under 2000
-  });
-
-  it('plays faster on a page that arrived late, and is still over by the deadline', () => {
-    vi.advanceTimersByTime(600);
-    startOpening(OPENING_KEY, OPENING_MS, OPENING_DEADLINE);
-    expect(Number(hero()?.style.getPropertyValue('--open-k'))).toBeCloseTo((OPENING_DEADLINE - 600) / OPENING_MS, 6);
-    vi.advanceTimersByTime(OPENING_DEADLINE - 600 - 1);
-    expect(state()).toBe('play');
-    vi.advanceTimersByTime(1);
+    await vi.advanceTimersByTimeAsync(1);
     expect(state()).toBe('done');
   });
 
-  it('still plays on a page that arrived very late, at its shortest', () => {
-    vi.advanceTimersByTime(3000);
-    startOpening(OPENING_KEY, OPENING_MS, OPENING_DEADLINE);
-    expect(hero()?.style.getPropertyValue('--open-k')).toBe('0.6');
-    vi.advanceTimersByTime(OPENING_MS * 0.6 - 1);
-    expect(state()).toBe('play');
-    vi.advanceTimersByTime(1);
+  it('skips the count when the images take too long, and does not start it if they arrive after that', async () => {
+    const plate = loadingPlate();
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
+    await vi.advanceTimersByTimeAsync(OPENING_WAIT);
+    expect(plates()).toBe('late');
+    plate.loaded();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(plates()).toBe('late');
+    await vi.advanceTimersByTimeAsync(OPENING_MS / 2);
     expect(state()).toBe('done');
+    expect(OPENING_WAIT + OPENING_MS / 2).toBeLessThanOrEqual(2000); // a slow connection is not kept waiting for a show it will not get
+  });
+
+  it('skips the count when a plate fails to load', async () => {
+    const plate = loadingPlate();
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
+    plate.failed();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(plates()).toBe('late');
   });
 
   it.each(['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'])('jumps to the end on %s', (type) => {
-    startOpening(OPENING_KEY, OPENING_MS);
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
     window.dispatchEvent(new Event(type));
     expect(state()).toBe('done');
   });
 
   it('does not treat pointer movement as a skip', () => {
-    startOpening(OPENING_KEY, OPENING_MS);
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
     window.dispatchEvent(new Event('pointermove'));
     expect(state()).toBe('play');
   });
@@ -108,7 +131,7 @@ describe('startOpening', () => {
     vi.spyOn(plate, 'getBoundingClientRect').mockReturnValue({ left: 500, top: 90, width: 900, height: 560 } as DOMRect);
     vi.stubGlobal('innerWidth', 1440);
     vi.stubGlobal('innerHeight', 900);
-    startOpening(OPENING_KEY, OPENING_MS);
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
     const style = hero()?.style;
     // plate centre is (950, 370), viewport centre (720, 450); tile is 17% of the viewport wide
     expect(style?.getPropertyValue('--open-x')).toBe('-230px');
@@ -120,7 +143,7 @@ describe('startOpening', () => {
   it('still works as the standalone text the page inlines', () => {
     // The page runs this function from its source text before React loads, so it cannot lean on imports.
     // eslint-disable-next-line @typescript-eslint/no-implied-eval -- evaluating our own function source is the point of the test
-    (new Function(`(${startOpening.toString()})(${JSON.stringify(OPENING_KEY)},${OPENING_MS},${OPENING_DEADLINE})`) as () => void)();
+    (new Function(`(${startOpening.toString()})(${JSON.stringify(OPENING_KEY)},${OPENING_MS},${OPENING_WAIT})`) as () => void)();
     expect(state()).toBe('play');
     vi.advanceTimersByTime(OPENING_MS);
     expect(state()).toBe('done');

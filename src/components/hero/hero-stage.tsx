@@ -6,9 +6,10 @@ import { Facts } from '@/components/facts';
 import { ArrowUpRight } from '@/components/icons';
 import { Plate, plateMorph } from '@/components/plate';
 import type { CaseStudy } from '@/content/work';
-import { OPENING_DEADLINE, OPENING_KEY, OPENING_MS, startOpening } from './opening';
+import { OPENING_KEY, OPENING_MS, OPENING_WAIT, startOpening } from './opening';
 import { runStageMotion } from './stage-motion';
 import { runField } from './field-canvas';
+import { dragRail } from './rail-drag';
 import './hero-stage.css';
 
 /** The statement, split so the first sentence can be set brighter than the rest. */
@@ -36,6 +37,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
   const statement = useRef<HTMLHeadingElement>(null);
   const stage = useRef<HTMLAnchorElement>(null);
   const field = useRef<HTMLCanvasElement>(null);
+  const rail = useRef<HTMLOListElement>(null);
   /** True only while hydrating server HTML: the inline script must not be rendered on the client. */
   const fromServer = useSyncExternalStore(
     noop,
@@ -44,7 +46,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
   );
 
   // Arriving by client-side navigation there is no inline script, so start the opening here.
-  useLayoutEffect(() => startOpening(OPENING_KEY, OPENING_MS), []);
+  useLayoutEffect(() => startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT), []);
 
   useEffect(() => {
     if (!statement.current || !stage.current) return;
@@ -56,6 +58,8 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
     if (!field.current || !hero) return;
     return runField(field.current, hero);
   }, []);
+
+  useEffect(() => (rail.current ? dragRail(rail.current) : undefined), []);
 
   const pick = (i: number) => {
     if (i === active) return;
@@ -81,7 +85,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
         ))}
       </h1>
 
-      <ol className="stage-index">
+      <ol ref={rail} className="stage-index">
         {studies.map((study, i) => (
           <li key={study.slug} style={{ '--i': i } as CSSProperties}>
             <Link
@@ -116,7 +120,8 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
                     data-face={i === active ? 'a' : i === replaced ? 'b' : undefined}
                     style={{ '--i': i } as CSSProperties}
                   >
-                    <Plate study={study} eager />
+                    {/* The first plate is what the opening lands on and what a late opening shows, so it must not arrive last. */}
+                    <Plate study={study} eager priority={i === 0} />
                   </div>
                 </ViewTransition>
               ))}
@@ -137,7 +142,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
       {fromServer && (
         <script
           suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: `(${startOpening.toString()})(${JSON.stringify(OPENING_KEY)},${OPENING_MS},${OPENING_DEADLINE})` }}
+          dangerouslySetInnerHTML={{ __html: `(${startOpening.toString()})(${JSON.stringify(OPENING_KEY)},${OPENING_MS},${OPENING_WAIT})` }}
         />
       )}
     </section>

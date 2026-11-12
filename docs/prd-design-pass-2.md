@@ -55,9 +55,9 @@ Check each on the running site (`npm run dev`, or the export served from `out/`)
 
 ### Hero: the two lead effects
 
-- **H8. Opening.** On the first visit to `/` in a browser session a sequence plays and finishes within 2 seconds: a small tile in the centre flicks through the six plates with an 01 to 06 counter, then grows into the stage, while the statement sets itself word by word.
+- **H8. Opening.** On the first visit to `/` in a browser session a sequence plays: the statement sets itself word by word at once, and when the six plate images are loaded a small tile in the centre counts down through them (06 to 01), then grows into the stage. The plate sequence takes 1.6 seconds and always runs at full speed. If the images are not loaded within 1 second, the count is skipped and the rest of the hero rises in over 0.8 seconds. (Revised after owner review: the original 2-second cap from navigation played the count on an empty tile, at up to 60% speed, on any first visit that was not on a fast connection.)
 - **H9.** The opening plays once per session. Navigating to a case study and back to `/` does not replay it.
-- **H10.** Any click, key press or scroll during the opening jumps it to its end state at once. It never delays interaction past 2 seconds.
+- **H10.** Any click, key press or scroll during the opening jumps it to its end state at once. Nothing is ever blocked while it plays.
 - **H11.** With JavaScript off, and separately with reduced motion on, the hero renders directly in its final state with all content visible.
 - **H12. Plate depth.** With a mouse, the stage plate tilts in 3D toward the pointer (visible, at most about 6 degrees) and a soft band of light moves across its surface with the pointer. It returns to rest when the pointer leaves.
 - **H13.** Choosing another project from the index (hover, keyboard focus, or tap) changes the plate with a soft dissolve: the new image is revealed over the previous one, which stays whole underneath, and it completes within 700ms. (Revised after owner review: the original flip was "too in your face and fast".)
