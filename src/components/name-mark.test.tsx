@@ -15,6 +15,6 @@ describe('NameMark', () => {
     const [amber, light] = screen.getByRole('img').children;
     expect(amber).toHaveTextContent('Kristijan Krešić');
     expect(light).toHaveTextContent('Kristijan Kresic');
-    expect(light?.textContent).toHaveLength(amber?.textContent?.length ?? 0);
+    expect(light?.textContent).toHaveLength(amber?.textContent.length ?? 0);
   });
 });

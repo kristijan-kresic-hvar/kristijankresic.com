@@ -43,7 +43,10 @@ export function AnnotatedShot({
 
     function measure() {
       if (!el || !im) return;
-      if (!window.matchMedia('(min-width: 1024px)').matches) return setLines([]);
+      if (!window.matchMedia('(min-width: 1024px)').matches) {
+        setLines([]);
+        return;
+      }
       const box = el.getBoundingClientRect();
       const ib = im.getBoundingClientRect();
       setLines(

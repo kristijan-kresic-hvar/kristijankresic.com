@@ -18,7 +18,7 @@ describe('AnnotatedShot', () => {
 
   it('highlights the pair when a callout is focused', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
-    const callout = document.getElementById('callout-1')!;
+    const callout = document.getElementById('callout-1') as HTMLElement;
     fireEvent.focus(callout);
     expect(callout).toHaveAttribute('data-active', 'true');
     expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'true');
