@@ -86,3 +86,35 @@ Check each on the running site (`npm run dev`, or the export served from `out/`)
 - **K1.** `npm run check` is green at the end of every task.
 - **K2.** New logic has tests: at minimum the once-per-session rule for the opening and any pure geometry or easing helpers.
 - **K3.** No dead code from the first pass remains in files this phase touches.
+
+## Phase 2 acceptance criteria: landing below the hero (M2)
+
+The owner picked one of three variants for each section in the browser (2026-11-12/13). The picks are in the code as previews; this milestone makes them finished work. Motion taste for everything here: quiet. The owner cut every effect in the hero that was loud, fast or tracked the pointer tightly.
+
+### Structure
+
+- **S1.** Below the hero the landing has exactly three parts, in this order: how I work, earlier work, the ending. The nav's Work link lands on the hero's project index.
+- **S2.** Nothing below the hero repeats the hero's fact row: no stack list, and the CV links appear once more only, in the ending. Nothing below the hero is set larger than `--text-title`.
+- **S3.** At 375, 768, 1024, 1280, 1440 and 1920 there is no horizontal scroll, no clipped or overlapping text, and the three parts share their left edges with the hero's grid (page gutter, and the fourth grid column where a part is offset).
+
+### How I work
+
+- **S4.** One paragraph: four claims in the bright tone, each followed by its evidence in the muted tone, with a link to About and the one-line list of sectors under it. The copy says only what `src/content/profile.ts` and the previous four points said.
+- **S5.** From 1024 up the portrait sits in the first columns and the paragraph starts on the fourth; the portrait's top lines up with the top of the paragraph's first line (within 4px). Below 1024 the portrait sits above the paragraph at no more than 160px wide.
+- **S6.** The paragraph's lines hold between about 28 and 62 characters at every width, and its size steps down smoothly from 1920 to 375 without a jump.
+- **S7.** One quiet authored moment: as the paragraph scrolls into view its sentences come up from a dimmer tone to their final two tones. CSS scroll-driven only, no layout shift, text readable (AA) at every point of it. Where scroll timelines are missing, or under reduced motion, the paragraph is simply in its final state.
+
+### Earlier work
+
+- **S8.** Three columns side by side from 1024, stacked below that, each with its dates first (mono, tabular), then title, then one line. At 1440 the whole section is no taller than 360px.
+- **S9.** Each column is one link to its case study with a visible focus ring. The amber tick on its top hairline runs the full width while the column is hovered or focused, in 500ms or less, and does not animate under reduced motion.
+
+### The ending
+
+- **S10.** Contact and footer are one `footer`: the closing sentence ends in the email address, which stays on one line without overflowing at every width from 320 to 1920. Copy, phone and both CVs sit under it once; one bar carries the copyright, location, local time, GitHub and LinkedIn and wraps cleanly on phones.
+- **S11.** The contour field runs behind the ending exactly as in the hero: it drifts, leans around the pointer, is dimmed behind the text, is still on touch devices and under reduced motion, and stops when the ending is off screen or the tab is hidden. All text over it meets AA.
+
+### Housekeeping
+
+- **S12.** With JavaScript off the three parts are complete. Keyboard order follows reading order. The console is free of errors on `/`, `/about/` and one case-study page.
+- **S13.** New or changed components have tests that assert behaviour (links, labels, structure), not constants. `npm run check` passes.
