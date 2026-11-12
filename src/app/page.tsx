@@ -46,23 +46,22 @@ export default function Home() {
         </Container>
       </section>
 
-      <section id="work" aria-labelledby="earlier-title" className="scroll-mt-20 border-t border-border-subtle py-16 lg:py-20">
+      <section aria-labelledby="earlier-title" className="earlier-work border-t border-border-subtle py-14 lg:py-20">
         <Container>
-          <h2 id="earlier-title" className="text-2xl font-semibold">Earlier work</h2>
-          <ul className="mt-6 border-b border-border-default">
+          <h2 id="earlier-title" className="text-lead font-medium tracking-normal text-text-muted">
+            Earlier work
+          </h2>
+          <ol className="ew-strip mt-8">
             {EARLIER.map((study) => (
               <li key={study.slug}>
-                <Link
-                  href={`/work/${study.slug}/`}
-                  className="earlier group grid gap-x-12 gap-y-1 border-t border-border-default py-4 sm:grid-cols-12 sm:items-baseline"
-                >
-                  <span className="font-medium text-text-primary sm:col-span-4">{study.title}</span>
-                  <span className="text-text-body sm:col-span-5 lg:col-span-6">{study.tagline}</span>
-                  <span className="text-sm whitespace-nowrap text-text-muted tabular-nums sm:col-span-3 sm:text-right lg:col-span-2">{study.period}</span>
+                <Link href={`/work/${study.slug}/`} className="ew-cell">
+                  <span className="ew-years">{study.period}</span>
+                  <span className="ew-title">{study.title}</span>
+                  <span className="ew-tag">{study.tagline}</span>
                 </Link>
               </li>
             ))}
-          </ul>
+          </ol>
         </Container>
       </section>
     </>

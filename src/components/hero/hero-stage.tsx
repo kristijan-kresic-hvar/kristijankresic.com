@@ -69,8 +69,9 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
 
   const current = studies[active];
 
+  // #work is where the nav's Work link lands: the six projects, not the earlier ones further down.
   return (
-    <section className="hero" suppressHydrationWarning>
+    <section id="work" className="hero" suppressHydrationWarning>
       <canvas ref={field} className="hero-field" aria-hidden="true" />
       <h1 ref={statement} className="stage-statement" aria-label={STATEMENT.map((part) => part.text).join(' ')}>
         {WORDS.map(({ word, lead }, n) => (
