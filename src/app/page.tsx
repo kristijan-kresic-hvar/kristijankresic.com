@@ -12,8 +12,8 @@ export default function Home() {
       <HeroStage studies={FEATURED} />
 
       <section aria-labelledby="practice-title" className="practice border-t border-border-subtle py-20 lg:py-32">
-        <Container className="grid gap-x-12 gap-y-8 lg:grid-cols-12">
-          <figure className="max-w-40 lg:col-span-2 lg:max-w-none">
+        <Container className="practice-grid grid gap-y-8 lg:grid-cols-12">
+          <figure className="practice-figure max-w-40 lg:col-span-2 lg:max-w-none">
             <Image
               src="/images/headshot.webp"
               alt={`Portrait of ${PROFILE.name}`}
@@ -30,11 +30,20 @@ export default function Home() {
               How I work
             </h2>
             <p className="practice-para">
-              <strong>I join the client&rsquo;s team:</strong> their standups, Figma and repo from week one.{' '}
-              <strong>I own the frontend end to end,</strong> from architecture and data layer to accessibility, performance and
-              delivery. <strong>I leave a foundation other people build on.</strong> On BioCirV two other developers built on my
-              component system while I reviewed their PRs. <strong>AI does the mechanical work;</strong> every architecture call and
-              merged line is mine.
+              <span>
+                <strong>I join the client&rsquo;s team:</strong> their standups, Figma and repo from week one.
+              </span>{' '}
+              <span>
+                <strong>I own the frontend end to end,</strong> from architecture and data layer to accessibility, performance and
+                delivery.
+              </span>{' '}
+              <span>
+                <strong>I leave a foundation other people build on.</strong> On BioCirV two other developers built on my component
+                system while I reviewed their PRs.
+              </span>{' '}
+              <span>
+                <strong>AI does the mechanical work;</strong> every architecture call and merged line is mine.
+              </span>
             </p>
             <p className="mt-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
               <Link href="/about/" className="link inline-flex items-center gap-2 text-text-primary">
