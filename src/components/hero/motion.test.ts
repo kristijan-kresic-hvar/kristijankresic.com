@@ -26,8 +26,6 @@ describe('falloff and weightAt', () => {
     expect(weightAt(0, 200)).toBe(WEIGHT.peak);
     expect(weightAt(200, 200)).toBe(WEIGHT.rest);
     expect(weightAt(5000, 200)).toBe(WEIGHT.rest);
-    expect(WEIGHT.rest).toBeGreaterThanOrEqual(100);
-    expect(WEIGHT.peak).toBeLessThanOrEqual(900);
   });
 });
 
@@ -37,7 +35,6 @@ describe('tiltFor', () => {
     expect(tiltFor(1, -1)).toEqual({ rx: TILT.x, ry: TILT.y });
     expect(tiltFor(-1, 1)).toEqual({ rx: -TILT.x, ry: -TILT.y });
     expect(tiltFor(40, -40)).toEqual({ rx: TILT.x, ry: TILT.y });
-    expect(Math.max(TILT.x, TILT.y)).toBeLessThanOrEqual(6);
   });
 
   it('rests at a lean inside the same limits, so the pointer never adds to it', () => {

@@ -131,24 +131,6 @@ body {
   color: var(--color-text-primary);
 }
 
-/* Hero statement: sized so the longest line fits the five-column block from 1024 up, and the
-   full-width block below that. */
-.hero-statement {
-  font-size: clamp(1.75rem, 9.6vw, 2.25rem); /* four lines from 320 to 423, three above */
-  line-height: 1.04;
-  letter-spacing: var(--tracking-tighter);
-}
-@media (min-width: 48rem) {
-  .hero-statement {
-    font-size: var(--text-display);
-  }
-}
-@media (min-width: 64rem) {
-  .hero-statement {
-    font-size: clamp(2.375rem, 3.9vw, 4.75rem);
-  }
-}
-
 .earlier {
   transition: background-color var(--duration-instant) var(--ease-standard);
 }
