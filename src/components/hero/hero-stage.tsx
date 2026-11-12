@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, ViewTransition, type CSSProperties } from 'react';
+import { ContourField } from '@/components/contour-field';
 import { Facts } from '@/components/facts';
 import { ArrowUpRight } from '@/components/icons';
 import { Plate, plateMorph } from '@/components/plate';
 import type { CaseStudy } from '@/content/work';
 import { OPENING_KEY, OPENING_MS, OPENING_WAIT, startOpening } from './opening';
 import { runStageMotion } from './stage-motion';
-import { runField } from './field-canvas';
 import { dragRail } from './rail-drag';
 import './hero-stage.css';
 
@@ -36,7 +36,6 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
   const [replaced, setReplaced] = useState(-1);
   const statement = useRef<HTMLHeadingElement>(null);
   const stage = useRef<HTMLAnchorElement>(null);
-  const field = useRef<HTMLCanvasElement>(null);
   const rail = useRef<HTMLOListElement>(null);
   /** True only while hydrating server HTML: the inline script must not be rendered on the client. */
   const fromServer = useSyncExternalStore(
@@ -53,12 +52,6 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
     return runStageMotion(stage.current, statement.current);
   }, []);
 
-  useEffect(() => {
-    const hero = field.current?.parentElement;
-    if (!field.current || !hero) return;
-    return runField(field.current, hero);
-  }, []);
-
   useEffect(() => (rail.current ? dragRail(rail.current) : undefined), []);
 
   const pick = (i: number) => {
@@ -72,7 +65,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
   // #work is where the nav's Work link lands: the six projects, not the earlier ones further down.
   return (
     <section id="work" className="hero" suppressHydrationWarning>
-      <canvas ref={field} className="hero-field" aria-hidden="true" />
+      <ContourField className="hero-field" text=".stage-statement, .stage-index, .hero-facts" />
       <h1 ref={statement} className="stage-statement" aria-label={STATEMENT.map((part) => part.text).join(' ')}>
         {WORDS.map(({ word, lead }, n) => (
           <Fragment key={n}>

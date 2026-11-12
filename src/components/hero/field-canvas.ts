@@ -7,19 +7,18 @@ const STEP = 18;
 const ALPHA = { quiet: 0.07, open: 0.16, index: 0.3 } as const;
 /** Milliseconds between frames. The chart drifts a few pixels a second, so 30 frames a second is plenty. */
 const FRAME = 30;
-/** Text the field keeps quiet behind, padded by `PAD` pixels. */
-const TEXT = '.stage-statement, .stage-index, .hero-facts';
+/** Padding in pixels around the text the field keeps quiet behind. */
 const PAD = 12;
 
 type Rect = { l: number; t: number; r: number; b: number };
 
 /**
- * Draws the depth chart behind the hero and keeps it moving while the hero is on screen and the
- * tab is visible; nothing runs otherwise. Under reduced motion or without a fine pointer it draws
- * one still frame and never animates. The CSS hides the canvas until the first frame and while
- * the opening plays, then fades it in. Returns a cleanup function.
+ * Draws the depth chart behind `hero` (any positioned element) and keeps it moving while that
+ * element is on screen and the tab is visible; nothing runs otherwise. Lines are dimmed behind
+ * the elements `text` selects inside it. Under reduced motion or without a fine pointer it draws
+ * one still frame and never animates. Returns a cleanup function.
  */
-export function runField(canvas: HTMLCanvasElement, hero: HTMLElement): () => void {
+export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: string): () => void {
   const ctx = canvas.getContext('2d');
   if (!ctx) return () => {};
   const live = matchMedia('(pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -49,7 +48,7 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement): () => vo
     rows = Math.ceil(height / STEP) + 1;
     values = new Float32Array(cols * rows);
     // Layout boxes, not client rects: the opening may have the text moved or scaled right now.
-    quiet = Array.from(hero.querySelectorAll<HTMLElement>(TEXT), (el) => ({
+    quiet = Array.from(hero.querySelectorAll<HTMLElement>(text), (el) => ({
       l: el.offsetLeft - PAD,
       t: el.offsetTop - PAD,
       r: el.offsetLeft + el.offsetWidth + PAD,

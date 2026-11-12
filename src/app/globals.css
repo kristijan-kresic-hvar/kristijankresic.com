@@ -111,26 +111,6 @@ body {
   text-decoration-color: var(--color-accent);
 }
 
-/* The wordmark with its two diacritics in amber. Two stacked copies: the amber one carries the full
-   name, the light one on top drops the marks, so only š and ć's accents show through. Kerning is off
-   so both copies advance identically. */
-.namemark {
-  position: relative;
-  display: block;
-  white-space: nowrap;
-  font-kerning: none;
-  user-select: none;
-  margin-left: -0.055em; /* optical: pull the K's side bearing onto the page edge */
-}
-.namemark > :first-child {
-  color: var(--color-accent);
-}
-.namemark > :last-child {
-  position: absolute;
-  inset: 0 auto auto 0;
-  color: var(--color-text-primary);
-}
-
 /* Earlier work: three columns side by side, dates leading, each under a hairline that starts with
    a short amber tick. The tick runs the full width while its project is hovered or focused. */
 .ew-strip {
@@ -267,25 +247,41 @@ body {
   }
 }
 
-/* Contact address: one amber rule under the whole line. It thickens on hover and, where scroll
-   timelines exist, draws from the left as the address arrives. */
-.contact-address {
+/* The ending (contact and footer in one). The contour chart from the hero returns behind it,
+   surfacing from the top edge; the closing sentence is set like the hero statement and its last
+   line is the address. */
+.ending {
   position: relative;
-  display: inline-block;
-  white-space: nowrap;
-  padding-bottom: 0.14em;
+  isolation: isolate; /* the chart sits at z-index -1 without leaving the footer */
 }
-.contact-address::after {
-  content: '';
+.ending-field {
   position: absolute;
-  inset: auto 0 0 0;
-  height: 2px;
-  background: var(--color-accent);
-  transform-origin: left;
-  transition: height var(--duration-fast) var(--ease-out);
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mask-image: linear-gradient(transparent, #000 45%);
 }
-.contact-address:hover::after {
-  height: 0.08em;
+.end-say {
+  max-width: 24ch;
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-muted);
+}
+.end-mail {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.12em;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+  text-decoration-color: var(--color-accent);
 }
 
 /* Annotated screenshot: markers, list rows and leader lines share one active state (amber). */
@@ -350,14 +346,6 @@ body {
     stroke-dasharray: var(--len);
     animation: leader-draw 0.7s var(--ease-out) calc(var(--i, 0) * 90ms + 200ms) both;
   }
-
-  @supports (animation-timeline: view()) {
-    .contact-address::after {
-      animation: rule-draw linear both;
-      animation-timeline: view();
-      animation-range: entry 60% cover 32%;
-    }
-  }
 }
 
 /* Page transition: the hero plate travels into the case-study plate (and back). React names the
@@ -389,12 +377,6 @@ body {
     stroke-dashoffset: var(--len);
   }
 }
-@keyframes rule-draw {
-  from {
-    transform: scaleX(0);
-  }
-}
-
 /* A short amber rule above a statement set at title scale (case-study outcome, practice statement). */
 .ruled::before {
   content: '';
@@ -412,15 +394,4 @@ body {
 a.frame:hover,
 a:hover .frame {
   border-color: var(--color-border-strong);
-}
-
-/* Lines that must span their container on one line. The divisor is the line's measured width in
-   em plus a little slack. The vw line is the fallback where container units are missing. */
-.namemark {
-  font-size: 12.8vw;
-  font-size: calc(100cqw / 6.85);
-}
-.contact-address {
-  font-size: 6vw;
-  font-size: calc(100cqw / 14.5);
 }
