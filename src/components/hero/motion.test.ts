@@ -30,7 +30,7 @@ describe('falloff and weightAt', () => {
 });
 
 describe('tiltFor', () => {
-  it('leans the plate into the pointer and never past about six degrees', () => {
+  it('leans the plate into the pointer and clamps at its limits', () => {
     expect(tiltFor(0, 0)).toEqual({ rx: -0, ry: 0 });
     expect(tiltFor(1, -1)).toEqual({ rx: TILT.x, ry: TILT.y });
     expect(tiltFor(-1, 1)).toEqual({ rx: -TILT.x, ry: -TILT.y });
