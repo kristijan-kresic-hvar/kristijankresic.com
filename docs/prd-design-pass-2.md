@@ -65,7 +65,7 @@ Check each on the running site (`npm run dev`, or the export served from `out/`)
 
 ### Hero: the two support effects
 
-- **H15. Living background.** A generative field in amber on the near-black ground sits behind the hero content, drawn on a canvas. It moves slowly at rest and visibly bends or reacts around the pointer.
+- **H15. Living background.** A generative field in amber on the near-black ground sits behind the hero content, drawn on a canvas. It moves slowly at rest and leans gently around the pointer, trailing it. (Revised after owner review: rings and a glow that tracked the pointer were "too reactive and in your face".)
 - **H16.** The field stops animating when the hero is scrolled out of view and when the tab is hidden.
 - **H17.** The field never reduces text legibility: all hero text still meets WCAG AA contrast against what is behind it, and amber covers no more than about 5 percent of the viewport.
 - **H18. Reactive type.** The statement is set in variable Geist and its letters gain weight toward the pointer within a radius, easing back as it leaves. Line breaks and the position of everything else do not shift while this happens.

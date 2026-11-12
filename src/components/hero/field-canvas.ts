@@ -3,12 +3,10 @@ import { contours, depthAt, INDEX_EVERY, rgba, SPACING, type Shoal } from './fie
 
 /** Pixels between grid points. Lines are straight within a cell, so this is their smoothness. */
 const STEP = 18;
-/** Line opacity: behind text, in open ground, on an index contour, and the most it reaches right at the pointer. */
-const ALPHA = { quiet: 0.1, open: 0.28, index: 0.5, peak: 0.6 } as const;
+/** Line opacity: behind text, in open ground, and on an index contour. */
+const ALPHA = { quiet: 0.07, open: 0.16, index: 0.3 } as const;
 /** Milliseconds between frames. The chart drifts a few pixels a second, so 30 frames a second is plenty. */
 const FRAME = 30;
-/** Radius in pixels of the brighter patch around the pointer. */
-const GLOW = 240;
 /** Text the field keeps quiet behind, padded by `PAD` pixels. */
 const TEXT = '.stage-statement, .stage-index, .hero-facts';
 const PAD = 12;
@@ -77,12 +75,7 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement): () => vo
     ctx.lineWidth = 1;
     ctx.strokeStyle = rgba(accent, ALPHA.quiet);
     ctx.stroke(hush);
-    if (shoal.amount > 0.001) {
-      const glow = ctx.createRadialGradient(shoal.x, shoal.y, 0, shoal.x, shoal.y, GLOW);
-      glow.addColorStop(0, rgba(accent, ALPHA.open + (ALPHA.peak - ALPHA.open) * shoal.amount));
-      glow.addColorStop(1, rgba(accent, ALPHA.open));
-      ctx.strokeStyle = glow;
-    } else ctx.strokeStyle = rgba(accent, ALPHA.open);
+    ctx.strokeStyle = rgba(accent, ALPHA.open);
     ctx.stroke(open);
     ctx.strokeStyle = rgba(accent, ALPHA.index);
     ctx.stroke(index);
@@ -96,11 +89,12 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement): () => vo
     last = now;
     clock += dt;
     if (aim) {
-      if (shoal.amount === 0) Object.assign(shoal, aim); // the shoal rises where the pointer is, it does not slide in
-      shoal.x = approach(shoal.x, aim.x, dt, 5);
-      shoal.y = approach(shoal.y, aim.y, dt, 5);
+      if (shoal.amount === 0) Object.assign(shoal, aim); // the swell rises where the pointer is, it does not slide in
+      // Slow on purpose: the swell trails the pointer and takes about two seconds to rise, so it never tracks the hand.
+      shoal.x = approach(shoal.x, aim.x, dt, 2);
+      shoal.y = approach(shoal.y, aim.y, dt, 2);
     }
-    const amount = approach(shoal.amount, aim ? 1 : 0, dt, 3);
+    const amount = approach(shoal.amount, aim ? 1 : 0, dt, 1.5);
     shoal.amount = amount < 0.001 ? 0 : amount;
     draw();
   }

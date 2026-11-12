@@ -1,6 +1,6 @@
 /**
  * Pure maths for the hero's background field: a depth chart of a slowly moving sea floor, drawn
- * as contour lines. The pointer raises a shoal under itself and the contours bend around it.
+ * as contour lines. The pointer raises a low swell under itself and the nearest contours lean around it.
  * No DOM in here, so every rule can be tested.
  */
 
@@ -8,8 +8,8 @@
 const SCALE = 300;
 /** Drift per second in noise units: the floor shifts sideways and changes shape, both slowly. */
 const DRIFT = { x: 0.012, z: 0.05 } as const;
-/** Height of the pointer's shoal, and its spread in pixels. */
-export const SHOAL = { height: 0.32, spread: 100 } as const;
+/** Height of the pointer's swell, and its spread in pixels: under two contour lines high and wide, so lines lean instead of closing into rings. */
+export const SHOAL = { height: 0.09, spread: 190 } as const;
 /** Height between two contour lines. */
 export const SPACING = 0.055;
 /** Every nth line is an index contour, drawn heavier, as on a printed chart. */
