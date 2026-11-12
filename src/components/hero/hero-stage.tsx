@@ -9,6 +9,7 @@ import type { CaseStudy } from '@/content/work';
 import { OPENING_KEY, OPENING_MS, startOpening } from './opening';
 import { retarget, type Spring } from './motion';
 import { runStageMotion } from './stage-motion';
+import { runField } from './field-canvas';
 import './hero-stage.css';
 
 /** The statement, split so the first sentence can be set brighter than the rest. */
@@ -36,6 +37,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
   const kick = useRef<(() => void) | null>(null);
   const statement = useRef<HTMLHeadingElement>(null);
   const stage = useRef<HTMLAnchorElement>(null);
+  const field = useRef<HTMLCanvasElement>(null);
   /** True only while hydrating server HTML: the inline script must not be rendered on the client. */
   const fromServer = useSyncExternalStore(
     noop,
@@ -57,6 +59,12 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
     };
   }, []);
 
+  useEffect(() => {
+    const hero = field.current?.parentElement;
+    if (!field.current || !hero) return;
+    return runField(field.current, hero);
+  }, []);
+
   const pick = (i: number) => {
     if (i === active) return;
     setActive(i);
@@ -74,6 +82,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
 
   return (
     <section className="hero" suppressHydrationWarning>
+      <canvas ref={field} className="hero-field" aria-hidden="true" />
       <h1 ref={statement} className="stage-statement" aria-label={STATEMENT.map((part) => part.text).join(' ')}>
         {WORDS.map(({ word, lead }, n) => (
           <Fragment key={n}>

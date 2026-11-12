@@ -82,6 +82,33 @@
   }
 }
 
+/* ---- field ----------------------------------------------------------------------------------
+   The depth chart behind everything (field-canvas.ts). Empty until its first frame, hidden while
+   the opening plays, then it surfaces once the opening has settled. */
+.hero-field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mask-image: linear-gradient(transparent, #000 4rem, #000 calc(100% - 4rem), transparent);
+  opacity: 0;
+  transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+.hero-field[data-on] {
+  opacity: 1;
+}
+.hero[data-opening='play'] .hero-field {
+  opacity: 0;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-field {
+    transition: none;
+  }
+}
+
 /* ---- statement -------------------------------------------------------------------------------
    Every word is a box that cannot break and every letter is its own span, so the opening can set
    the line word by word and the pointer can add weight letter by letter. Once the script has

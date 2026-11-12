@@ -17,3 +17,6 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList;
 }
+
+// jsdom has no canvas and logs an error when asked for one; the hero's field skips itself on null.
+if (typeof window !== 'undefined') HTMLCanvasElement.prototype.getContext = () => null;
