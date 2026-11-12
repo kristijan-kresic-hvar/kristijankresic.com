@@ -7,7 +7,6 @@ import { ArrowUpRight } from '@/components/icons';
 import { Plate, plateMorph } from '@/components/plate';
 import type { CaseStudy } from '@/content/work';
 import { OPENING_DEADLINE, OPENING_KEY, OPENING_MS, startOpening } from './opening';
-import { retarget, type Spring } from './motion';
 import { runStageMotion } from './stage-motion';
 import { runField } from './field-canvas';
 import './hero-stage.css';
@@ -24,18 +23,16 @@ const two = (n: number) => String(n).padStart(2, '0');
 
 /**
  * Hero as a stage. One project plate holds most of the screen and the index beside it chooses
- * which of the six it shows. The plate is a board with two faces, lying on two more boards:
- * choosing a project puts it on the far face and turns the board over. On phones the index is a
- * rail of the six plates instead. Server HTML is the finished hero; the opening sequence,
+ * which of the six it shows. The plate is a board lying on two more boards: choosing a project
+ * dissolves it in over the one it replaces (CSS). On phones the index is a rail of the six plates
+ * instead. Server HTML is the finished hero; the opening sequence,
  * the tilt and the reactive type are added on top by script and CSS, and none of them run under
  * reduced motion.
  */
 export function HeroStage({ studies }: { studies: CaseStudy[] }) {
   const [active, setActive] = useState(0);
-  /** Project index on each side of the board; -1 is an empty side. */
-  const [faces, setFaces] = useState<[number, number]>([0, -1]);
-  const flip = useRef<Spring & { target: number }>({ x: 0, v: 0, target: 0 });
-  const kick = useRef<(() => void) | null>(null);
+  /** The project the active one replaced, kept under it while it dissolves in; -1 before any choice. */
+  const [replaced, setReplaced] = useState(-1);
   const statement = useRef<HTMLHeadingElement>(null);
   const stage = useRef<HTMLAnchorElement>(null);
   const field = useRef<HTMLCanvasElement>(null);
@@ -51,13 +48,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
 
   useEffect(() => {
     if (!statement.current || !stage.current) return;
-    const motion = runStageMotion(stage.current, statement.current, flip.current);
-    if (!motion) return;
-    kick.current = motion.kick;
-    return () => {
-      kick.current = null;
-      motion.stop();
-    };
+    return runStageMotion(stage.current, statement.current);
   }, []);
 
   useEffect(() => {
@@ -68,15 +59,8 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
 
   const pick = (i: number) => {
     if (i === active) return;
+    setReplaced(active);
     setActive(i);
-    if (!kick.current) {
-      setFaces([i, -1]); // reduced motion: the plate changes in place
-      return;
-    }
-    const next = retarget(flip.current.x, faces, i, i > active ? 1 : -1);
-    flip.current.target = next.target;
-    setFaces(next.faces);
-    kick.current();
   };
 
   const current = studies[active];
@@ -123,21 +107,19 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
           <span className="stage-deck" />
           <span className="stage-deck" />
           <div className="stage-tilt">
-            <div className="stage-turn">
+            <div className="stage-plate">
               {studies.map((study, i) => (
                 // Only the project the link opens carries the shared name, so only it travels into the case study.
                 <ViewTransition key={study.slug} {...(i === active ? plateMorph(study.slug) : { default: 'none' })}>
                   <div
                     className="stage-face"
-                    data-face={i === faces[0] ? 'a' : i === faces[1] ? 'b' : undefined}
+                    data-face={i === active ? 'a' : i === replaced ? 'b' : undefined}
                     style={{ '--i': i } as CSSProperties}
                   >
                     <Plate study={study} eager />
                   </div>
                 </ViewTransition>
               ))}
-              <span className="stage-edge" data-edge="top" />
-              <span className="stage-edge" data-edge="bottom" />
             </div>
             <span className="stage-caption" aria-hidden="true">
               <span className="stage-n">

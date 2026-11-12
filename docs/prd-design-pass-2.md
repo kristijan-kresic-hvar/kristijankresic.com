@@ -60,7 +60,7 @@ Check each on the running site (`npm run dev`, or the export served from `out/`)
 - **H10.** Any click, key press or scroll during the opening jumps it to its end state at once. It never delays interaction past 2 seconds.
 - **H11.** With JavaScript off, and separately with reduced motion on, the hero renders directly in its final state with all content visible.
 - **H12. Plate depth.** With a mouse, the stage plate tilts in 3D toward the pointer (visible, at most about 6 degrees) and a soft band of light moves across its surface with the pointer. It returns to rest when the pointer leaves.
-- **H13.** Choosing another project from the index (hover, keyboard focus, or tap) changes the plate with a transition that reads as a physical move (a flip, peel or turn of the plate), not a plain cross-fade, and completes within 700ms.
+- **H13.** Choosing another project from the index (hover, keyboard focus, or tap) changes the plate with a soft dissolve: the new image is revealed over the previous one, which stays whole underneath, and it completes within 700ms. (Revised after owner review: the original flip was "too in your face and fast".)
 - **H14.** Hovering quickly up and down the whole index never leaves the stage blank and always ends on the plate of the last item hovered.
 
 ### Hero: the two support effects

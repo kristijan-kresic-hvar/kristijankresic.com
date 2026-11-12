@@ -7,6 +7,12 @@
   inherits: true;
   initial-value: 0;
 }
+/* How far the dissolve between two projects has travelled along the band's diagonal. Past 100% plus its soft edge at rest. */
+@property --reveal {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 160%;
+}
 
 /* ---- grid ------------------------------------------------------------------------------------
    Phones: statement, the six projects as a rail of plates you swipe, then the fact sheet, all in
@@ -15,7 +21,6 @@
    fact sheet sits on the same columns underneath, so every edge lines up with another one. */
 .hero {
   --hero-gap: clamp(1.5rem, 2.5vw, 3rem);
-  --depth: 10px;
   position: relative;
   isolation: isolate; /* a background layer can sit at z-index -1 without leaving the hero */
   display: grid;
@@ -280,12 +285,11 @@
 }
 
 /* ---- the plate -------------------------------------------------------------------------------
-   A board with thickness in a perspective box, lying on two more boards that sit a little askew
-   and throw the shadow. `.stage` holds the pose (lean and light, the same numbers as REST in
-   motion.ts) and the script moves it with the pointer. `.stage-tilt` leans, `.stage-turn` turns
-   the board over, and the six project images wait on it: one on the front ([data-face='a']), one
-   on the back ('b'), the rest hidden. The script only ever changes which image is on the side
-   facing away. */
+   A board in a perspective box, lying on two more boards that sit a little askew and throw the
+   shadow. `.stage` holds the pose (lean and light, the same numbers as REST in motion.ts) and the
+   script moves it with the pointer. `.stage-tilt` leans; `.stage-plate` is the board, flat, with
+   the six project images stacked on it: the one that is up ([data-face='a']), the one it just
+   replaced ('b'), the rest hidden. */
 .stage {
   --rx: 2.5deg;
   --ry: 4.5deg;
@@ -303,20 +307,15 @@
 }
 .stage-deck,
 .stage-tilt,
-.stage-turn {
+.stage-plate {
   position: absolute;
   inset: 0;
 }
-.stage-tilt,
-.stage-turn {
-  transform-style: preserve-3d;
-}
 /* Set back a little, so the edge leaning toward the viewer lands on the grid line instead of past it. */
 .stage-tilt {
+  transform-style: preserve-3d; /* the caption floats above the board */
   transform: translateZ(var(--back)) rotateX(var(--rx)) rotateY(var(--ry));
 }
-/* No depth of their own: they are painted under the plate in source order, so the plate can sink
-   as it turns without cutting through them. */
 .stage-deck {
   border-radius: 3px;
   background: var(--color-bg-elev-1);
@@ -336,16 +335,13 @@
   overflow: hidden;
   border-radius: 3px;
   background: var(--color-bg-elev-1);
-  backface-visibility: hidden;
   visibility: hidden;
-  transform: translateZ(calc(var(--depth) / 2));
 }
 .stage-face[data-face] {
   visibility: visible;
 }
-.stage-face[data-face='b'] {
-  --band: 75deg; /* this side is upside down until the board turns, so its band leans the other way */
-  transform: rotateX(180deg) translateZ(calc(var(--depth) / 2));
+.stage-face[data-face='a'] {
+  z-index: 1;
 }
 .stage-face picture {
   display: contents;
@@ -355,9 +351,30 @@
   height: 100%;
   aspect-ratio: auto;
 }
+/* Choosing a project: the new image dissolves in along the band of light, over the one it
+   replaces, and settles a little as it lands. Only once something has been replaced, so never on
+   load. The replaced image is whole underneath for the whole move, however fast the index is raked. */
+@media (prefers-reduced-motion: no-preference) {
+  .stage-plate:has([data-face='b']) [data-face='a'] {
+    mask-image: linear-gradient(105deg, #000 calc(var(--reveal) - 60%), transparent var(--reveal));
+    animation: plate-reveal 700ms var(--ease-standard);
+  }
+  .stage-plate:has([data-face='b']) [data-face='a'] img {
+    animation: plate-settle 700ms var(--ease-out);
+  }
+}
+@keyframes plate-reveal {
+  from {
+    --reveal: 0%;
+  }
+}
+@keyframes plate-settle {
+  from {
+    scale: 1.04;
+  }
+}
 /* Light. The plate sits in shade with a band of light across it (--lx, --lit), made by lifting
-   the shade and adding a little gloss. The band follows the pointer and brightens under it, and
-   a board that is turning away from the viewer goes darker (--shade). */
+   the shade and adding a little gloss. The band follows the pointer and brightens under it. */
 .stage-face::before,
 .stage-face::after {
   content: '';
@@ -367,41 +384,18 @@
 }
 .stage-face::before {
   background: var(--color-bg-base);
-  opacity: calc(0.08 + 0.16 * var(--lit) + 0.6 * var(--shade, 0));
-  mask-image: linear-gradient(
-    var(--band, 105deg),
-    #000 calc(var(--lx) - 26%),
-    rgb(0 0 0 / calc(1 - var(--lit))) var(--lx),
-    #000 calc(var(--lx) + 26%)
-  );
+  opacity: calc(0.08 + 0.16 * var(--lit));
+  mask-image: linear-gradient(105deg, #000 calc(var(--lx) - 26%), rgb(0 0 0 / calc(1 - var(--lit))) var(--lx), #000 calc(var(--lx) + 26%));
 }
 .stage-face::after {
   background: linear-gradient(
-    var(--band, 105deg),
+    105deg,
     transparent calc(var(--lx) - 15%),
     color-mix(in srgb, var(--color-text-primary) 18%, transparent) var(--lx),
     transparent calc(var(--lx) + 15%)
   );
   opacity: var(--lit);
   mix-blend-mode: screen;
-}
-/* The board's top and bottom edges: what you see when it is edge-on mid-turn. */
-.stage-edge {
-  position: absolute;
-  inset-inline: 2px;
-  height: var(--depth);
-}
-.stage-edge[data-edge='top'] {
-  top: 0;
-  background: var(--color-border-strong);
-  transform-origin: 50% 0;
-  transform: translateZ(calc(var(--depth) / -2)) rotateX(90deg);
-}
-.stage-edge[data-edge='bottom'] {
-  bottom: 0;
-  background: var(--color-bg-elev-3);
-  transform-origin: 50% 100%;
-  transform: translateZ(calc(var(--depth) / -2)) rotateX(-90deg);
 }
 /* Which project is up, on a tab that floats above the board so it shifts against it on a lean. */
 .stage-caption {
@@ -435,9 +429,9 @@
 /* ---- opening ---------------------------------------------------------------------------------
    Plays only while the hero carries data-opening="play", which opening.ts sets once per session and clears
    after 1600ms or on the first click, key or scroll. Timeline (ms, at full length):
-     0 to 720      the plate, shrunk to a tile in the middle of the screen, shows the six projects
-                   in turn with a counter under it; the statement sets itself word by word
-     720 to 1520   the tile travels to the stage, growing, and turns over once to land on project 01
+     0 to 720      the plate, shrunk to a tile in the middle of the screen, counts down through the
+                   six projects to 01 with a counter under it; the statement sets itself word by word
+     720 to 1520   the tile travels to the stage, growing
      940 to 1580   index, the boards under the plate, caption and fact sheet arrive
    Phones and tablets have no stage: there the statement sets itself, then the projects and the
    fact sheet follow. Every rule is an animation with a backwards fill, so dropping the attribute
@@ -464,18 +458,11 @@
   .hero[data-opening='play'] .stage-tilt {
     animation: open-grow calc(800 * var(--t)) cubic-bezier(0.65, 0, 0.1, 1) calc(720 * var(--t)) backwards;
   }
-  .hero[data-opening='play'] .stage-turn {
-    animation: open-turn calc(800 * var(--t)) cubic-bezier(0.5, 0, 0.15, 1) calc(720 * var(--t)) both;
-  }
-  /* During the count every image is on the front and only the one being counted shows. The rest
+  /* During the count only the one being counted shows. The rest
      stay a hair above transparent so the browser has them decoded before their turn comes. */
   .hero[data-opening='play'] .stage-face {
     visibility: visible;
     opacity: calc(1 - 0.998 * min(1, max(var(--flick) - var(--i), var(--i) - var(--flick))));
-  }
-  /* When the count ends project 01 moves to the back, so the turn that ends the opening lands on it. */
-  .hero[data-opening='play'] .stage-face[data-face='a'] {
-    animation: open-first calc(720 * var(--t)) step-end both;
   }
   /* Below the desktop grid there is no stage: the projects and the fact sheet follow the statement. */
   @media (max-width: 63.99rem) {
@@ -528,10 +515,10 @@
 }
 @keyframes open-flick {
   from {
-    --flick: 0;
+    --flick: 5;
   }
   to {
-    --flick: 5;
+    --flick: 0;
   }
 }
 @keyframes open-word {
@@ -568,23 +555,6 @@
 @keyframes open-grow {
   from {
     transform: translate(var(--open-x, 0px), var(--open-y, 0px)) scale(var(--open-s, 1));
-  }
-}
-@keyframes open-turn {
-  from {
-    transform: rotateX(0deg);
-  }
-  to {
-    transform: rotateX(-180deg);
-  }
-}
-@keyframes open-first {
-  from {
-    opacity: calc(1 - 0.998 * min(1, var(--flick)));
-  }
-  to {
-    opacity: 1;
-    transform: rotateX(180deg) translateZ(calc(var(--depth) / 2));
   }
 }
 @keyframes open-count {

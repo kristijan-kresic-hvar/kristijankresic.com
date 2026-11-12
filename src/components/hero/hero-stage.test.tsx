@@ -35,8 +35,9 @@ describe('HeroStage', () => {
     fireEvent.focus(item);
     expect(path(screen.getByRole('link', { name: `${third.title}: open the case study` }))).toBe(`/work/${third.slug}`);
     expect(item).toHaveAttribute('data-active', 'true');
-    // the new project waits on the back of the plate; the old one is still on the front
-    expect(document.querySelectorAll('.stage-face[data-face]')).toHaveLength(2);
+    // the new project is up and the one it replaced stays under it while it dissolves in
+    expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', third.image.alt);
+    expect(document.querySelector('.stage-face[data-face="b"] img')).toHaveAttribute('alt', first.image.alt);
   });
 
   it('server-renders the finished hero: every word, every project, the first plate up, nothing waiting on script', () => {

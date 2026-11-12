@@ -1,21 +1,15 @@
-import { approach, REST, sink, stepFlip, tiltFor, weightAt, WEIGHT, type Spring } from './motion';
+import { approach, REST, tiltFor, weightAt, WEIGHT } from './motion';
 
 type Letter = { el: HTMLElement; x: number; y: number; weight: number };
 
 /**
  * Runs everything in the hero that moves after the opening, on one animation frame loop that
- * stops as soon as nothing is moving: the plate turning over, the plate leaning into the pointer
- * with a band of light across it, and the statement's letters gaining weight near the pointer.
- * Returns null under reduced motion. The lean and the type need a fine pointer; the turn does not.
- * `flip` is owned by the caller: set `flip.target` and call `kick()` to turn the plate.
+ * stops as soon as nothing is moving: the plate leaning into the pointer with a band of light
+ * across it, and the statement's letters gaining weight near the pointer. Both need a fine
+ * pointer and neither runs under reduced motion. Returns the function that stops it.
  */
-export function runStageMotion(
-  stage: HTMLElement,
-  statement: HTMLElement,
-  flip: Spring & { target: number },
-): { kick: () => void; stop: () => void } | null {
-  const turn = stage.querySelector<HTMLElement>('.stage-turn');
-  if (!turn || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+export function runStageMotion(stage: HTMLElement, statement: HTMLElement): (() => void) | undefined {
+  if (!matchMedia('(pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   let raf = 0;
   let last = 0;
@@ -26,15 +20,6 @@ export function runStageMotion(
   let near: { x: number; y: number } | null = null;
   let letters: Letter[] = [];
   let radius = 0;
-
-  const turnPlate = (dt: number) => {
-    if (flip.x === flip.target && flip.v === 0) return false;
-    Object.assign(flip, stepFlip(flip, flip.target, dt));
-    const depth = sink(flip.x);
-    turn.style.transform = `translateZ(${((-depth * turn.offsetHeight) / 2).toFixed(1)}px) rotateX(${(-flip.x * 180).toFixed(2)}deg)`;
-    turn.style.setProperty('--shade', depth.toFixed(3));
-    return true;
-  };
 
   const leanPlate = (dt: number) => {
     const aim = over ? { ...tiltFor(over.nx, over.ny), lx: over.px, lit: 1 } : REST;
@@ -72,7 +57,7 @@ export function runStageMotion(
     // Real elapsed time, uncapped: every motion here is exact in time, so slow frames skip ahead instead of running long.
     const dt = Math.max(0, (now - last) / 1000);
     last = now;
-    const moving = [turnPlate(dt), leanPlate(dt), weighLetters(dt)].some(Boolean);
+    const moving = [leanPlate(dt), weighLetters(dt)].some(Boolean);
     raf = moving ? requestAnimationFrame(frame) : 0;
   }
   const kick = () => {
@@ -133,25 +118,20 @@ export function runStageMotion(
   }
 
   let stopped = false;
-  if (matchMedia('(pointer: fine)').matches) {
-    void document.fonts.ready.then(() => {
-      if (!stopped) lockLetters();
-    });
-    addEventListener('pointermove', onWindowMove, { passive: true });
-    document.documentElement.addEventListener('pointerleave', onWindowLeave);
-    stage.addEventListener('pointermove', onStageMove, { passive: true });
-    stage.addEventListener('pointerleave', onStageLeave);
-  }
+  void document.fonts.ready.then(() => {
+    if (!stopped) lockLetters();
+  });
+  addEventListener('pointermove', onWindowMove, { passive: true });
+  document.documentElement.addEventListener('pointerleave', onWindowLeave);
+  stage.addEventListener('pointermove', onStageMove, { passive: true });
+  stage.addEventListener('pointerleave', onStageLeave);
 
-  return {
-    kick,
-    stop() {
-      stopped = true;
-      cancelAnimationFrame(raf);
-      removeEventListener('pointermove', onWindowMove);
-      document.documentElement.removeEventListener('pointerleave', onWindowLeave);
-      stage.removeEventListener('pointermove', onStageMove);
-      stage.removeEventListener('pointerleave', onStageLeave);
-    },
+  return () => {
+    stopped = true;
+    cancelAnimationFrame(raf);
+    removeEventListener('pointermove', onWindowMove);
+    document.documentElement.removeEventListener('pointerleave', onWindowLeave);
+    stage.removeEventListener('pointermove', onStageMove);
+    stage.removeEventListener('pointerleave', onStageLeave);
   };
 }
