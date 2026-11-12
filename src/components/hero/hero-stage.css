@@ -53,8 +53,9 @@
   .stage-index li {
     flex: 0 0 86%;
     scroll-snap-align: start;
+    scroll-snap-stop: always; /* one project per swipe, however hard */
   }
-  /* While a mouse is dragging the rail (rail-drag.ts): it follows the hand, then snaps on release. */
+  /* While a mouse is dragging the rail and until it has glided onto a plate (rail-drag.ts). */
   .stage-index[data-dragging] {
     scroll-snap-type: none;
     cursor: grabbing;

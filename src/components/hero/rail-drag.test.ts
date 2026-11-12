@@ -12,10 +12,9 @@ function rail(scrollWidth = 1300) {
   });
   Object.defineProperty(el, 'scrollWidth', { value: scrollWidth });
   Object.defineProperty(el, 'clientWidth', { value: 350 });
-  el.setPointerCapture = vi.fn();
-  const scrollTo = vi.fn();
-  el.scrollTo = scrollTo;
-  return Object.assign(el, { scrolledTo: scrollTo });
+  el.setPointerCapture = () => {};
+  el.hasPointerCapture = () => false;
+  return el;
 }
 /** jsdom has no PointerEvent: a mouse event carrying the one extra field the rail reads stands in for it. */
 const pointer = (type: string, x: number, pointerType = 'mouse') =>
@@ -29,26 +28,16 @@ afterEach(() => {
 });
 
 describe('restingPlace', () => {
-  it('goes back to the plate it left after a short drag', () => {
-    const el = rail();
-    el.scrollLeft = 30;
-    expect(restingPlace(el, -30)).toBe(0);
+  it('rests on the plate nearest to where it began, or the one next to it', () => {
+    expect(restingPlace(rail(), 300, 0)).toBe(312);
+    expect(restingPlace(rail(), 300, 1)).toBe(624);
+    expect(restingPlace(rail(), 300, -1)).toBe(0);
   });
 
-  it('moves on one plate after a drag long enough to mean it, in either direction', () => {
-    const el = rail();
-    el.scrollLeft = 100;
-    expect(restingPlace(el, -100)).toBe(312);
-    el.scrollLeft = 532;
-    expect(restingPlace(el, 92)).toBe(312);
-  });
-
-  it('never rests before the first plate or past the last', () => {
-    const el = rail();
-    el.scrollLeft = 0;
-    expect(restingPlace(el, 200)).toBe(0);
-    el.scrollLeft = 1000;
-    expect(restingPlace(el, -200)).toBe(936);
+  it('never rests before the first plate, and stops the last one at the end of the rail', () => {
+    expect(restingPlace(rail(), 0, -1)).toBe(0);
+    expect(restingPlace(rail(), 936, 1)).toBe(936);
+    expect(restingPlace(rail(1250), 624, 1)).toBe(900); // 1250 wide in a 350 window: the rail ends at 900, before the last stop
   });
 });
 
@@ -61,12 +50,47 @@ describe('dragRail', () => {
     expect(el.scrollLeft).toBe(120);
     expect(el.dataset.dragging).toBe('');
     el.dispatchEvent(mouse('pointerup', 180));
-    expect(el.scrolledTo).toHaveBeenCalledWith({ left: 312, behavior: 'smooth' });
     const click = new MouseEvent('click', { bubbles: true, cancelable: true });
     el.querySelector('a')?.dispatchEvent(click);
     expect(click.defaultPrevented).toBe(true);
-    vi.runAllTimers();
+    vi.runAllTimers(); // the glide: fake timers drive requestAnimationFrame too
+    expect(el.scrollLeft).toBe(312);
     expect(el.dataset.dragging).toBeUndefined();
+  });
+
+  it('moves one plate for a long drag as for a short one, and back to where it began for a nudge', () => {
+    const el = rail();
+    dragRail(el);
+    el.dispatchEvent(mouse('pointerdown', 340));
+    el.dispatchEvent(mouse('pointermove', -300));
+    el.dispatchEvent(mouse('pointerup', -300));
+    vi.runAllTimers();
+    expect(el.scrollLeft).toBe(312);
+    el.dispatchEvent(mouse('pointerdown', 300));
+    el.dispatchEvent(mouse('pointermove', 280));
+    el.dispatchEvent(mouse('pointerup', 280));
+    vi.runAllTimers();
+    expect(el.scrollLeft).toBe(312);
+  });
+
+  it('moves one plate per sideways wheel gesture, inertia included, and leaves vertical wheels to the page', () => {
+    const el = rail();
+    dragRail(el);
+    const wheel = (deltaX: number, deltaY = 0) => {
+      const e = new WheelEvent('wheel', { deltaX, deltaY, bubbles: true, cancelable: true });
+      el.dispatchEvent(e);
+      vi.advanceTimersByTime(16);
+      return e;
+    };
+    expect(wheel(0, 80).defaultPrevented).toBe(false);
+    // one swipe: the fingers, then a long fading tail
+    for (const d of [8, 20, 45, 60, 52, 40, 31, 24, 18, 13, 9, 6, 4, 2, 1]) expect(wheel(d).defaultPrevented).toBe(true);
+    vi.advanceTimersByTime(600);
+    expect(el.scrollLeft).toBe(312);
+    // the next swipe, the other way
+    for (const d of [-10, -30, -50, -30, -12, -4]) wheel(d);
+    vi.advanceTimersByTime(600);
+    expect(el.scrollLeft).toBe(0);
   });
 
   it('leaves a plain click alone', () => {
@@ -77,7 +101,7 @@ describe('dragRail', () => {
     const click = new MouseEvent('click', { bubbles: true, cancelable: true });
     el.querySelector('a')?.dispatchEvent(click);
     expect(click.defaultPrevented).toBe(false);
-    expect(el.scrolledTo).not.toHaveBeenCalled();
+    expect(el.dataset.dragging).toBeUndefined();
   });
 
   it('ignores touch, which scrolls the rail natively, and widths where there is nothing to scroll', () => {
