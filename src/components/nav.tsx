@@ -20,6 +20,8 @@ export function Nav() {
             <Link
               key={l.href}
               href={l.href}
+              // The CV is a PDF, not a route: prefetching it only logs a 404 for a route payload that never exists.
+              prefetch={l.href.endsWith('.pdf') ? false : undefined}
               className={`text-text-body transition-colors duration-(--duration-instant) hover:text-text-primary ${l.always ? '' : 'hidden sm:inline'}`}
             >
               {l.label}
