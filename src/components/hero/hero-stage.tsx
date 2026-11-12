@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, ViewTransition, type CSSProperties } from 'react';
 import { Facts } from '@/components/facts';
 import { ArrowUpRight } from '@/components/icons';
-import { Plate } from '@/components/plate';
+import { Plate, plateMorph } from '@/components/plate';
 import type { CaseStudy } from '@/content/work';
 import { OPENING_KEY, OPENING_MS, startOpening } from './opening';
 import { retarget, type Spring } from './motion';
@@ -122,14 +122,16 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
           <div className="stage-tilt">
             <div className="stage-turn">
               {studies.map((study, i) => (
-                <div
-                  key={study.slug}
-                  className="stage-face"
-                  data-face={i === faces[0] ? 'a' : i === faces[1] ? 'b' : undefined}
-                  style={{ '--i': i } as CSSProperties}
-                >
-                  <Plate study={study} eager />
-                </div>
+                // Only the project the link opens carries the shared name, so only it travels into the case study.
+                <ViewTransition key={study.slug} {...(i === active ? plateMorph(study.slug) : { default: 'none' })}>
+                  <div
+                    className="stage-face"
+                    data-face={i === faces[0] ? 'a' : i === faces[1] ? 'b' : undefined}
+                    style={{ '--i': i } as CSSProperties}
+                  >
+                    <Plate study={study} eager />
+                  </div>
+                </ViewTransition>
               ))}
               <span className="stage-edge" data-edge="top" />
               <span className="stage-edge" data-edge="bottom" />

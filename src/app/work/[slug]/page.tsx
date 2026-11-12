@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ViewTransition } from 'react';
 import { AnnotatedShot } from '@/components/annotated-shot';
 import { Container } from '@/components/container';
+import { Plate, plateMorph } from '@/components/plate';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from '@/components/icons';
 import { WORK, getCaseStudy } from '@/content/work';
 
@@ -77,6 +79,17 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
           </dl>
         </header>
       </Container>
+
+      {/* The hero's projects have a plate; it opens the page so the hero's plate can land on it. */}
+      {study.featured && (
+        <Container className="mt-12 lg:mt-16">
+          <ViewTransition {...plateMorph(study.slug)}>
+            <div className="overflow-hidden rounded-lg border border-border-default bg-bg-elev-1">
+              <Plate study={study} eager />
+            </div>
+          </ViewTransition>
+        </Container>
+      )}
 
       <Container className="mt-12 lg:mt-16">
         <AnnotatedShot

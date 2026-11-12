@@ -15,3 +15,9 @@ export function Plate({ study, eager = false, className = '' }: { study: CaseStu
     </picture>
   );
 }
+
+/**
+ * Props for the <ViewTransition> around a plate that should travel between the hero stage and the
+ * case-study header: the same name on both ends pairs them, and the class is styled in globals.css.
+ */
+export const plateMorph = (slug: string) => ({ name: `plate-${slug}`, share: 'plate-morph', default: 'none' }) as const;

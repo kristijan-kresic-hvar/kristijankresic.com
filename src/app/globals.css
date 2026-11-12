@@ -312,6 +312,30 @@ body {
   }
 }
 
+/* Page transition: the hero plate travels into the case-study plate (and back). React names the
+   pair only for the navigation; without the API the link is a plain navigation. */
+@media (prefers-reduced-motion: no-preference) {
+  /* The curve the opening uses to carry the tile onto the stage, so both journeys move alike. */
+  ::view-transition-group(.plate-morph) {
+    animation-duration: 700ms;
+    animation-timing-function: cubic-bezier(0.65, 0, 0.1, 1);
+  }
+  ::view-transition-old(.plate-morph),
+  ::view-transition-new(.plate-morph) {
+    height: 100%;
+    object-fit: cover;
+    animation-duration: 320ms;
+  }
+}
+/* Reduced motion: the browser may still swap the page through a view transition, but nothing moves. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 @keyframes leader-draw {
   from {
     stroke-dashoffset: var(--len);
