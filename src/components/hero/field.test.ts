@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contours, depthAt, noise3, rgba, SHOAL } from './field';
+import { contours, depthAt, dropStone, noise3, ringAt, rgba, SHOAL, STONE } from './field';
 
 const still = { x: 0, y: 0, amount: 0 };
 
@@ -15,6 +15,21 @@ describe('noise3', () => {
 
   it('is continuous across lattice lines', () => {
     expect(Math.abs(noise3(2.9999, 1.5, 0.5) - noise3(3.0001, 1.5, 0.5))).toBeLessThan(0.001);
+  });
+});
+
+describe('ringAt', () => {
+  it('is a ridge that widens from where the stone fell and lives until it has crossed the chart', () => {
+    // dropped near the top left of a 1440 by 800 chart, even from above it: the far corner is the bottom right
+    const far = Math.hypot(1440 - 100, 800 + 30);
+    expect(dropStone(100, -30, 1440, 800).life * STONE.speed).toBeGreaterThan(far);
+    const stone = { ...dropStone(100, 0, 1440, 800), age: 1 };
+    const front = STONE.speed * stone.age;
+    expect(ringAt(100 + front, 0, stone)).toBeGreaterThan(STONE.height * 0.4);
+    expect(ringAt(100, 0, stone)).toBeLessThan(0.001); // the middle has already settled
+    expect(ringAt(100 + front + STONE.width * 5, 0, stone)).toBeLessThan(0.001); // not yet reached
+    expect(ringAt(100 + STONE.speed * stone.life, 0, { ...stone, age: stone.life })).toBe(0);
+    expect(depthAt(100 + front, 0, 3, { x: 0, y: 0, amount: 0 }, stone) - depthAt(100 + front, 0, 3, { x: 0, y: 0, amount: 0 })).toBeCloseTo(ringAt(100 + front, 0, stone));
   });
 });
 

@@ -1,10 +1,10 @@
 import { approach } from './motion';
-import { contours, depthAt, INDEX_EVERY, rgba, SPACING, type Shoal } from './field';
+import { contours, depthAt, dropStone, INDEX_EVERY, rgba, ringAt, SPACING, STONE, type Shoal, type Stone } from './field';
 
 /** Pixels between grid points. Lines are straight within a cell, so this is their smoothness. */
 const STEP = 18;
-/** Line opacity: behind text, in open ground, and on an index contour. */
-const ALPHA = { quiet: 0.07, open: 0.16, index: 0.3 } as const;
+/** Line opacity: behind text, in open ground, on an index contour, and where a dropped stone's ring is passing. */
+const ALPHA = { quiet: 0.07, open: 0.16, index: 0.3, ring: 0.5 } as const;
 /** Milliseconds between frames. The chart drifts a few pixels a second, so 30 frames a second is plenty. */
 const FRAME = 30;
 /** Padding in pixels around the text the field keeps quiet behind. */
@@ -32,6 +32,7 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: str
   let quiet: Rect[] = [];
   const shoal: Shoal = { x: 0, y: 0, amount: 0 };
   let aim: { x: number; y: number } | null = null;
+  let stone: Stone | null = null;
   let raf = 0;
   let last = 0;
   let clock = 0;
@@ -59,14 +60,26 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: str
 
   function draw() {
     if (!ctx) return;
-    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) values[j * cols + i] = depthAt(i * STEP, j * STEP, clock, shoal);
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) values[j * cols + i] = depthAt(i * STEP, j * STEP, clock, shoal, stone);
     const open = new Path2D();
     const index = new Path2D();
     const hush = new Path2D();
+    const lit = new Path2D();
+    const ring = stone; // the lines the ring is crossing light up, or the lean alone is too slight to notice
+    const passing = (x: number, y: number) => ring !== null && ringAt(x, y, ring) > STONE.height * 0.12;
     contours(values, cols, rows, STEP, SPACING, (x1, y1, x2, y2, line) => {
       const mx = (x1 + x2) / 2;
       const my = (y1 + y2) / 2;
-      const path = quiet.some((q) => mx > q.l && mx < q.r && my > q.t && my < q.b) ? hush : line % INDEX_EVERY === 0 ? index : open;
+      // Behind text the ring only lifts a line to the level of open ground, so the words stay easy to read.
+      const path = quiet.some((q) => mx > q.l && mx < q.r && my > q.t && my < q.b)
+        ? passing(mx, my)
+          ? open
+          : hush
+        : passing(mx, my)
+          ? lit
+          : line % INDEX_EVERY === 0
+            ? index
+            : open;
       path.moveTo(x1, y1);
       path.lineTo(x2, y2);
     });
@@ -78,6 +91,10 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: str
     ctx.stroke(open);
     ctx.strokeStyle = rgba(accent, ALPHA.index);
     ctx.stroke(index);
+    if (ring) {
+      ctx.strokeStyle = rgba(accent, ALPHA.ring);
+      ctx.stroke(lit);
+    }
     if (canvas.dataset.on === undefined) canvas.dataset.on = ''; // once: the CSS fades the canvas in from here
   }
 
@@ -95,6 +112,7 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: str
     }
     const amount = approach(shoal.amount, aim ? 1 : 0, dt, 1.5);
     shoal.amount = amount < 0.001 ? 0 : amount;
+    if (stone && (stone.age += dt) >= stone.life) stone = null;
     draw();
   }
 
@@ -117,6 +135,12 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: str
   function onLeave() {
     aim = null;
   }
+  /** The easter egg: resting on the name in the nav drops a stone there (see nav.tsx). The point may lie outside the chart. */
+  function onStone(e: Event) {
+    const at = (e as CustomEvent<{ x: number; y: number }>).detail;
+    const box = hero.getBoundingClientRect();
+    stone = dropStone(at.x - box.left, at.y - box.top, width, height);
+  }
 
   const sizer = new ResizeObserver(resize);
   sizer.observe(hero);
@@ -131,6 +155,7 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: str
     document.addEventListener('visibilitychange', run);
     addEventListener('pointermove', onMove, { passive: true });
     document.documentElement.addEventListener('pointerleave', onLeave);
+    addEventListener('chart-stone', onStone);
   }
 
   return () => {
@@ -140,5 +165,6 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: str
     document.removeEventListener('visibilitychange', run);
     removeEventListener('pointermove', onMove);
     document.documentElement.removeEventListener('pointerleave', onLeave);
+    removeEventListener('chart-stone', onStone);
   };
 }

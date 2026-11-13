@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useRef } from 'react';
 import { Container } from './container';
 import { PROFILE } from '@/content/profile';
 
@@ -13,11 +14,25 @@ const LINKS = [
 
 export function Nav() {
   const path = usePathname();
+  /** Easter egg: rest the pointer on the name for a second and a stone drops into whichever chart is on screen (field-canvas.ts). */
+  const rest = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const drop = (el: HTMLElement) => {
+    const box = el.getBoundingClientRect();
+    dispatchEvent(new CustomEvent('chart-stone', { detail: { x: box.left + box.width / 2, y: box.top + box.height / 2 } }));
+  };
   const tone = 'text-text-body transition-colors duration-(--duration-instant) hover:text-text-primary';
   return (
     <header className="site-nav sticky top-0 z-40 bg-bg-base/85 backdrop-blur-md">
       <Container className="flex h-14 items-center justify-between gap-4 sm:h-16">
-        <Link href="/" className="font-semibold tracking-tight text-text-primary">
+        <Link
+          href="/"
+          className="font-semibold tracking-tight text-text-primary"
+          onPointerEnter={(e) => {
+            const el = e.currentTarget;
+            rest.current = setTimeout(() => drop(el), 1000);
+          }}
+          onPointerLeave={() => clearTimeout(rest.current)}
+        >
           {PROFILE.name}
         </Link>
         <nav aria-label="Primary" className="flex items-center gap-4 text-sm sm:gap-7">

@@ -10,6 +10,12 @@ const SCALE = 300;
 const DRIFT = { x: 0.012, z: 0.05 } as const;
 /** Height of the pointer's swell, and its spread in pixels: under two contour lines high and wide, so lines lean instead of closing into rings. */
 export const SHOAL = { height: 0.09, spread: 190 } as const;
+/**
+ * A stone dropped in the chart: one ring that widens from where it fell until it has crossed the
+ * whole chart. About one contour line high, so the lines it passes lean outwards and settle back.
+ * Speed in pixels a second.
+ */
+export const STONE = { height: 0.06, width: 70, speed: 420 } as const;
 /** Height between two contour lines. */
 export const SPACING = 0.055;
 /** Every nth line is an index contour, drawn heavier, as on a printed chart. */
@@ -38,15 +44,32 @@ export function noise3(x: number, y: number, z: number): number {
 }
 
 export type Shoal = { x: number; y: number; amount: number };
+/** Where a stone fell, how many seconds ago, and how many seconds its ring needs to leave the chart. */
+export type Stone = { x: number; y: number; age: number; life: number };
 
-/** Height of the floor at pixel `x`, `y` after `t` seconds, with the pointer's shoal on top. */
-export function depthAt(x: number, y: number, t: number, shoal: Shoal): number {
+/** A stone at `x`, `y` in a chart `width` by `height`: its ring lives until it has passed the farthest corner. */
+export function dropStone(x: number, y: number, width: number, height: number): Stone {
+  const reach = Math.hypot(Math.max(x, width - x), Math.max(y, height - y));
+  return { x, y, age: 0, life: (reach + STONE.width * 3) / STONE.speed };
+}
+
+/** Height the stone's ring adds at pixel `x`, `y`: a ridge at radius speed × age, rising fast and easing to half by the end of its life. */
+export function ringAt(x: number, y: number, stone: Stone): number {
+  if (stone.age <= 0 || stone.age >= stone.life) return 0;
+  const off = Math.hypot(x - stone.x, y - stone.y) - STONE.speed * stone.age;
+  const strength = Math.min(1, stone.age / 0.3) * (1 - 0.5 * (stone.age / stone.life));
+  return STONE.height * strength * Math.exp(-(off * off) / (2 * STONE.width ** 2));
+}
+
+/** Height of the floor at pixel `x`, `y` after `t` seconds, with the pointer's shoal and any stone's ring on top. */
+export function depthAt(x: number, y: number, t: number, shoal: Shoal, stone?: Stone | null): number {
   const nx = x / SCALE + t * DRIFT.x;
   const ny = y / SCALE;
-  const floor = noise3(nx, ny, t * DRIFT.z) * 0.68 + noise3(nx * 2.1 + 5.2, ny * 2.1 + 1.3, t * DRIFT.z * 1.6) * 0.32;
-  if (shoal.amount === 0) return floor;
+  let depth = noise3(nx, ny, t * DRIFT.z) * 0.68 + noise3(nx * 2.1 + 5.2, ny * 2.1 + 1.3, t * DRIFT.z * 1.6) * 0.32;
+  if (stone) depth += ringAt(x, y, stone);
+  if (shoal.amount === 0) return depth;
   const d2 = (x - shoal.x) ** 2 + (y - shoal.y) ** 2;
-  return floor + SHOAL.height * shoal.amount * Math.exp(-d2 / (2 * SHOAL.spread ** 2));
+  return depth + SHOAL.height * shoal.amount * Math.exp(-d2 / (2 * SHOAL.spread ** 2));
 }
 
 /**
