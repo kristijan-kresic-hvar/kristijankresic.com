@@ -12,9 +12,12 @@ const LINKS = [
   { href: PROFILE.cv.frontend, label: 'CV', always: false },
 ];
 
+/** Milliseconds the pointer must rest on the name before the stone drops: long enough that nobody triggers it on the way to a click. */
+const REST = 2000;
+
 export function Nav() {
   const path = usePathname();
-  /** Easter egg: rest the pointer on the name for a second and a stone drops into whichever chart is on screen (field-canvas.ts). */
+  /** Easter egg: rest the pointer on the name for two seconds and a stone drops into whichever chart is on screen (field-canvas.ts). */
   const rest = useRef<ReturnType<typeof setTimeout>>(undefined);
   const drop = (el: HTMLElement) => {
     const box = el.getBoundingClientRect();
@@ -29,7 +32,7 @@ export function Nav() {
           className="font-semibold tracking-tight text-text-primary"
           onPointerEnter={(e) => {
             const el = e.currentTarget;
-            rest.current = setTimeout(() => drop(el), 1000);
+            rest.current = setTimeout(() => drop(el), REST);
           }}
           onPointerLeave={() => clearTimeout(rest.current)}
         >

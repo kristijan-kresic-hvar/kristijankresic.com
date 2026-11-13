@@ -137,6 +137,7 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: str
   }
   /** The easter egg: resting on the name in the nav drops a stone there (see nav.tsx). The point may lie outside the chart. */
   function onStone(e: Event) {
+    if (stone) return; // one ring at a time: a second stone waits until the first ring has left the chart
     const at = (e as CustomEvent<{ x: number; y: number }>).detail;
     const box = hero.getBoundingClientRect();
     stone = dropStone(at.x - box.left, at.y - box.top, width, height);
