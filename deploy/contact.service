@@ -1,0 +1,24 @@
+# systemd unit for the contact service. Install: docs/contact-service.md
+[Unit]
+Description=kristijankresic.com contact form
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/node /opt/kristijankresic-contact/contact.mjs
+EnvironmentFile=/etc/kristijankresic/contact.env
+DynamicUser=yes
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+MemoryMax=128M
+
+[Install]
+WantedBy=multi-user.target
