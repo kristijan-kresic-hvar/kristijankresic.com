@@ -120,6 +120,8 @@ export function runField(canvas: HTMLCanvasElement, hero: HTMLElement, text: str
 
   const sizer = new ResizeObserver(resize);
   sizer.observe(hero);
+  // The text too: it can grow without the host growing (a form message in a column shorter than its neighbour).
+  for (const el of hero.querySelectorAll(text)) sizer.observe(el);
   const watcher = new IntersectionObserver(([entry]) => {
     onScreen = entry?.isIntersecting ?? false;
     run();
