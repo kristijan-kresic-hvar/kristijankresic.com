@@ -1,7 +1,7 @@
 'use client';
 
 import { getImageProps } from 'next/image';
-import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState, ViewTransition } from 'react';
+import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState, ViewTransition } from 'react';
 import { plateMorph } from '@/components/plate';
 import type { Annotation } from '@/content/work';
 
@@ -24,7 +24,7 @@ export function AnnotatedShot({
   alt,
   width,
   height,
-  annotations,
+  annotations: given,
   morph,
 }: {
   src: string;
@@ -37,6 +37,8 @@ export function AnnotatedShot({
   /** Project slug, when this image is where the hero's plate lands (see `plateMorph`). */
   morph?: string | undefined;
 }) {
+  // Numbered top to bottom on the image, so the lines to the list never cross whatever order the content lists them in.
+  const annotations = useMemo(() => [...given].sort((a, b) => a.y - b.y), [given]);
   const wrap = useRef<HTMLDivElement>(null);
   const img = useRef<HTMLDivElement>(null);
   const labels = useRef<(HTMLSpanElement | null)[]>([]);

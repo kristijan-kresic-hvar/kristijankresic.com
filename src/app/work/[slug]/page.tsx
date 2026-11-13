@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ViewTransition } from 'react';
 import { AnnotatedShot } from '@/components/annotated-shot';
 import { Container } from '@/components/container';
+import { Plate, plateMorph } from '@/components/plate';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from '@/components/icons';
 import { Screens } from '@/components/screens';
 import { FEATURED, WORK, getCaseStudy } from '@/content/work';
@@ -145,27 +147,28 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
 
       {next && (
         <Container>
-          <Link
-            href={`/work/${next.slug}/`}
-            className="next-study group grid items-center gap-x-12 gap-y-6 border-t border-border-default py-10 sm:grid-cols-12 lg:py-14"
-          >
-            <span className="sm:col-span-8">
-              <span className="block text-sm text-text-muted">Next project</span>
-              <span className="mt-2 flex items-baseline gap-4 text-display leading-[1.04] font-semibold tracking-tighter text-text-primary">
+          <Link href={`/work/${next.slug}/`} className="ew-cell cs-next">
+            <span>
+              <span className="cs-next-label">Next project</span>
+              <span className="cs-next-title">
                 {next.title}
-                <ArrowRight className="size-[0.5em] shrink-0 text-accent transition-transform duration-(--duration-fast) ease-out group-hover:translate-x-1.5 motion-reduce:transition-none" />
+                {/* Two arrows: on hover one leaves to the right as the other arrives from the left. */}
+                <span className="cs-go" aria-hidden="true">
+                  <ArrowRight />
+                  <ArrowRight />
+                </span>
               </span>
+              <span className="cs-next-tag">{next.tagline}</span>
             </span>
-            <span className="frame block overflow-hidden rounded-md border border-border-default sm:col-span-4">
-              <Image
-                src={next.image.src.replace('.webp', '-card.webp')}
-                alt=""
-                width={800}
-                height={500}
-                loading="lazy"
-                sizes="(min-width: 640px) 33vw, 100vw"
-                className="w-full"
-              />
+            <span className="cs-next-plate">
+              {next.featured ? (
+                // The same plate the next page opens on, so a click carries it there.
+                <ViewTransition {...plateMorph(next.slug)}>
+                  <Plate study={next} />
+                </ViewTransition>
+              ) : (
+                <Image src={next.image.src.replace('.webp', '-card.webp')} alt="" width={800} height={500} loading="lazy" className="w-full" />
+              )}
             </span>
           </Link>
         </Container>

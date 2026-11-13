@@ -51,9 +51,9 @@ export const WORK: CaseStudy[] = [
     outcome: 'Shipped as the public face of the platform; the foundation is still what the team ships on.',
     image: { src: '/images/work/biocirv.webp', alt: 'BioCirV Data Portal discovery page with biomass cards and filters', width: 1600, height: 1000 },
     annotations: [
-      { x: 39.6, y: 34.2, title: 'Search over a Django REST API', text: 'Debounced autocomplete; the query lives in the URL, so every search is a shareable link and TanStack Query serves repeats from cache.' },
-      { x: 5.4, y: 38.3, title: 'Faceted filters as URL state', text: 'Filter combinations are serialised into the address bar and restored on load; no global store, no stale results after navigation.' },
-      { x: 22, y: 64, title: 'The component system others built on', text: 'Typed cards, forms (React Hook Form + Zod) and tables that two other developers extended; I reviewed their pull requests.' },
+      { x: 39.8, y: 35.3, title: 'Search over a Django REST API', text: 'Debounced autocomplete; the query lives in the URL, so every search is a shareable link and TanStack Query serves repeats from cache.' },
+      { x: 5.6, y: 37.1, title: 'Faceted filters as URL state', text: 'Filter combinations are serialised into the address bar and restored on load; no global store, no stale results after navigation.' },
+      { x: 35.75, y: 76, title: 'The component system others built on', text: 'Typed cards, forms (React Hook Form + Zod) and tables that two other developers extended; I reviewed their pull requests.' },
     ],
     screens: 3,
     scroll: true,
@@ -81,7 +81,7 @@ export const WORK: CaseStudy[] = [
     image: { src: '/images/work/oncallable.webp', alt: 'OnCallable marketing site home page', width: 1600, height: 1000 },
     annotations: [
       { x: 31, y: 26, title: 'Every word is a Sanity document', text: 'Headlines, sections and CTAs are editable content with a page-builder schema; editors publish without a developer deploy.' },
-      { x: 58, y: 47, title: 'Sections you can reorder and A/B test', text: 'Each block is a schema type with variants, so marketing runs experiments, popups and redirects from the CMS.' },
+      { x: 61, y: 10.4, title: 'Sections you can reorder and A/B test', text: 'Each block is a schema type with variants, so marketing runs experiments, popups and redirects from the CMS.' },
       { x: 34, y: 71.5, title: 'Forms defined in the CMS', text: 'Lead capture reads its fields and destination from Sanity; adding a form is content, not code.' },
     ],
     screens: 3,
@@ -139,7 +139,7 @@ export const WORK: CaseStudy[] = [
     ],
     image: { src: '/images/work/vetster.webp', alt: 'Vetster find-a-vet page', width: 1600, height: 1000 },
     annotations: [
-      { x: 40.5, y: 8.5, title: 'Vet-side flows in Vue.js', text: 'Onboarding, profile and account-settings screens shipped inside an established Vue codebase with staged releases.' },
+      { x: 40.5, y: 7.8, title: 'Vet-side flows in Vue.js', text: 'Onboarding, profile and account-settings screens shipped inside an established Vue codebase with staged releases.' },
       { x: 29.3, y: 33.3, title: 'Profile data from Laravel', text: 'Controllers and migrations I wrote back the vet profile fields; PostgreSQL underneath.' },
       { x: 65, y: 55, title: '100k+ users, zero downtime changes', text: 'Every change went through code review and staged rollout on a 24/7 video-consultation platform.' },
     ],
@@ -197,7 +197,7 @@ export const WORK: CaseStudy[] = [
     image: { src: '/images/work/buddyins.webp', alt: 'BuddyIns agent dashboard with activity feed', width: 1600, height: 1000 },
     annotations: [
       { x: 15.5, y: 19, title: 'Benefit Buddy plan builder', text: 'CRUD screens over the Django REST API for building and sharing long-term-care plans.' },
-      { x: 52.6, y: 24, title: 'Activity feed and tables', text: 'Data tables with sorting and CSV export so agents can work their book outside the app.' },
+      { x: 33.8, y: 14.5, title: 'Activity feed and tables', text: 'Data tables with sorting and CSV export so agents can work their book outside the app.' },
       { x: 20.6, y: 95.5, title: 'PayPal subscriptions gate the tools', text: 'Subscription checkout integrated end-to-end; the tier on the account unlocks sales tools.' },
     ],
     screens: 3,
