@@ -118,3 +118,25 @@ The owner picked one of three variants for each section in the browser (2026-11-
 
 - **S12.** With JavaScript off the three parts are complete. Keyboard order follows reading order. The console is free of errors on `/`, `/about/` and one case-study page.
 - **S13.** New or changed components have tests that assert behaviour (links, labels, structure), not constants. `npm run check` passes.
+
+## Phase 2 acceptance criteria: contact form (M2, added 2026-11-13)
+
+Owner decisions: a real form (PRODUCT.md principle 5) that sends through Resend; the endpoint is a small service on the same VPS behind nginx, so the site stays a static export; fields are intent (hire or project), name, email, message; the email address stays in the ending beside the form.
+
+### The service
+
+- **F1.** One file that runs with `node` (version 22) and no installed dependencies, listening on a local port for `POST /api/contact`. Everything it needs comes from environment variables: the Resend API key, the address mail goes to, the verified sender, the allowed site origin, the port. No secret or address is hard-coded, and nothing secret reaches the browser bundle or the repo.
+- **F2.** It accepts JSON and form-encoded bodies with `intent` (`hire` or `project`), `name`, `email`, `message`, and a honeypot field that must be empty. It rejects anything else with 400 and says which fields failed. Limits: body 10 KB, name 100 characters, email 254, message 5000.
+- **F3.** A valid request sends one plain-text email through Resend's HTTP API: subject `[Hire] <name>` or `[Project] <name>`, reply-to the sender's address, body the message plus name and address. No field can inject headers or extra recipients (line breaks are refused in name and email). A filled honeypot gets a 200 and sends nothing.
+- **F4.** It limits each client address to 5 requests an hour (429 beyond that), reads the client address from the header nginx sets, refuses other origins, times out the call to Resend after 10 seconds, and answers 502 when Resend fails, without leaking Resend's response to the client. It logs one line per request with outcome and no message content.
+- **F5.** JSON requests get JSON answers (`{ ok: true }` or `{ ok: false, error, fields? }`). Form-encoded requests (JavaScript off) get a 303 redirect to `/thanks/` on success and back to `/#contact` on failure.
+- **F6.** Tests cover validation, the honeypot, header injection, the rate limit, both content types, and Resend failing or timing out, with Resend mocked. They run in `npm run check`.
+- **F7.** `docs/contact-service.md` gives the one-time VPS setup: where the file goes, the environment file, a systemd unit, the nginx `location` block, how to test it with curl, and what to set up at Resend (key, verified domain). Unit file and nginx snippet are in the repo.
+
+### The form
+
+- **F8.** In the ending, beside the address: an intent switch (hiring for a role, or a project), name, email, message, and a send button. Every control has a visible label, a keyboard focus ring, and the right `type`, `autocomplete` and `inputmode`. The intent switch works with arrow keys.
+- **F9.** Sending shows progress on the button, then a confirmation in place of the form that names what happens next. Errors appear next to the field they belong to and are announced to screen readers; a failed send keeps everything the person typed and offers the email address as the fallback. The button cannot be pressed twice while sending.
+- **F10.** With JavaScript off the form posts to the same endpoint and lands on a static `/thanks/` page. The address and copy button stay available either way.
+- **F11.** The form holds at 375, 768, 1024, 1280, 1440 and 1920 without horizontal scroll; inputs are at least 44px tall on touch screens and 16px text so phones do not zoom. The contour field stays dim behind it and all text meets AA.
+- **F12.** `/thanks/` exists as a static page in the site's design, with a way back.
