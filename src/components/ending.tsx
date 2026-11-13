@@ -1,3 +1,4 @@
+import { ContactForm } from './contact-form';
 import { Container } from './container';
 import { ContourField } from './contour-field';
 import { CopyButton } from './copy-button';
@@ -18,8 +19,10 @@ export function Ending() {
         <div className="grid gap-x-12 gap-y-14 lg:grid-cols-12">
           <section id="contact" aria-labelledby="contact-title" className="scroll-mt-20 lg:col-span-6">
             <h2 id="contact-title" className="end-say">
-              <span className="text-text-primary">Hiring a frontend engineer?</span> Email is the fastest way to reach me, and I reply the
-              same day.
+              <span className="end-lead">
+                <span className="text-text-primary">Hiring a frontend engineer?</span> Email is the fastest way to reach me, and I reply
+                the same day.
+              </span>
               <a href={`mailto:${PROFILE.email}`} className="end-mail">
                 {PROFILE.email}
               </a>
@@ -40,41 +43,16 @@ export function Ending() {
               Remote across the EU or with US-East overlap, or hybrid in Split or Zagreb. EU citizen, no visa needed.
             </p>
           </section>
-          <form className="cf lg:col-span-5 lg:col-start-8" aria-labelledby="cf-title">
-            <h3 id="cf-title" className="sr-only">
-              Send a message
-            </h3>
-            <p className="cf-say">
-              Or write it here. I&rsquo;m{' '}
-              <input className="cf-blank" name="name" type="text" autoComplete="name" required maxLength={100} placeholder="your name" aria-label="Your name" />{' '}
-              and I&rsquo;m{' '}
-              <select className="cf-blank" name="intent" aria-label="What it is about" defaultValue="hire">
-                <option value="hire">hiring for a role</option>
-                <option value="project">starting a project</option>
-              </select>
-              . Reach me at{' '}
-              <input
-                className="cf-blank"
-                name="email"
-                type="email"
-                autoComplete="email"
-                inputMode="email"
-                required
-                maxLength={254}
-                placeholder="your email"
-                aria-label="Your email"
-              />
-              .
-            </p>
-            <textarea className="cf-note" name="message" rows={4} required maxLength={5000} placeholder="What do you need?" aria-label="Message" />
-            <button type="button" className="btn-primary cf-send">
-              Send message
-            </button>
-          </form>
+          <ContactForm />
         </div>
         <div className="end-bar mt-16 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-border-default pt-5 text-sm text-text-muted sm:mt-24">
           <p>
-            © {new Date().getFullYear()} {PROFILE.name} · Hvar, Croatia · <LocalTime />
+            © {new Date().getFullYear()} {PROFILE.name}
+            <span className="max-sm:hidden"> · </span>
+            <br className="sm:hidden" />
+            <span className="whitespace-nowrap">
+              Hvar, Croatia · <LocalTime />
+            </span>
           </p>
           <ul className="flex gap-x-6">
             <li>

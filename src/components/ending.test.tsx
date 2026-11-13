@@ -24,4 +24,12 @@ describe('Ending', () => {
     expect(footer).toContainElement(screen.getByRole('link', { name: /GitHub/ }));
     expect(screen.getByRole('link', { name: /LinkedIn/ })).toHaveAttribute('href', PROFILE.linkedin);
   });
+
+  it('follows the contact details with the form, in reading order', () => {
+    render(<Ending />);
+    const details = screen.getByRole('link', { name: /Full-stack CV/ });
+    const form = screen.getByRole('form', { name: 'Send a message' });
+    expect(details.compareDocumentPosition(form) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2 }).lastElementChild).toHaveAttribute('href', `mailto:${PROFILE.email}`);
+  });
 });
