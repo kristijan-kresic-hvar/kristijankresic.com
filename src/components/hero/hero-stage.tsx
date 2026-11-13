@@ -5,7 +5,7 @@ import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternal
 import { ContourField } from '@/components/contour-field';
 import { Facts } from '@/components/facts';
 import { ArrowUpRight } from '@/components/icons';
-import { Plate, plateMorph } from '@/components/plate';
+import { lastLookedAt, lookedAt, Plate, plateMorph } from '@/components/plate';
 import type { CaseStudy } from '@/content/work';
 import { OPENING_KEY, OPENING_MS, OPENING_WAIT, startOpening } from './opening';
 import { runStageMotion } from './stage-motion';
@@ -19,8 +19,26 @@ const STATEMENT = [
 ];
 const WORDS = STATEMENT.flatMap((part) => part.text.split(' ').map((word) => ({ word, lead: part.lead })));
 
+/** Milliseconds after the hero arrives before the pointer may change the project: the plate takes 700 to travel back. */
+const SETTLE = 900;
+
 const noop = () => () => {};
 const two = (n: number) => String(n).padStart(2, '0');
+
+/**
+ * The project the hero opens on: the one the visitor last looked at, so coming back from its case
+ * study the plate travels back to the stage. Project 01 on a first load, and while the opening is still to play, because
+ * the opening lands on 01.
+ */
+function returningTo(studies: CaseStudy[]): number {
+  const i = studies.findIndex((s) => s.slug === lastLookedAt());
+  if (i <= 0) return 0;
+  try {
+    return sessionStorage.getItem(OPENING_KEY) === null ? 0 : i;
+  } catch {
+    return i; // storage blocked: the opening never plays
+  }
+}
 
 /**
  * Hero as a stage. One project plate holds most of the screen and the index beside it chooses
@@ -31,7 +49,7 @@ const two = (n: number) => String(n).padStart(2, '0');
  * reduced motion.
  */
 export function HeroStage({ studies }: { studies: CaseStudy[] }) {
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(() => returningTo(studies));
   /** The project the active one replaced, kept under it while it dissolves in; -1 before any choice. */
   const [replaced, setReplaced] = useState(-1);
   const statement = useRef<HTMLHeadingElement>(null);
@@ -54,10 +72,24 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
 
   useEffect(() => (rail.current ? dragRail(rail.current) : undefined), []);
 
+  /** False just after the hero arrives, so the pointer can be ignored while a plate may still be travelling back. */
+  const settled = useRef(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      settled.current = true;
+    }, SETTLE);
+    return () => clearTimeout(timer);
+  }, []);
+
   const pick = (i: number) => {
     if (i === active) return;
     setReplaced(active);
     setActive(i);
+    lookedAt(studies[i]?.slug ?? '');
+  };
+  /** Choosing by pointer. Held off just after arriving: a pointer left over the index would swap the project out from under the plate travelling back. */
+  const point = (i: number) => {
+    if (settled.current) pick(i);
   };
 
   const current = studies[active];
@@ -86,7 +118,8 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
               href={`/work/${study.slug}/`}
               className="stage-item"
               data-active={active === i}
-              onPointerEnter={() => pick(i)}
+              onPointerEnter={() => point(i)}
+              onPointerMove={() => point(i)}
               onFocus={() => pick(i)}
             >
               <span className="stage-n">{two(i + 1)}</span>
@@ -107,8 +140,9 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
           <div className="stage-tilt">
             <div className="stage-plate">
               {studies.map((study, i) => (
-                // Only the project the link opens carries the shared name, so only it travels into the case study.
-                <ViewTransition key={study.slug} {...(i === active ? plateMorph(study.slug) : { default: 'none' })}>
+                // Every plate keeps its name while the hero is mounted: React pairs only transitions that were named
+                // when they mounted. `share` picks the one that travels into the case study, the project the link opens.
+                <ViewTransition key={study.slug} {...plateMorph(study.slug)} share={i === active ? 'plate-morph' : 'none'}>
                   <div
                     className="stage-face"
                     data-face={i === active ? 'a' : i === replaced ? 'b' : undefined}

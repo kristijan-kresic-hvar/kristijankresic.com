@@ -42,7 +42,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
   const screens = Array.from({ length: study.screens }, (_, i) => `/images/work/${study.slug}-screen-${i + 1}.webp`);
 
   return (
-    <article>
+    <article className="from-top">
       <Container className="pt-6 sm:pt-8">
         <nav aria-label="Projects" className="cs-slate">
           <Link href="/#work">
@@ -166,9 +166,8 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
               <span className="cs-next-tag">{next.tagline}</span>
             </span>
             <span className="cs-next-plate">
-              {next.featured && index + 1 < WORK.length ? (
-                // The same plate the next page opens on, so a click carries it there. Not when the list
-                // wraps round to the first project: the landing's hero opens on that plate under the same name.
+              {next.featured ? (
+                // The same plate the next page opens on, so a click carries it there.
                 <ViewTransition {...plateMorph(next.slug)}>
                   <Plate study={next} />
                 </ViewTransition>

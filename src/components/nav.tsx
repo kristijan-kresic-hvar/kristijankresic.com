@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Container } from './container';
 import { PROFILE } from '@/content/profile';
@@ -25,6 +27,10 @@ export function Nav() {
               // And it opens in a new tab, so the site stays where the visitor left it.
               target={l.href.endsWith('.pdf') ? '_blank' : undefined}
               rel={l.href.endsWith('.pdf') ? 'noopener' : undefined}
+              // The router ignores a click on the address it is already at, so on the landing this link scrolls there itself.
+              onClick={() => {
+                if (l.href === location.pathname + location.hash) document.getElementById('work')?.scrollIntoView();
+              }}
               className={`text-text-body transition-colors duration-(--duration-instant) hover:text-text-primary ${l.always ? '' : 'hidden sm:inline'}`}
             >
               {l.label}

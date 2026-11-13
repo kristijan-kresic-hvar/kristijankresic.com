@@ -39,3 +39,14 @@ export function Plate({
  * case-study header: the same name on both ends pairs them, and the class is styled in globals.css.
  */
 export const plateMorph = (slug: string) => ({ name: `plate-${slug}`, share: 'plate-morph', default: 'none' }) as const;
+
+/**
+ * The featured project the visitor last looked at in this page load, chosen in the hero or opened
+ * as a case study ('' before either). The hero opens on it, so coming back from any case study its
+ * plate has a place to travel to, not only the first one.
+ */
+let looked = '';
+export const lastLookedAt = () => looked;
+export function lookedAt(slug: string) {
+  looked = slug;
+}

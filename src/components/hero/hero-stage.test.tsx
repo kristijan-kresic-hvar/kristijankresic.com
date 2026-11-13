@@ -1,12 +1,16 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
 import { HeroStage } from './hero-stage';
+import { lookedAt } from '@/components/plate';
 import { FEATURED } from '@/content/work';
+import { OPENING_KEY } from './opening';
 
 afterEach(() => {
   cleanup();
   sessionStorage.clear();
+  lookedAt('');
+  vi.useRealTimers();
 });
 
 /** next/link drops the trailing slash outside a Next build, so compare hrefs without it. */
@@ -23,6 +27,32 @@ describe('HeroStage', () => {
     render(<HeroStage studies={FEATURED} />);
     const links = within(screen.getByRole('list')).getAllByRole('link');
     expect(links.map(path)).toEqual(FEATURED.map((s) => `/work/${s.slug}`));
+  });
+
+  it('opens on the project the visitor is coming back from, once the opening has played', () => {
+    const fourth = FEATURED[3];
+    if (!fourth) throw new Error('needs at least four featured projects');
+    lookedAt(fourth.slug);
+    // The opening lands on project 01, so until it has played the hero stays there.
+    const { unmount } = render(<HeroStage studies={FEATURED} />);
+    expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', FEATURED[0]?.image.alt);
+    unmount();
+    sessionStorage.setItem(OPENING_KEY, '1');
+    render(<HeroStage studies={FEATURED} />);
+    expect(path(screen.getByRole('link', { name: `${fourth.title}: open the case study` }))).toBe(`/work/${fourth.slug}`);
+    expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', fourth.image.alt);
+  });
+
+  it('ignores the pointer just after arriving, while a plate may still be travelling back', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    render(<HeroStage studies={FEATURED} />);
+    const item = within(screen.getByRole('list')).getAllByRole('link')[2];
+    if (!item) throw new Error('index item missing');
+    fireEvent.pointerMove(item);
+    expect(item).toHaveAttribute('data-active', 'false');
+    vi.advanceTimersByTime(900);
+    fireEvent.pointerMove(item);
+    expect(item).toHaveAttribute('data-active', 'true');
   });
 
   it('switches the stage to the project whose index item takes focus', () => {

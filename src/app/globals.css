@@ -63,10 +63,26 @@
 }
 
 html {
+  /* The sticky nav's height with its rule. Anything scrolled to (a new page, #work, #contact) lands below it, not under it. */
+  --nav-h: calc(3.5rem + 1px);
+  scroll-padding-top: var(--nav-h);
   background: var(--color-bg-base);
   color: var(--color-text-body);
   scrollbar-color: var(--color-border-strong) var(--color-bg-base);
   caret-color: var(--color-accent);
+}
+
+@media (min-width: 40rem) {
+  html {
+    --nav-h: calc(4rem + 1px);
+  }
+}
+/* A page whose box starts at the very top of the document, behind the nav. The router scrolls a new
+   page into place only when its first element starts above the window, so without this a page
+   opened from one scrolled a few pixels keeps those pixels and the nav covers its first row. */
+.from-top {
+  margin-top: calc(var(--nav-h) * -1);
+  padding-top: var(--nav-h);
 }
 
 body {

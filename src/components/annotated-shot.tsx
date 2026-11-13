@@ -2,7 +2,7 @@
 
 import { getImageProps } from 'next/image';
 import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState, ViewTransition } from 'react';
-import { plateMorph } from '@/components/plate';
+import { lookedAt, plateMorph } from '@/components/plate';
 import type { Annotation } from '@/content/work';
 
 type Line = { x1: number; y1: number; x2: number; y2: number; ex: number; mx: number };
@@ -46,6 +46,11 @@ export function AnnotatedShot({
   const [active, setActive] = useState<number | null>(null);
   const pic = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
+
+  // Tell the hero which project to open on when the visitor goes back.
+  useEffect(() => {
+    if (morph) lookedAt(morph);
+  }, [morph]);
 
   // Markers wait for the picture: numbers on an empty frame point at nothing. A failed image still releases them.
   useEffect(() => {
