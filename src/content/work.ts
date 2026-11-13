@@ -19,6 +19,8 @@ export type CaseStudy = {
   annotations: Annotation[];
   /** Extra screens for the case-study page: /images/work/<slug>-screen-N.webp */
   screens: number;
+  /** The screens are whole phone captures: shown uncropped, in portrait. */
+  phone?: boolean;
   /** Whether a tall /images/work/<slug>-full.webp exists for the hover-scroll card. */
   scroll: boolean;
   featured: boolean;
@@ -112,6 +114,7 @@ export const WORK: CaseStudy[] = [
       { x: 56, y: 66.7, title: 'Connection and battery that survive real life', text: 'Reconnect and retry logic handles drops and app backgrounding so pairing and onboarding feel instant.' },
     ],
     screens: 3,
+    phone: true,
     scroll: true,
     featured: true,
   },
