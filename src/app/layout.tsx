@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Ending } from '@/components/ending';
 import { Nav } from '@/components/nav';
-import { Footer } from '@/components/footer';
+import { PageFade } from '@/components/page-fade';
+import { Reveals } from '@/components/reveals';
 import { PROFILE } from '@/content/profile';
 import './globals.css';
 
 const geist = Geist({ subsets: ['latin', 'latin-ext'], variable: '--font-geist', display: 'swap' });
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap' });
+// Mono only sets small data (frame numbers, markers), so it is not worth a preload ahead of the LCP.
+const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap', preload: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://kristijankresic.com'),
@@ -29,7 +32,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${geist.variable} ${geistMono.variable}`}>
       <body className="min-h-dvh flex flex-col">
         <a
           href="#main"
@@ -39,9 +42,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <Nav />
         <main id="main" className="flex-1">
-          {children}
+          <PageFade>{children}</PageFade>
         </main>
-        <Footer />
+        <Ending />
+        <Reveals />
       </body>
     </html>
   );

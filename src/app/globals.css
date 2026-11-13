@@ -27,10 +27,35 @@
   --color-accent-glow: rgba(245, 158, 11, 0.2);
   --color-accent-text: #fcd34d;
 
-  --text-display: clamp(44px, 7vw, 88px);
+  /* Sized by wrap math, not taste: the hero statement holds two lines from 768 to 1920 because the
+     page gutter scales on the same vw curve. Re-measure if the copy or the gutter changes. */
+  --text-display: clamp(2.25rem, 4.72vw, 5.75rem);
+  --text-title: clamp(1.75rem, 2.9vw, 3.5rem);
+  --text-lead: clamp(1.125rem, 1.4vw, 1.375rem);
   --tracking-tighter: -0.04em;
   --tracking-tight: -0.02em;
-  --tracking-wide: 0.08em;
+  --tracking-wide: 0.05em;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --container-reading: 680px;
+  --container-page: 1920px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root {
+  --gutter: clamp(1.25rem, 2.78vw, 3.5rem);
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  /* The dimmest text tone in use (#818181): 5:1 on the base, and still above 4.5:1 where a dimmed
+     contour line of the field passes behind it. */
+  --tone-dim: color-mix(in srgb, var(--color-text-muted) 90%, var(--color-bg-base));
 }
 
 :root {
@@ -38,9 +63,38 @@
 }
 
 html {
+  /* The sticky nav's height with its rule. Anything scrolled to (a new page, #work, #contact) lands below it, not under it. */
+  --nav-h: calc(3.5rem + 1px);
+  scroll-padding-top: var(--nav-h);
   background: var(--color-bg-base);
   color: var(--color-text-body);
-  scroll-behavior: smooth;
+  scrollbar-color: var(--color-border-strong) var(--color-bg-base);
+  caret-color: var(--color-accent);
+}
+
+@media (min-width: 40rem) {
+  html {
+    --nav-h: calc(4rem + 1px);
+  }
+}
+/* In-page links glide (Work, Email me). Route changes still jump: the router turns this off for
+   its own scroll, told to by data-scroll-behavior on <html>. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+/* A little air under the nav when the contact block or the form is scrolled to. */
+#contact,
+#message {
+  scroll-margin-top: 2rem;
+}
+/* A page whose box starts at the very top of the document, behind the nav. The router scrolls a new
+   page into place only when its first element starts above the window, so without this a page
+   opened from one scrolled a few pixels keeps those pixels and the nav covers its first row. */
+.from-top {
+  margin-top: calc(var(--nav-h) * -1);
+  padding-top: var(--nav-h);
 }
 
 body {
@@ -60,103 +114,1064 @@ body {
   border-radius: 2px;
 }
 
-h1,
-h2,
-h3 {
+/* Element defaults sit in the base layer so utilities on the element can override them. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    color: var(--color-text-primary);
+    text-wrap: balance;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* Inline text links: a hairline that turns amber, never a colour block. */
+.link {
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color var(--duration-instant) var(--ease-standard), color var(--duration-instant) var(--ease-standard);
+}
+.link:hover {
   color: var(--color-text-primary);
-  text-wrap: balance;
-  letter-spacing: var(--tracking-tight);
+  text-decoration-color: var(--color-accent);
 }
 
-.grid-lines {
-  background-image: repeating-linear-gradient(to right, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 120px);
+/* Earlier work: three columns side by side, dates leading, each under a hairline that starts with
+   a short amber tick. The tick runs the full width while its project is hovered or focused. */
+.ew-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem 3rem;
 }
-
-.glow {
-  background: radial-gradient(circle at 20% 80%, var(--color-accent-glow) 0%, rgba(245, 158, 11, 0.05) 40%, transparent 70%);
+.ew-strip li {
+  flex: 1;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .reveal {
-    animation: reveal 0.4s ease-out both;
-  }
-  .reveal-delay-1 {
-    animation-delay: 80ms;
-  }
-  .reveal-delay-2 {
-    animation-delay: 160ms;
-  }
-  .reveal-delay-3 {
-    animation-delay: 240ms;
-  }
-  @keyframes reveal {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
+.ew-cell {
+  position: relative;
+  display: grid;
+  align-content: start;
+  height: 100%; /* equal focus rings across the row */
+  gap: 0.375rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-default);
 }
-
-/* Work card: the tall capture scrolls inside a 16:10 frame on hover. Container-query units make the
-   travel distance exact without JS: frame height = 62.5cqw. */
-.shot {
-  container-type: inline-size;
+.ew-cell::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 2.5rem;
+  height: 1px;
+  background: var(--color-accent);
+  transition: width var(--duration-slow) var(--ease-out);
 }
-.shot-scroll {
-  height: auto;
-  transform: translateY(0);
+.ew-cell:hover::before,
+.ew-cell:focus-visible::before {
+  width: 100%;
 }
-@media (prefers-reduced-motion: no-preference) and (hover: hover) {
-  .shot-scroll {
-    transition: transform 6s linear;
-  }
-  .group:hover .shot-scroll {
-    transform: translateY(calc(-100% + 62.5cqw));
-  }
+.ew-years {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
 }
-
-/* Ticker */
-.ticker {
-  overflow: hidden;
-  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+.ew-title {
+  margin-top: 0.5rem;
+  font-size: var(--text-lead);
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--color-text-primary);
 }
-.ticker-track {
-  width: max-content;
+.ew-tag {
+  max-width: 38ch;
+  color: var(--color-text-body);
 }
-@media (prefers-reduced-motion: no-preference) {
-  .ticker-track {
-    animation: ticker 60s linear infinite;
-  }
-  .ticker:hover .ticker-track {
-    animation-play-state: paused;
-  }
-  @keyframes ticker {
-    to {
-      transform: translateX(-50%);
-    }
+@media (min-width: 64rem) {
+  .ew-strip {
+    flex-direction: row;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ticker-track {
-    flex-wrap: wrap;
-    width: auto;
-  }
-  .ticker-track > ul[aria-hidden='true'] {
-    display: none;
-  }
-  .ticker-track > ul {
-    flex-wrap: wrap;
-    row-gap: 8px;
+  .ew-cell::before {
+    transition: none;
   }
 }
 
-/* Browser frame around the hero screenshot */
-.frame {
+/* How I work: one paragraph, each claim bright and its evidence grey. The size runs on one line
+   from 20px at 375 to 32.4px at 1440 (the size the owner approved); 36ch sets lines of 47 to 55 characters. */
+.practice {
+  --practice-size: clamp(1.25rem, 0.977rem + 1.164vw, 2.625rem);
+}
+.practice-grid {
+  column-gap: clamp(1.5rem, 2.5vw, 3rem); /* the hero's --hero-gap, so column 4 is the hero's column 4 */
+}
+.practice-para {
+  max-width: 36ch;
+  font-size: var(--practice-size);
+  font-weight: 500;
+  line-height: 1.24;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-muted);
+  text-wrap: pretty;
+}
+.practice-para strong {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+@media (min-width: 64rem) {
+  /* Geist at line-height 1.24: the cap top of the first line sits 0.265em below the line box. */
+  .practice-figure {
+    margin-top: calc(var(--practice-size) * 0.265);
+  }
+}
+/* As the paragraph scrolls in, each sentence comes up from a dimmer tone to its final two, one
+   after another. Colour only, so nothing moves; the dimmest point is #7a7a7a on the page (4.6:1). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .practice-para {
+      view-timeline: --practice block;
+    }
+    .practice-para > span,
+    .practice-para strong {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --practice;
+      animation-range: entry calc(var(--i) * 20%) entry calc(var(--i) * 20% + 60%);
+    }
+    .practice-para > span {
+      animation-name: practice-evidence;
+    }
+    .practice-para strong {
+      animation-name: practice-claim;
+    }
+    .practice-para > span:nth-child(2) {
+      --i: 1;
+    }
+    .practice-para > span:nth-child(3) {
+      --i: 2;
+    }
+    .practice-para > span:nth-child(4) {
+      --i: 3;
+    }
+  }
+}
+.practice-para > span {
+  --i: 0;
+}
+@keyframes practice-evidence {
+  from {
+    color: var(--tone-dim);
+  }
+}
+@keyframes practice-claim {
+  from {
+    color: var(--color-text-muted);
+  }
+}
+.portrait {
+  filter: grayscale(1) contrast(1.06);
+}
+
+/* Buttons. Hover and press answer within --duration-instant. */
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-instant) var(--ease-standard),
+    border-color var(--duration-instant) var(--ease-standard),
+    color var(--duration-instant) var(--ease-standard);
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-bg-base);
+}
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+.btn-primary:active {
+  background: var(--color-accent-active);
+}
+.btn-secondary {
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+}
+.btn-secondary:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-bg-elev-1);
+}
+.btn-secondary:active {
+  background: var(--color-bg-elev-2);
+}
+.btn-secondary[data-state='copied'] {
+  border-color: var(--color-accent);
+}
+
+/* Confirmation ticks: the one in the copy button and the ringed one on a sent message. Each line
+   has a path length of 1 and draws itself once; under reduced motion it is simply there. */
+.check {
+  color: var(--color-accent);
+}
+.cf-check {
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 1.25rem;
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cf-check circle {
+  /* from twelve o'clock */
+  rotate: -90deg;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .check path,
+  .cf-check :is(circle, path) {
+    stroke-dasharray: 1;
+    animation: tick-draw 320ms var(--ease-out) both;
+  }
+  .cf-check circle {
+    animation-duration: 600ms;
+  }
+  .cf-check path {
+    animation-duration: 380ms;
+    animation-delay: 380ms;
+  }
+}
+@keyframes tick-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* Scroll reveals (.rise). A block below the window waits transparent and a little low, and comes
+   up once when it has scrolled in. The script in reveals.tsx marks the ones that wait
+   ([data-wait]); a block it never marked is simply there, so nothing depends on it running.
+   One motion per section: this is for sections that have none of their own. */
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    transition:
+      opacity 800ms var(--ease-out),
+      translate 800ms var(--ease-out);
+  }
+  .rise[data-wait] {
+    opacity: 0;
+    translate: 0 1.25rem;
+    transition: none; /* hiding is instant and out of sight; only the arrival is seen */
+  }
+}
+
+/* Nav hairline appears once the page has scrolled (progressive: without scroll timelines it is always on). */
+.site-nav {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+@supports (animation-timeline: scroll()) {
+  .site-nav {
+    animation: nav-rule linear both;
+    animation-timeline: scroll();
+    animation-range: 0 4rem;
+  }
+  @keyframes nav-rule {
+    from {
+      border-bottom-color: transparent;
+    }
+  }
+}
+
+/* The ending (contact and footer in one). The contour chart from the hero returns behind it,
+   surfacing from the top edge; the closing sentence is set like the hero statement and its last
+   line is the address. */
+.ending {
+  position: relative;
+  isolation: isolate; /* the chart sits at z-index -1 without leaving the footer */
+}
+.ending-field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mask-image: linear-gradient(transparent, #000 45%);
+}
+.end-say {
+  container-type: inline-size; /* the address sizes itself to this width */
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-muted);
+}
+.end-lead {
+  display: block;
+  max-width: 24ch;
+}
+/* One line at every width: the address is 14.3em wide in Geist 600, so its size is capped at
+   1/14.3 of the sentence block (7cqi), less a few percent for hinting. */
+.end-mail {
+  display: block;
+  width: fit-content;
+  margin-top: 0.12em;
+  font-size: min(1em, 6.8cqi);
+  white-space: nowrap;
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+  text-decoration-color: var(--color-accent);
+}
+
+/* Contact form, written as a sentence with blanks: name, what it is about, email. Each blank is a
+   hairline that becomes a 2px amber rule while it has focus; the message is a ruled area under
+   the sentence, under its own question. */
+.cf-say {
+  font-size: clamp(1.25rem, 1.6vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-body);
+}
+.cf-thanks {
+  color: var(--color-text-primary);
+}
+.cf-blank {
+  field-sizing: content;
+  min-width: 7ch;
+  max-width: 100%;
+  padding: 0 0.1em;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  outline: none;
+  transition:
+    border-color var(--duration-instant) var(--ease-standard),
+    box-shadow var(--duration-instant) var(--ease-standard);
+}
+.cf-blank::placeholder,
+.cf-note::placeholder {
+  color: var(--tone-dim);
+  opacity: 1;
+}
+/* The intent blank reads as a choice: a drawn caret after it, in the hairline's colour. */
+.cf-pick {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 0.9em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238e8e8e' stroke-width='1.25'/%3E%3C/svg%3E")
+    no-repeat right 0.1em bottom 0.64em / 0.55em auto; /* centred on the text line, also when touch pads the top */
+}
+.cf-pick:hover {
+  border-bottom-color: var(--color-text-muted);
+}
+.cf-pick option {
+  background: var(--color-bg-elev-1);
+  color: var(--color-text-primary);
+}
+.cf-blank:focus-visible {
+  border-bottom-color: var(--color-accent);
+  /* The second pixel of the rule, inside the box, so the text does not move. */
+  box-shadow: inset 0 -1px 0 var(--color-accent);
+}
+.cf-pick:focus-visible {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23f59e0b' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+.cf-blank[aria-invalid='true'],
+.cf-note[aria-invalid='true'] {
+  border-bottom-color: var(--color-accent-text);
+}
+.cf-errors p,
+.cf-failed p {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-accent-text);
+}
+.cf-failed p {
+  max-width: 48ch;
+  color: var(--color-text-body);
+}
+.cf-trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.cf-ask {
+  display: block;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-body);
+}
+.cf-note {
+  display: block;
+  width: 100%;
+  min-height: 7rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem 0;
+  border: 0;
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  outline: none;
+  transition:
+    border-color var(--duration-instant) var(--ease-standard),
+    box-shadow var(--duration-instant) var(--ease-standard);
+}
+.cf-note:focus-visible {
+  border-color: var(--color-accent);
   box-shadow:
-    0 0 0 1px var(--color-border-default),
-    0 30px 80px -30px rgba(0, 0, 0, 0.8);
+    inset 0 1px 0 var(--color-accent),
+    inset 0 -1px 0 var(--color-accent);
+}
+.cf-send {
+  margin-top: 1.25rem;
+}
+.cf-send[aria-disabled='true'] {
+  cursor: progress;
+  background: var(--color-accent-active);
+}
+/* Touch: blanks and button at least 44px tall. The blanks grow upward so the text stays on its
+   hairline, and the sentence opens up to hold them. */
+@media (pointer: coarse) {
+  .cf-say {
+    line-height: 2.2;
+  }
+  .cf-blank {
+    line-height: 1.6;
+    padding-top: calc(2.75rem - 1.6em);
+  }
+  .cf-send {
+    min-height: 2.75rem;
+  }
+}
+
+/* Annotated screenshot: markers, list rows and leader lines share one active state (amber). */
+.marker {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-bg-base);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background-color var(--duration-instant) var(--ease-standard),
+    color var(--duration-instant) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-out);
+}
+/* 44px touch target around the 28px marker */
+.marker:not(.marker-static)::before {
+  content: '';
+  position: absolute;
+  inset: -0.5rem;
+}
+.marker[data-active='true'],
+.callout[data-active='true'] .marker {
+  background: var(--color-accent);
+  color: var(--color-bg-base);
+}
+.marker:not(.marker-static)[data-active='true'] {
+  scale: 1.15;
+}
+.callout {
+  border-top: 1px solid var(--color-border-default);
+  transition: border-color var(--duration-instant) var(--ease-standard);
+}
+/* Rules only between rows. The first keeps a clear one so its lit state still has a line to colour. */
+li:first-child > .callout:not([data-active='true']) {
+  border-top-color: transparent;
+}
+.callout[data-active='true'] {
+  border-top-color: var(--color-accent);
+}
+.leader {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+  transition: stroke var(--duration-instant) var(--ease-standard);
+}
+.leader-across {
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+[data-active='true'] > .leader {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Motion outside the hero, all CSS, all behind prefers-reduced-motion:
+   1. once the screenshot has loaded its markers arrive, then leader lines draw from the image's
+      edge to each decision, which is what explains the pairing;
+   2. the rule under the contact address draws as the address arrives.
+   Everything else is feedback at --duration-instant. Nothing here hides content: without these
+   rules the page is the same page, already in its final state.
+   --------------------------------------------------------------------------------------------- */
+/* Markers and lines wait for the screenshot (.shot gets data-ready once it has decoded). Only
+   where scripts run, because a script is what lifts the wait. */
+@media (scripting: enabled) {
+  .shot:not([data-ready]) :is(.marker:not(.marker-static), .leader) {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* The numbers arrive one by one, then each line draws out to its decision. */
+  .shot[data-ready] .marker:not(.marker-static) {
+    animation: marker-in 400ms var(--ease-out) calc(var(--i, 0) * 110ms + 250ms) backwards;
+  }
+  .leader-gutter {
+    stroke-dasharray: var(--len);
+  }
+  .shot[data-ready] .leader-gutter {
+    animation: leader-draw 0.7s var(--ease-out) calc(var(--i, 0) * 110ms + 550ms) backwards;
+  }
+}
+@keyframes marker-in {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+}
+
+/* Page transition: the hero plate travels into the case-study plate (and back). React names the
+   pair only for the navigation; without the API the link is a plain navigation. */
+@media (prefers-reduced-motion: no-preference) {
+  /* The curve the opening uses to carry the tile onto the stage, so both journeys move alike. */
+  ::view-transition-group(.plate-morph) {
+    animation-duration: 700ms;
+    animation-timing-function: cubic-bezier(0.65, 0, 0.1, 1);
+  }
+  ::view-transition-old(.plate-morph),
+  ::view-transition-new(.plate-morph) {
+    height: 100%;
+    object-fit: cover;
+    animation-duration: 320ms;
+  }
+}
+/* The About page (see page-fade.tsx) fades in, rising a few pixels, and fades out when it is left.
+   While it is up the nav is its own layer above it, so the page scrolled under the nav never shows
+   over it as it leaves; the layer does not animate, so the nav simply holds still. */
+:root:has(.about-page) .site-nav {
+  view-transition-name: site-nav;
+}
+::view-transition-group(site-nav),
+::view-transition-old(site-nav),
+::view-transition-new(site-nav) {
+  animation: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(.page-out) {
+    animation: page-out 180ms var(--ease-standard) both;
+  }
+  ::view-transition-new(.page-in) {
+    animation: page-in 520ms var(--ease-out) both;
+  }
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    translate: 0 1rem;
+  }
+}
+/* Reduced motion: the browser may still swap the page through a view transition, but nothing moves. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes leader-draw {
+  from {
+    stroke-dashoffset: var(--len);
+  }
+}
+/* Case-study opening: a slate row (back, place in the set, next), the annotated plate, then the
+   title between hairlines and one strip of credits. Phones and studies without markers lead with
+   the title instead: the image (and on phones its list) would push it a screen down. */
+.cs-open {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.5rem;
+}
+.cs-shot {
+  margin-top: 2rem;
+}
+.cs-slate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+.cs-slate a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color var(--duration-instant) var(--ease-standard);
+}
+.cs-slate a:hover {
+  color: var(--color-text-primary);
+}
+.cs-count {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+.cs-head {
+  display: grid;
+  gap: 1rem 3rem;
+  padding-block: 1.5rem 1.75rem;
+  border-block: 1px solid var(--color-border-default);
+}
+.cs-credits {
+  order: 1;
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 3rem;
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--color-border-default);
+  font-size: 0.875rem;
+}
+.cs-credits dt {
+  color: var(--color-text-muted);
+}
+.cs-credits dd {
+  margin-top: 0.125rem;
+  overflow-wrap: anywhere;
+  color: var(--color-text-primary);
+}
+@media (min-width: 64rem) {
+  .cs-head {
+    grid-template-columns: 8fr 4fr;
+    align-items: end;
+  }
+  .cs-credits {
+    order: 0;
+    margin-top: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .cs-shot {
+    margin-top: 3rem;
+  }
+  .cs-open[data-marked] .cs-shot {
+    order: -1;
+    margin-top: 0;
+  }
+  .cs-open[data-marked] .cs-head {
+    margin-top: 3.5rem;
+  }
+}
+
+/* Case-study "What I built": heading, summary and stack hold the left (pinned from 1024px) while
+   the highlights, the evidence, run down the right at lead size. */
+.cs-built {
+  display: grid;
+  gap: 2.5rem 3rem;
+}
+.cs-side p {
+  margin-top: 1.25rem;
+  max-width: 46ch;
+  color: var(--color-text-body);
+}
+.cs-side dl {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-default);
+  font-size: 0.875rem;
+}
+.cs-side dt {
+  color: var(--color-text-muted);
+}
+.cs-side dd {
+  margin-top: 0.25rem;
+  color: var(--color-text-secondary);
+}
+.cs-proof li {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  padding-block: 1.75rem;
+  font-size: var(--text-lead);
+  line-height: 1.45;
+  color: var(--color-text-primary);
+}
+/* Rules only between items: nothing above the first or below the last. */
+.cs-proof li + li {
+  border-top: 1px solid var(--color-border-default);
+}
+.cs-proof li:first-child {
+  padding-top: 0;
+}
+.cs-proof li:last-child {
+  padding-bottom: 0;
+}
+.cs-num {
+  padding-top: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--color-accent);
+}
+@media (min-width: 64rem) {
+  .cs-built {
+    grid-template-columns: 5fr 7fr;
+    align-items: start;
+  }
+  .cs-proof li {
+    padding-block: 2.25rem;
+  }
+}
+/* Pinned only where the window can hold the whole column under the nav. */
+@media (min-width: 64rem) and (min-height: 44rem) {
+  .cs-side {
+    position: sticky;
+    top: 6.5rem;
+  }
+}
+
+/* Case-study "More screens": one capture large with the rest stacked beside it. Phone captures
+   stand whole, side by side. */
+.sc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+.sc-grid li:first-child {
+  grid-column: 1 / -1;
+}
+.sc-frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elev-1);
+}
+@media (min-width: 64rem) {
+  .sc-grid {
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .sc-grid li:first-child {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+  .sc-grid li:first-child .sc-frame {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}
+.sc-grid[data-phone] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 54rem;
+}
+.sc-grid[data-phone] li:first-child {
+  grid-column: auto;
+  grid-row: auto;
+}
+.sc-grid[data-phone] li .sc-frame {
+  aspect-ratio: 3 / 5;
+  height: auto;
+}
+
+/* Lightbox: a native dialog over the whole window, the capture scrolling inside it. */
+.lightbox {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--color-bg-base) 96%, transparent);
+  color: var(--color-text-secondary);
+}
+.lightbox[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.lightbox::backdrop {
+  background: none;
+}
+html:has(.lightbox[open]) {
+  overflow: hidden;
+}
+.lb-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem var(--gutter);
+  /* Solid, so the site nav behind never shows through the controls. */
+  background: var(--color-bg-base);
+  font-size: 0.875rem;
+}
+.lb-count {
+  margin-right: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+.lb-btn {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding-inline: 0.75rem;
+  border-radius: var(--radius-md);
+  transition:
+    background-color var(--duration-instant) var(--ease-standard),
+    color var(--duration-instant) var(--ease-standard);
+}
+.lb-btn:hover {
+  background: var(--color-bg-elev-2);
+  color: var(--color-text-primary);
+}
+.lb-stage {
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem var(--gutter) 2rem;
+}
+.lb-stage img {
+  display: block;
+  width: auto;
+  max-width: min(100%, 75rem);
+  height: auto;
+  margin-inline: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+.lightbox[data-phone] .lb-stage img {
+  max-height: 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lightbox[open] {
+    animation: lightbox-in var(--duration-fast) var(--ease-out);
+  }
+}
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Where the band of light on the next-project plate is, along its diagonal. Off the left edge at rest. */
+@property --sweep {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: -30%;
+}
+/* Case-study close: the next project's name with its plate, small, beside it. On hover the arrow
+   leaves the name and runs across to the plate, which takes an amber edge as it lands and is
+   then crossed once by a band of light. */
+.cs-next {
+  display: grid;
+  gap: 1.75rem 3rem;
+  align-items: center;
+  padding-block: 3rem 3.5rem;
+  border-top: 1px solid var(--color-border-default);
+}
+.cs-next-label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+.cs-next-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.22em; /* a word space at this tracking */
+  margin-top: 0.5rem;
+  font-size: var(--text-display);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: var(--tracking-tighter);
+  color: var(--color-text-primary);
+}
+.cs-next-tag {
+  display: block;
+  max-width: 44ch;
+  margin-top: 1rem;
+  font-size: var(--text-lead);
+  color: var(--color-text-body);
+}
+/* The track the arrow runs along. Its runner is a line with the arrowhead at its right end. */
+.cs-go {
+  flex: none;
+  width: 0.5em;
+  margin-left: 0.08em;
+  overflow: hidden;
+  color: var(--color-accent);
+}
+.cs-go > span {
+  display: flex;
+  align-items: center;
+}
+.cs-go i {
+  flex: 1;
+  height: 0.047em; /* the icon's stroke at this size */
+  margin-right: -0.09em;
+  background: currentColor;
+}
+.cs-go svg {
+  flex: none;
+  width: 0.5em;
+  height: 0.5em;
+}
+.cs-next-plate {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elev-1);
+}
+/* A study with no screenshot: the plate holds the site's depth chart and the facts there are,
+   so the arrow still has somewhere to land and nothing poses as a screen. */
+.cs-chart {
+  position: relative;
+  aspect-ratio: 16 / 10;
+}
+.cs-chart-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.cs-chart-note {
+  position: absolute;
+  inset: auto 1rem 0.875rem;
+  display: grid;
+  gap: 0.125rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+.cs-chart-note b {
+  margin-top: 0.375rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+@media (min-width: 64rem) {
+  .cs-next {
+    grid-template-columns: 8fr 4fr;
+    padding-block: 3.5rem 5rem;
+  }
+}
+/* Only where the plate sits beside the name and there is a pointer to hover with. */
+@media (min-width: 64rem) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .cs-go {
+    flex: 1;
+    min-width: 0.5em;
+    margin-right: -2.25rem; /* across the column gap, stopping just short of the plate */
+  }
+  .cs-go > span {
+    /* At rest only the arrowhead end shows, beside the name. */
+    translate: calc(-100% + 0.5em) 0;
+    transition: translate 700ms var(--ease-out);
+  }
+  .cs-next:is(:hover, :focus-visible) .cs-go > span {
+    translate: 0 0;
+  }
+  /* The hero's light: the plate sits in a little shade, and once the arrow has landed and the edge
+     has lit, a band of light crosses it once (the shade lifts along the band, with a little gloss). */
+  .cs-next-plate {
+    position: relative;
+    isolation: isolate;
+    transition: border-color var(--duration-normal) var(--ease-standard);
+  }
+  .cs-next-plate::before,
+  .cs-next-plate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .cs-next-plate::before {
+    background: var(--color-bg-base);
+    opacity: 0.16;
+    mask-image: linear-gradient(105deg, #000 calc(var(--sweep) - 26%), transparent var(--sweep), #000 calc(var(--sweep) + 26%));
+  }
+  .cs-next-plate::after {
+    background: linear-gradient(
+      105deg,
+      transparent calc(var(--sweep) - 15%),
+      color-mix(in srgb, var(--color-text-primary) 18%, transparent) var(--sweep),
+      transparent calc(var(--sweep) + 15%)
+    );
+    mix-blend-mode: screen;
+  }
+  .cs-next:is(:hover, :focus-visible) .cs-next-plate {
+    --sweep: 130%;
+    border-color: var(--color-accent);
+    /* Leaving has no transition for the band, so it resets out of sight instead of sweeping back. */
+    transition:
+      border-color var(--duration-normal) var(--ease-standard) 400ms,
+      --sweep 1200ms var(--ease-standard) 600ms;
+  }
+}
+
+/* A short amber rule above a statement set at title scale (case-study outcome, practice statement). */
+.ruled::before {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin-bottom: 1.25rem;
+  background: var(--color-accent);
+}
+
+/* Linked screenshots: the border answers the pointer, nothing moves. */
+.frame {
+  transition: border-color var(--duration-instant) var(--ease-standard);
+}
+a.frame:hover,
+a:hover .frame {
+  border-color: var(--color-border-strong);
 }
