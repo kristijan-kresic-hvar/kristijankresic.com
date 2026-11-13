@@ -1,10 +1,11 @@
 'use client';
 
 import { getImageProps } from 'next/image';
-import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState, ViewTransition } from 'react';
+import { plateMorph } from '@/components/plate';
 import type { Annotation } from '@/content/work';
 
-type Line = { x1: number; y1: number; x2: number; y2: number; mx: number };
+type Line = { x1: number; y1: number; x2: number; y2: number; ex: number; mx: number };
 
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
@@ -12,23 +13,29 @@ const MARKER = 14; // marker radius in px; lines start and end at the marker's e
 
 /**
  * Hero screenshot marked up like a proof: numbered markers on the image, the decision behind each
- * one listed beside it, and a leader line joining every pair.
+ * one listed beside it, and a leader line from the image's edge, at the marker's height, to its decision.
  * From 1024px: image left, list right, SVG lines measured from the DOM.
  * Below that: markers on the image, numbered list underneath, no lines.
  * Markers and list rows are buttons: hover or focus either one to light the pair.
  */
 export function AnnotatedShot({
   src,
+  small,
   alt,
   width,
   height,
   annotations,
+  morph,
 }: {
   src: string;
+  /** The half-size file phones get. Defaults to the `-card` crop beside `src`. */
+  small?: string | undefined;
   alt: string;
   width: number;
   height: number;
   annotations: Annotation[];
+  /** Project slug, when this image is where the hero's plate lands (see `plateMorph`). */
+  morph?: string | undefined;
 }) {
   const wrap = useRef<HTMLDivElement>(null);
   const img = useRef<HTMLDivElement>(null);
@@ -57,6 +64,7 @@ export function AnnotatedShot({
             y1: ib.top - box.top + (a.y / 100) * ib.height,
             x2: lb ? lb.left - box.left : ib.right - box.left,
             y2: lb ? lb.top - box.top + lb.height / 2 : ib.top - box.top,
+            ex: ib.right - box.left,
             // Each line turns in the gutter at its own x so the vertical runs never stack.
             mx: ib.right - box.left + 12 + i * 9,
           };
@@ -74,14 +82,15 @@ export function AnnotatedShot({
   // The LCP element on this page: fetched first, and phones get the half-size crop (same framing,
   // so the marker positions still hold).
   const { props } = getImageProps({ src, alt, width, height, loading: 'eager', fetchPriority: 'high', decoding: 'sync' });
-  const frame = (
+  const picture = (
     <div className="overflow-hidden rounded-lg border border-border-default bg-bg-elev-1">
       <picture>
-        <source media="(max-width: 40rem)" srcSet={src.replace('.webp', '-card.webp')} />
+        <source media="(max-width: 40rem)" srcSet={small ?? src.replace('.webp', '-card.webp')} />
         <img {...props} alt={alt} className="w-full" />
       </picture>
     </div>
   );
+  const frame = morph ? <ViewTransition {...plateMorph(morph)}>{picture}</ViewTransition> : picture;
 
   if (annotations.length === 0) return frame;
 
@@ -147,15 +156,17 @@ export function AnnotatedShot({
         <svg className="pointer-events-none absolute inset-0 hidden h-full w-full overflow-visible lg:block" aria-hidden="true">
           {lines.map((l, i) => {
             // Real length, so the draw-in can dash the whole path without normalising it.
-            const len = Math.abs(l.mx - l.x1) + Math.abs(l.y2 - l.y1) + Math.abs(l.x2 - l.mx);
+            const len = Math.abs(l.mx - l.ex) + Math.abs(l.y2 - l.y1) + Math.abs(l.x2 - l.mx);
             return (
-              <path
-                key={i}
-                d={`M ${l.x1} ${l.y1} H ${l.mx} V ${l.y2} H ${l.x2}`}
-                data-active={active === i}
-                className="leader"
-                style={{ '--i': i, '--len': len } as CSSProperties}
-              />
+              <g key={i} data-active={active === i}>
+                {/* Across the screenshot only while the pair is lit, so no line sits on the UI it explains. */}
+                <path d={`M ${l.x1} ${l.y1} H ${l.ex}`} className="leader leader-across" />
+                <path
+                  d={`M ${l.ex} ${l.y1} H ${l.mx} V ${l.y2} H ${l.x2}`}
+                  className="leader leader-gutter"
+                  style={{ '--i': i, '--len': len } as CSSProperties}
+                />
+              </g>
             );
           })}
         </svg>

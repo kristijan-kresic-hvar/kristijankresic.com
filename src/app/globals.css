@@ -530,20 +530,25 @@ body {
   stroke-width: 1;
   transition: stroke var(--duration-instant) var(--ease-standard);
 }
-.leader[data-active='true'] {
+.leader-across {
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+[data-active='true'] > .leader {
   stroke: var(--color-accent);
   stroke-width: 1.5;
+  opacity: 1;
 }
 
 /* ---------------------------------------------------------------------------------------------
    Motion outside the hero, all CSS, all behind prefers-reduced-motion:
-   1. leader lines draw from marker to decision, which is what explains the pairing;
+   1. leader lines draw from the image's edge to the decision, which is what explains the pairing;
    2. the rule under the contact address draws as the address arrives.
    Everything else is feedback at --duration-instant. Nothing here hides content: without these
    rules the page is the same page, already in its final state.
    --------------------------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: no-preference) {
-  .leader {
+  .leader-gutter {
     stroke-dasharray: var(--len);
     animation: leader-draw 0.7s var(--ease-out) calc(var(--i, 0) * 90ms + 200ms) both;
   }
@@ -578,6 +583,86 @@ body {
     stroke-dashoffset: var(--len);
   }
 }
+/* Case-study opening: a slate row (back, place in the set, next), the annotated plate, then the
+   title between hairlines and one strip of credits. Phones and studies without markers lead with
+   the title instead: the image (and on phones its list) would push it a screen down. */
+.cs-open {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.5rem;
+}
+.cs-shot {
+  margin-top: 2rem;
+}
+.cs-slate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+.cs-slate a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color var(--duration-instant) var(--ease-standard);
+}
+.cs-slate a:hover {
+  color: var(--color-text-primary);
+}
+.cs-count {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+.cs-head {
+  display: grid;
+  gap: 1rem 3rem;
+  padding-block: 1.5rem 1.75rem;
+  border-block: 1px solid var(--color-border-default);
+}
+.cs-credits {
+  order: 1;
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 3rem;
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--color-border-default);
+  font-size: 0.875rem;
+}
+.cs-credits dt {
+  color: var(--color-text-muted);
+}
+.cs-credits dd {
+  margin-top: 0.125rem;
+  overflow-wrap: anywhere;
+  color: var(--color-text-primary);
+}
+@media (min-width: 64rem) {
+  .cs-head {
+    grid-template-columns: 8fr 4fr;
+    align-items: end;
+  }
+  .cs-credits {
+    order: 0;
+    margin-top: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .cs-shot {
+    margin-top: 3rem;
+  }
+  .cs-open[data-marked] .cs-shot {
+    order: -1;
+    margin-top: 0;
+  }
+  .cs-open[data-marked] .cs-head {
+    margin-top: 3.5rem;
+  }
+}
+
 /* A short amber rule above a statement set at title scale (case-study outcome, practice statement). */
 .ruled::before {
   content: '';

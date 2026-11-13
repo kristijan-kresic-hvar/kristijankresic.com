@@ -2,12 +2,10 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ViewTransition } from 'react';
 import { AnnotatedShot } from '@/components/annotated-shot';
 import { Container } from '@/components/container';
-import { Plate, plateMorph } from '@/components/plate';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from '@/components/icons';
-import { WORK, getCaseStudy } from '@/content/work';
+import { FEATURED, WORK, getCaseStudy } from '@/content/work';
 
 type Params = { slug: string };
 
@@ -35,70 +33,79 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
 
   const index = WORK.findIndex((w) => w.slug === study.slug);
   const next = WORK[(index + 1) % WORK.length];
+  const featuredIndex = FEATURED.findIndex((f) => f.slug === study.slug);
+  // Featured projects are annotated on their plate, the image the hero shows, so the hero's plate lands on the same picture.
+  const lead = study.featured
+    ? { src: `/images/work/${study.slug}-plate.webp`, small: `/images/work/${study.slug}-plate-sm.webp`, width: 1920, height: 1200 }
+    : { src: study.image.src, small: undefined, width: study.image.width, height: study.image.height };
   const screens = Array.from({ length: study.screens }, (_, i) => `/images/work/${study.slug}-screen-${i + 1}.webp`);
 
   return (
     <article>
-      <Container className="pt-8 sm:pt-12">
-        <Link
-          href="/#work"
-          className="inline-flex items-center gap-2 text-sm text-text-muted transition-colors duration-(--duration-instant) hover:text-text-primary"
-        >
-          <ArrowLeft /> All work
-        </Link>
-        <header className="mt-8 grid gap-x-12 gap-y-10 lg:mt-14 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-8">
+      <Container className="pt-6 sm:pt-8">
+        <nav aria-label="Projects" className="cs-slate">
+          <Link href="/#work">
+            <ArrowLeft /> All work
+          </Link>
+          {featuredIndex >= 0 && (
+            <span>
+              <span className="cs-count">
+                {String(featuredIndex + 1).padStart(2, '0')} / {String(FEATURED.length).padStart(2, '0')}
+              </span>
+              {/* The title is below the plate on desktop, so the row names the project. */}
+              <span className="ml-3 max-lg:hidden">{study.client}</span>
+            </span>
+          )}
+          {next && (
+            <Link href={`/work/${next.slug}/`}>
+              Next: {next.client} <ArrowRight />
+            </Link>
+          )}
+        </nav>
+        {/* Title first in the source; from 1024px a marked-up plate is shown above it (see .cs-open). */}
+        <div className="cs-open" data-marked={study.annotations.length > 0 || undefined}>
+          <header className="cs-head">
             <h1 className="text-display leading-[1.04] font-semibold tracking-tighter">{study.title}</h1>
-            <p className="mt-5 max-w-[44ch] text-lead text-text-body">{study.tagline}</p>
-          </div>
-          <dl className="text-sm lg:col-span-4">
-            <div className={row}>
-              <dt className="text-text-muted">Role</dt>
-              <dd className="text-text-primary">{study.role}</dd>
+            <p className="max-w-[44ch] text-lead text-text-body">{study.tagline}</p>
+          </header>
+          <dl className="cs-credits">
+            <div>
+              <dt>Role</dt>
+              <dd>{study.role}</dd>
             </div>
-            <div className={row}>
-              <dt className="text-text-muted">Client</dt>
-              <dd className="text-text-primary">
+            <div>
+              <dt>Client</dt>
+              <dd>
                 {study.context}, {study.location}
               </dd>
             </div>
-            <div className={row}>
-              <dt className="text-text-muted">Period</dt>
-              <dd className="text-text-primary tabular-nums">{study.period}</dd>
+            <div>
+              <dt>Period</dt>
+              <dd className="tabular-nums">{study.period}</dd>
             </div>
             {study.url && (
-              <div className={`${row} border-b`}>
-                <dt className="text-text-muted">Live</dt>
+              <div>
+                <dt>Live</dt>
                 <dd>
-                  <a href={study.url} rel="noopener" className="link inline-flex items-center gap-1.5 text-text-primary">
+                  <a href={study.url} rel="noopener" className="link inline-flex items-center gap-1.5">
                     {study.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')} <ArrowUpRight />
                   </a>
                 </dd>
               </div>
             )}
           </dl>
-        </header>
-      </Container>
-
-      {/* The hero's projects have a plate; it opens the page so the hero's plate can land on it. */}
-      {study.featured && (
-        <Container className="mt-12 lg:mt-16">
-          <ViewTransition {...plateMorph(study.slug)}>
-            <div className="overflow-hidden rounded-lg border border-border-default bg-bg-elev-1">
-              <Plate study={study} eager />
-            </div>
-          </ViewTransition>
-        </Container>
-      )}
-
-      <Container className="mt-12 lg:mt-16">
-        <AnnotatedShot
-          src={study.image.src}
-          alt={study.image.alt}
-          width={study.image.width}
-          height={study.image.height}
-          annotations={study.annotations}
-        />
+          <div className="cs-shot">
+            <AnnotatedShot
+              src={lead.src}
+              small={lead.small}
+              alt={study.image.alt}
+              width={lead.width}
+              height={lead.height}
+              annotations={study.annotations}
+              morph={study.featured ? study.slug : undefined}
+            />
+          </div>
+        </div>
       </Container>
 
       <Container className="grid gap-x-12 gap-y-8 py-20 lg:grid-cols-12 lg:py-28">
