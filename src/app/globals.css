@@ -77,6 +77,18 @@ html {
     --nav-h: calc(4rem + 1px);
   }
 }
+/* In-page links glide (Work, Email me). Route changes still jump: the router turns this off for
+   its own scroll, told to by data-scroll-behavior on <html>. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+/* A little air under the nav when the contact block or the form is scrolled to. */
+#contact,
+#message {
+  scroll-margin-top: 2rem;
+}
 /* A page whose box starts at the very top of the document, behind the nav. The router scrolls a new
    page into place only when its first element starts above the window, so without this a page
    opened from one scrolled a few pixels keeps those pixels and the nav covers its first row. */

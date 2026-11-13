@@ -81,7 +81,7 @@ export function ContactForm() {
 
   if (state.step === 'sent') {
     return (
-      <div className="cf cf-done lg:col-span-5 lg:col-start-8" style={{ minHeight: state.height }}>
+      <div id="message" className="cf cf-done lg:col-span-5 lg:col-start-8" style={{ minHeight: state.height }}>
         <h3 ref={done} tabIndex={-1} className="cf-say cf-thanks">
           Thanks, {state.name.trim().split(/\s+/)[0]}. Your message is with me.
         </h3>
@@ -100,7 +100,7 @@ export function ContactForm() {
   });
 
   return (
-    <form ref={form} action={ENDPOINT} method="post" onSubmit={(e) => void submit(e)} className="cf lg:col-span-5 lg:col-start-8" aria-labelledby="cf-title">
+    <form id="message" ref={form} action={ENDPOINT} method="post" onSubmit={(e) => void submit(e)} className="cf lg:col-span-5 lg:col-start-8" aria-labelledby="cf-title">
       <h3 id="cf-title" className="sr-only">
         Send a message
       </h3>

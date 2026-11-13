@@ -17,7 +17,7 @@ export function Ending() {
       <ContourField className="ending-field" text=".end-say, .end-details, .end-where, .end-bar, .cf" />
       <Container className="pt-20 pb-6 sm:pt-28">
         <div className="grid gap-x-12 gap-y-14 lg:grid-cols-12">
-          <section id="contact" aria-labelledby="contact-title" className="scroll-mt-20 lg:col-span-6">
+          <section id="contact" aria-labelledby="contact-title" className="lg:col-span-6">
             <h2 id="contact-title" className="end-say">
               <span className="end-lead">
                 <span className="text-text-primary">Hiring a frontend engineer?</span> Email is the fastest way to reach me, and I reply
