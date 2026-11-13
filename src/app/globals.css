@@ -308,6 +308,35 @@ body {
   border-color: var(--color-accent);
 }
 
+/* Scroll reveals (.rise). A block comes up a few pixels and out of transparency as it enters the
+   window, tied to the scroll position, and is always complete once it is fully in view. Scroll
+   timelines only: without them, or under reduced motion, the block is simply there. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rise {
+      animation: rise var(--ease-out) both;
+      animation-timeline: view();
+      /* Done by the time the block is inside, so the last block on a page can never stay half shown. */
+      animation-range: entry 0% entry 100%;
+      /* Tall blocks finish early instead of fading for their whole height. */
+      animation-range: entry 0% entry min(100%, 14rem);
+    }
+    /* A row of cells arrives left to right. */
+    .ew-strip .rise:nth-child(2) {
+      animation-range-start: entry 20%;
+    }
+    .ew-strip .rise:nth-child(3) {
+      animation-range-start: entry 40%;
+    }
+    @keyframes rise {
+      from {
+        opacity: 0;
+        translate: 0 0.875rem;
+      }
+    }
+  }
+}
+
 /* Nav hairline appears once the page has scrolled (progressive: without scroll timelines it is always on). */
 .site-nav {
   border-bottom: 1px solid var(--color-border-subtle);

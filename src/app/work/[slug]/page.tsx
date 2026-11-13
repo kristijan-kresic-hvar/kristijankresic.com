@@ -74,7 +74,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
             <h1 className="text-display leading-[1.04] font-semibold tracking-tighter">{study.title}</h1>
             <p className="max-w-[44ch] text-lead text-text-body">{study.tagline}</p>
           </header>
-          <dl className="cs-credits">
+          <dl className="cs-credits rise">
             <div>
               <dt>Role</dt>
               <dd>{study.role}</dd>
@@ -116,7 +116,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
 
       <Container className="py-20 lg:py-28">
         <div className="cs-built">
-          <div className="cs-side">
+          <div className="cs-side rise">
             <h2 className="text-title leading-[1.08] font-semibold">What I built</h2>
             <p>{study.summary}</p>
             <dl>
@@ -126,7 +126,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
           </div>
           <ol className="cs-proof">
             {study.highlights.map((h, i) => (
-              <li key={h}>
+              <li key={h} className="rise">
                 <span className="cs-num" aria-hidden="true">
                   {String(i + 1).padStart(2, '0')}
                 </span>
@@ -137,7 +137,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
         </div>
         {/* Outside the grid above: the pinned column must stop with the highlights, not slide over this. */}
         {study.outcome && (
-          <p className="ruled mt-16 max-w-[26ch] text-title leading-[1.12] font-semibold tracking-tight text-text-primary lg:mt-20">
+          <p className="ruled rise mt-16 max-w-[26ch] text-title leading-[1.12] font-semibold tracking-tight text-text-primary lg:mt-20">
             {study.outcome}
           </p>
         )}
@@ -145,14 +145,14 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
 
       {screens.length > 0 && (
         <Container className="pb-20 lg:pb-28">
-          <h2 className="text-title leading-[1.08] font-semibold">More screens</h2>
+          <h2 className="rise text-title leading-[1.08] font-semibold">More screens</h2>
           <Screens title={study.title} screens={screens} phone={study.phone} />
         </Container>
       )}
 
       {next && (
         <Container>
-          <Link href={`/work/${next.slug}/`} className="cs-next">
+          <Link href={`/work/${next.slug}/`} className="cs-next rise">
             <span>
               <span className="cs-next-label">Next project</span>
               <span className="cs-next-title">

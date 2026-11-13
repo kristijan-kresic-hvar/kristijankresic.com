@@ -18,7 +18,7 @@ export function Ending() {
       <Container className="pt-20 pb-6 sm:pt-28">
         <div className="grid gap-x-12 gap-y-14 lg:grid-cols-12">
           <section id="contact" aria-labelledby="contact-title" className="scroll-mt-20 lg:col-span-6">
-            <h2 id="contact-title" className="end-say">
+            <h2 id="contact-title" className="end-say rise">
               <span className="end-lead">
                 <span className="text-text-primary">Hiring a frontend engineer?</span> Email is the fastest way to reach me, and I reply
                 the same day.
@@ -27,7 +27,7 @@ export function Ending() {
                 {PROFILE.email}
               </a>
             </h2>
-            <div className="end-details mt-8 flex w-fit flex-wrap items-center gap-x-6 gap-y-3 text-sm sm:mt-10">
+            <div className="end-details rise mt-8 flex w-fit flex-wrap items-center gap-x-6 gap-y-3 text-sm sm:mt-10">
               <CopyButton value={PROFILE.email} label="Copy email" />
               <a href={PROFILE.phoneHref} className="link text-text-secondary tabular-nums">
                 {PROFILE.phone}
@@ -39,7 +39,7 @@ export function Ending() {
                 Full-stack CV, PDF <Download />
               </a>
             </div>
-            <p className="end-where mt-6 max-w-[62ch] text-sm text-text-body">
+            <p className="end-where rise mt-6 max-w-[62ch] text-sm text-text-body">
               Remote across the EU or with US-East overlap, or hybrid in Split or Zagreb. EU citizen, no visa needed.
             </p>
           </section>

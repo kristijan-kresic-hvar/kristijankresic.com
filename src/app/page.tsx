@@ -13,7 +13,7 @@ export default function Home() {
 
       <section aria-labelledby="practice-title" className="practice border-t border-border-subtle py-20 lg:py-32">
         <Container className="practice-grid grid gap-y-8 lg:grid-cols-12">
-          <figure className="practice-figure max-w-40 lg:col-span-2 lg:max-w-none">
+          <figure className="practice-figure rise max-w-40 lg:col-span-2 lg:max-w-none">
             <Image
               src="/images/headshot.webp"
               alt={`Portrait of ${PROFILE.name}`}
@@ -45,7 +45,7 @@ export default function Home() {
                 <strong>AI does the mechanical work;</strong> every architecture call and merged line is mine.
               </span>
             </p>
-            <p className="mt-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
+            <p className="rise mt-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
               <Link href="/about/" className="link inline-flex items-center gap-2 text-text-primary">
                 More about me <ArrowRight />
               </Link>
@@ -57,12 +57,12 @@ export default function Home() {
 
       <section aria-labelledby="earlier-title" className="earlier-work border-t border-border-subtle py-14 lg:py-20">
         <Container>
-          <h2 id="earlier-title" className="text-lead font-medium tracking-normal text-text-muted">
+          <h2 id="earlier-title" className="rise text-lead font-medium tracking-normal text-text-muted">
             Earlier work
           </h2>
           <ol className="ew-strip mt-8">
             {EARLIER.map((study) => (
-              <li key={study.slug}>
+              <li key={study.slug} className="rise">
                 <Link href={`/work/${study.slug}/`} className="ew-cell">
                   <span className="ew-years">{study.period}</span>
                   <span className="ew-title">{study.title}</span>

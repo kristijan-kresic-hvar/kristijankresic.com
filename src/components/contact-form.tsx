@@ -100,7 +100,7 @@ export function ContactForm() {
   });
 
   return (
-    <form ref={form} action={ENDPOINT} method="post" onSubmit={(e) => void submit(e)} className="cf lg:col-span-5 lg:col-start-8" aria-labelledby="cf-title">
+    <form ref={form} action={ENDPOINT} method="post" onSubmit={(e) => void submit(e)} className="cf rise lg:col-span-5 lg:col-start-8" aria-labelledby="cf-title">
       <h3 id="cf-title" className="sr-only">
         Send a message
       </h3>

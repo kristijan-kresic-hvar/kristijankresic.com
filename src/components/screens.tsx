@@ -34,7 +34,7 @@ export function Screens({ title, screens, phone }: { title: string; screens: str
     <>
       <ul className="sc-grid" data-phone={phone || undefined}>
         {screens.map((s, i) => (
-          <li key={s}>
+          <li key={s} className="rise">
             <a
               href={s}
               target="_blank"
