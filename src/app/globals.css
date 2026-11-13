@@ -547,15 +547,35 @@ li:first-child > .callout:not([data-active='true']) {
 
 /* ---------------------------------------------------------------------------------------------
    Motion outside the hero, all CSS, all behind prefers-reduced-motion:
-   1. leader lines draw from the image's edge to the decision, which is what explains the pairing;
+   1. once the screenshot has loaded its markers arrive, then leader lines draw from the image's
+      edge to each decision, which is what explains the pairing;
    2. the rule under the contact address draws as the address arrives.
    Everything else is feedback at --duration-instant. Nothing here hides content: without these
    rules the page is the same page, already in its final state.
    --------------------------------------------------------------------------------------------- */
+/* Markers and lines wait for the screenshot (.shot gets data-ready once it has decoded). Only
+   where scripts run, because a script is what lifts the wait. */
+@media (scripting: enabled) {
+  .shot:not([data-ready]) :is(.marker:not(.marker-static), .leader) {
+    opacity: 0;
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
+  /* The numbers arrive one by one, then each line draws out to its decision. */
+  .shot[data-ready] .marker:not(.marker-static) {
+    animation: marker-in 400ms var(--ease-out) calc(var(--i, 0) * 110ms + 250ms) backwards;
+  }
   .leader-gutter {
     stroke-dasharray: var(--len);
-    animation: leader-draw 0.7s var(--ease-out) calc(var(--i, 0) * 90ms + 200ms) both;
+  }
+  .shot[data-ready] .leader-gutter {
+    animation: leader-draw 0.7s var(--ease-out) calc(var(--i, 0) * 110ms + 550ms) backwards;
+  }
+}
+@keyframes marker-in {
+  from {
+    opacity: 0;
+    scale: 0.7;
   }
 }
 

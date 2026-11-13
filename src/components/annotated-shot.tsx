@@ -42,6 +42,23 @@ export function AnnotatedShot({
   const labels = useRef<(HTMLSpanElement | null)[]>([]);
   const [lines, setLines] = useState<Line[]>([]);
   const [active, setActive] = useState<number | null>(null);
+  const pic = useRef<HTMLImageElement>(null);
+  const [ready, setReady] = useState(false);
+
+  // Markers wait for the picture: numbers on an empty frame point at nothing. A failed image still releases them.
+  useEffect(() => {
+    let on = true;
+    void new Promise<void>((resolve) => {
+      resolve(pic.current?.decode());
+    })
+      .catch(() => {})
+      .then(() => {
+        if (on) setReady(true);
+      });
+    return () => {
+      on = false;
+    };
+  }, []);
 
   useIsoLayoutEffect(() => {
     const el = wrap.current;
@@ -86,7 +103,7 @@ export function AnnotatedShot({
     <div className="overflow-hidden rounded-lg border border-border-default bg-bg-elev-1">
       <picture>
         <source media="(max-width: 40rem)" srcSet={small ?? src.replace('.webp', '-card.webp')} />
-        <img {...props} alt={alt} className="w-full" />
+        <img {...props} ref={pic} alt={alt} className="w-full" />
       </picture>
     </div>
   );
@@ -103,7 +120,7 @@ export function AnnotatedShot({
   });
 
   return (
-    <div ref={wrap} className="relative grid gap-x-12 gap-y-8 lg:grid-cols-12">
+    <div ref={wrap} data-ready={ready || undefined} className="shot relative grid gap-x-12 gap-y-8 lg:grid-cols-12">
       <div ref={img} className="relative self-start lg:col-span-8">
         {frame}
         {annotations.map((a, i) => (
@@ -113,7 +130,7 @@ export function AnnotatedShot({
             aria-label={`${i + 1}. ${a.title}`}
             aria-describedby={`callout-${i}`}
             {...pair(i)}
-            style={{ left: `${a.x}%`, top: `${a.y}%` }}
+            style={{ left: `${a.x}%`, top: `${a.y}%`, '--i': i } as CSSProperties}
             className="marker absolute z-10 -translate-x-1/2 -translate-y-1/2"
           >
             {i + 1}
