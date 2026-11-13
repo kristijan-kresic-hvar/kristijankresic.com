@@ -20,7 +20,7 @@ export function Plate({
   const base = `/images/work/${study.slug}-plate`;
   const { props } = getImageProps({
     src: `${base}.webp`,
-    alt: study.image.alt,
+    alt: study.image?.alt ?? '',
     width: 1920,
     height: 1200,
     loading: eager ? 'eager' : 'lazy',
@@ -29,7 +29,7 @@ export function Plate({
   return (
     <picture>
       <source media="(max-width: 48rem)" srcSet={`${base}-sm.webp`} />
-      <img {...props} alt={study.image.alt} draggable={false} className={`block aspect-[16/10] w-full object-cover ${className}`} />
+      <img {...props} alt={study.image?.alt ?? ''} draggable={false} className={`block aspect-[16/10] w-full object-cover ${className}`} />
     </picture>
   );
 }

@@ -1052,6 +1052,10 @@ html:has(.lightbox[open]) {
     min-width: 0.5em;
     margin-right: -2.25rem; /* across the column gap, stopping just short of the plate */
   }
+  /* No picture to reach: the arrow runs to the end of the text column instead. */
+  .cs-next:not(:has(.cs-next-plate)) .cs-go {
+    margin-right: 0;
+  }
   .cs-go > span {
     /* At rest only the arrowhead end shows, beside the name. */
     translate: calc(-100% + 0.5em) 0;

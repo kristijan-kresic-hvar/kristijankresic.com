@@ -8,7 +8,7 @@ import { Container } from '@/components/container';
 import { Plate, plateMorph } from '@/components/plate';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from '@/components/icons';
 import { Screens } from '@/components/screens';
-import { EARLIER, FEATURED, WORK, getCaseStudy } from '@/content/work';
+import { EARLIER, FEATURED, WORK, getCaseStudy, hasPlate } from '@/content/work';
 
 type Params = { slug: string };
 
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title: study.title,
     description: study.tagline,
-    openGraph: { title: study.title, description: study.tagline, images: [{ url: study.image.src }] },
+    openGraph: { title: study.title, description: study.tagline, ...(study.image ? { images: [{ url: study.image.src }] } : {}) },
   };
 }
 
@@ -37,10 +37,14 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
   // Two sets, as on the landing: the six in the hero, numbered as the hero numbers them, and the earlier work.
   const set = study.featured ? FEATURED : EARLIER;
   const place = set.findIndex((w) => w.slug === study.slug);
-  // Featured projects are annotated on their plate, the image the hero shows, so the hero's plate lands on the same picture.
-  const lead = study.featured
-    ? { src: `/images/work/${study.slug}-plate.webp`, small: `/images/work/${study.slug}-plate-sm.webp`, width: 1920, height: 1200 }
-    : { src: study.image.src, small: undefined, width: study.image.width, height: study.image.height };
+  // The lead picture is the plate where there is one (featured projects are annotated on it, so the hero's plate
+  // lands on the same picture), else the plain screenshot, and nothing while a study has no real screenshot.
+  const shot = study.image;
+  const lead = !shot
+    ? null
+    : hasPlate(study)
+      ? { src: `/images/work/${study.slug}-plate.webp`, small: `/images/work/${study.slug}-plate-sm.webp`, width: 1920, height: 1200, alt: shot.alt }
+      : { src: shot.src, small: undefined, width: shot.width, height: shot.height, alt: shot.alt };
   const screens = Array.from({ length: study.screens }, (_, i) => `/images/work/${study.slug}-screen-${i + 1}.webp`);
 
   return (
@@ -62,7 +66,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
             <Link href={`/work/${next.slug}/`}>
               {/* On a phone the name would push the row onto two lines. */}
               <span>
-                Next<span className="max-sm:hidden">: {next.client}</span>
+                Next<span className="max-sm:hidden">: {next.title}</span>
               </span>
               <ArrowRight />
             </Link>
@@ -100,17 +104,19 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
               </div>
             )}
           </dl>
-          <div className="cs-shot">
-            <AnnotatedShot
-              src={lead.src}
-              small={lead.small}
-              alt={study.image.alt}
-              width={lead.width}
-              height={lead.height}
-              annotations={study.annotations}
-              morph={study.featured ? study.slug : undefined}
-            />
-          </div>
+          {lead && (
+            <div className="cs-shot">
+              <AnnotatedShot
+                src={lead.src}
+                small={lead.small}
+                alt={lead.alt}
+                width={lead.width}
+                height={lead.height}
+                annotations={study.annotations}
+                morph={study.slug}
+              />
+            </div>
+          )}
         </div>
       </Container>
 
@@ -170,16 +176,18 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
               </span>
               <span className="cs-next-tag">{next.tagline}</span>
             </span>
-            <span className="cs-next-plate">
-              {next.featured ? (
-                // The same plate the next page opens on, so a click carries it there.
+            {/* The same picture the next page opens on, so a click carries it there. None while that study has no screenshot. */}
+            {next.image && (
+              <span className="cs-next-plate">
                 <ViewTransition {...plateMorph(next.slug)}>
-                  <Plate study={next} />
+                  {hasPlate(next) ? (
+                    <Plate study={next} />
+                  ) : (
+                    <Image src={next.image.src.replace('.webp', '-card.webp')} alt="" width={800} height={500} loading="lazy" className="w-full" />
+                  )}
                 </ViewTransition>
-              ) : (
-                <Image src={next.image.src.replace('.webp', '-card.webp')} alt="" width={800} height={500} loading="lazy" className="w-full" />
-              )}
-            </span>
+              </span>
+            )}
           </Link>
         </Container>
       )}

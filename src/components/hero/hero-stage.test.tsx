@@ -35,12 +35,12 @@ describe('HeroStage', () => {
     lookedAt(fourth.slug);
     // The opening lands on project 01, so until it has played the hero stays there.
     const { unmount } = render(<HeroStage studies={FEATURED} />);
-    expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', FEATURED[0]?.image.alt);
+    expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', FEATURED[0]?.image?.alt);
     unmount();
     sessionStorage.setItem(OPENING_KEY, '1');
     render(<HeroStage studies={FEATURED} />);
     expect(path(screen.getByRole('link', { name: `${fourth.title}: open the case study` }))).toBe(`/work/${fourth.slug}`);
-    expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', fourth.image.alt);
+    expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', fourth.image?.alt);
   });
 
   it('ignores the pointer just after arriving, while a plate may still be travelling back', () => {
@@ -66,8 +66,8 @@ describe('HeroStage', () => {
     expect(path(screen.getByRole('link', { name: `${third.title}: open the case study` }))).toBe(`/work/${third.slug}`);
     expect(item).toHaveAttribute('data-active', 'true');
     // the new project is up and the one it replaced stays under it while it dissolves in
-    expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', third.image.alt);
-    expect(document.querySelector('.stage-face[data-face="b"] img')).toHaveAttribute('alt', first.image.alt);
+    expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', third.image?.alt);
+    expect(document.querySelector('.stage-face[data-face="b"] img')).toHaveAttribute('alt', first.image?.alt);
   });
 
   it('server-renders the finished hero: every word, every project, the first plate up, nothing waiting on script', () => {
@@ -76,7 +76,7 @@ describe('HeroStage', () => {
     page.innerHTML = html;
     expect(page.querySelector('h1')?.textContent.replace(/ /g, ' ')).toBe('Frontend engineer. Six client products, built inside the client’s team.');
     expect(Array.from(page.querySelectorAll('.stage-index a'), path)).toEqual(FEATURED.map((s) => `/work/${s.slug}`));
-    expect(page.querySelector('.stage-face[data-face="a"] img')?.getAttribute('alt')).toBe(FEATURED[0]?.image.alt);
+    expect(page.querySelector('.stage-face[data-face="a"] img')?.getAttribute('alt')).toBe(FEATURED[0]?.image?.alt);
     expect(page.querySelector('.hero')?.hasAttribute('data-opening')).toBe(false);
     expect(html).not.toMatch(/style="[^"]*(opacity|visibility|display)/);
   });

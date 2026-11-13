@@ -14,13 +14,16 @@ export type CaseStudy = {
   summary: string;
   highlights: string[];
   outcome?: string;
-  image: { src: string; alt: string; width: number; height: number };
+  /** The screenshot. Absent while a study has none: its page and the links to it then show no picture. */
+  image?: { src: string; alt: string; width: number; height: number };
   /** Hotspots on the hero image, in percent of width/height, with the decision or feature they point at. */
   annotations: Annotation[];
   /** Extra screens for the case-study page: /images/work/<slug>-screen-N.webp */
   screens: number;
   /** The screens are whole phone captures: shown uncropped, in portrait. */
   phone?: boolean;
+  /** A 16:10 plate exists at /images/work/<slug>-plate.webp beside the image. Every featured study has one. */
+  plate?: boolean;
   /** Whether a tall /images/work/<slug>-full.webp exists for the hover-scroll card. */
   scroll: boolean;
   featured: boolean;
@@ -207,20 +210,45 @@ export const WORK: CaseStudy[] = [
   {
     slug: 'carcatcher',
     client: 'amondi GmbH',
-    title: 'car-catcher.de & buildmycareer.de',
-    tagline: 'CMS-driven React apps for a German agency.',
+    title: 'Car Catcher',
+    tagline: 'An online car-auction platform, built as a CMS-driven React app.',
+    period: 'Apr 2022 – Nov 2022',
+    role: 'Frontend Web Developer',
+    context: 'Media & IT development agency',
+    location: 'Zagreb, Croatia (hybrid)',
+    stack: ['React', 'JavaScript', 'CSS', 'Headless CMS'],
+    summary:
+      'car-catcher.de is a used-car auction platform: listings with vehicle data and damage reports, and a step-by-step flow for putting a car up for auction. I built its screens in React from CMS content.',
+    highlights: [
+      'Vehicle listing, vehicle-data and damage-report screens from CMS content.',
+      'The create-auction steps: the vehicle-data form and damage marking on a car diagram.',
+    ],
+    image: { src: '/images/work/carcatcher.webp', alt: 'car-catcher.de vehicle listing with the bidding panel', width: 1600, height: 1000 },
+    plate: true,
+    annotations: [
+      { x: 15.5, y: 22, title: 'Condition before the price', text: 'Drive-ready, defects and fixed damage are flagged under the title, ahead of the full damage report further down the page.' },
+      { x: 42.5, y: 45.8, title: 'Bidding on a running auction', text: 'The current highest bid, a field for a new bid, a bidding agent and an instant purchase price, with the time left beside the title.' },
+      { x: 9.8, y: 77.8, title: 'Vehicle data from the CMS', text: 'Consignor, distance, pickup and transport cost in one row, then the full vehicle-data table, all rendered from CMS content.' },
+    ],
+    screens: 3,
+    scroll: false,
+    featured: false,
+  },
+  {
+    slug: 'buildmycareer',
+    client: 'amondi GmbH',
+    title: 'BuildMyCareer',
+    tagline: 'A careers portal, built as a CMS-driven React app.',
     period: 'Apr 2022 – Nov 2022',
     role: 'Frontend Web Developer',
     context: 'Media & IT development agency',
     location: 'Zagreb, Croatia (hybrid)',
     url: 'https://buildmycareer.de',
     stack: ['React', 'JavaScript', 'CSS', 'Headless CMS'],
-    summary:
-      'Two CMS-driven React applications: a used-car listing platform with vehicle data and damage reports, and a careers portal.',
-    highlights: ['Vehicle listing, vehicle-data and damage-report screens from CMS content.', 'Careers portal frontend with CMS-managed content.'],
-    image: { src: '/images/work/carcatcher.webp', alt: 'car-catcher.de vehicle listing', width: 1600, height: 1000 },
+    summary: 'buildmycareer.de is a careers portal. I built its frontend in React, with the content managed in a CMS.',
+    highlights: ['Careers portal frontend with CMS-managed content.'],
     annotations: [],
-    screens: 3,
+    screens: 0,
     scroll: false,
     featured: false,
   },
@@ -237,7 +265,6 @@ export const WORK: CaseStudy[] = [
     stack: ['WordPress', 'PHP', 'Multilingual'],
     summary: 'Rebuilt the multilingual marketing site of Agrivi on WordPress with a custom theme.',
     highlights: ['Custom WordPress theme, multilingual content, performance pass.'],
-    image: { src: '/images/work/agrivi.webp', alt: 'Agrivi marketing site', width: 1600, height: 1000 },
     annotations: [],
     screens: 0,
     scroll: false,
@@ -246,7 +273,7 @@ export const WORK: CaseStudy[] = [
   {
     slug: 'robinson',
     client: 'Robinson Restaurant',
-    title: 'Robinson Restaurant, Hvar',
+    title: 'Robinson Restaurant',
     tagline: 'A custom WordPress theme for a beach restaurant; the owner reported inquiries up about 200%.',
     period: '2019 – 2021',
     role: 'Freelance web developer',
@@ -265,6 +292,8 @@ export const WORK: CaseStudy[] = [
 ];
 
 export const FEATURED = WORK.filter((w) => w.featured);
+/** Whether the study's lead picture is its plate (the hero's crop) and not the plain screenshot. */
+export const hasPlate = (w: CaseStudy) => w.image !== undefined && (w.featured || w.plate === true);
 export const EARLIER = WORK.filter((w) => !w.featured);
 
 export function getCaseStudy(slug: string): CaseStudy | undefined {
