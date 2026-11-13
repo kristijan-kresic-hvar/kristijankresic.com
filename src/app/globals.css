@@ -1064,40 +1064,42 @@ html:has(.lightbox[open]) {
   .cs-next:is(:hover, :focus-visible) .cs-go > span {
     translate: 0 0;
   }
-  /* Once the arrow has landed and the edge has lit, a band of the same amber light crosses the
-     plate once. Tinted, and never a shade: the picture is at full brightness before, during and
-     after, and a white screenshot shows the band as well as a dark one. */
+  /* The hero's light: the plate sits in a little shade, and once the arrow has landed and the edge
+     has lit, a band of light crosses it once (the shade lifts along the band, with a little gloss). */
   .cs-next-plate {
     position: relative;
     isolation: isolate;
     transition: border-color var(--duration-normal) var(--ease-standard);
   }
+  .cs-next-plate::before,
   .cs-next-plate::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
+  }
+  .cs-next-plate::before {
+    background: var(--color-bg-base);
+    opacity: 0.16;
+    mask-image: linear-gradient(105deg, #000 calc(var(--sweep) - 26%), transparent var(--sweep), #000 calc(var(--sweep) + 26%));
+  }
+  .cs-next-plate::after {
     background: linear-gradient(
       105deg,
-      transparent calc(var(--sweep) - 18%),
-      color-mix(in srgb, var(--color-accent) 20%, transparent) var(--sweep),
-      transparent calc(var(--sweep) + 18%)
+      transparent calc(var(--sweep) - 15%),
+      color-mix(in srgb, var(--color-text-primary) 18%, transparent) var(--sweep),
+      transparent calc(var(--sweep) + 15%)
     );
+    mix-blend-mode: screen;
   }
   .cs-next:is(:hover, :focus-visible) .cs-next-plate {
-    border-color: var(--color-accent);
-    transition-delay: 400ms;
-    /* An animation, so leaving drops it at once: the band never sweeps back. */
-    animation: plate-shine 1200ms var(--ease-standard) 600ms both;
-  }
-}
-@keyframes plate-shine {
-  from {
-    --sweep: -30%;
-  }
-  to {
     --sweep: 130%;
+    border-color: var(--color-accent);
+    /* Leaving has no transition for the band, so it resets out of sight instead of sweeping back. */
+    transition:
+      border-color var(--duration-normal) var(--ease-standard) 400ms,
+      --sweep 1200ms var(--ease-standard) 600ms;
   }
 }
 
