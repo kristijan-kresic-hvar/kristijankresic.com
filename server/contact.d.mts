@@ -5,6 +5,8 @@ export interface ContactConfig {
   from: string;
   origin: string;
   port: number;
+  /** Answer as if sent without calling Resend. Local work only. */
+  dryRun?: boolean;
 }
 
 export interface ContactRequest {

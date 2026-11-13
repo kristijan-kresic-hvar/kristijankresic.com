@@ -117,13 +117,9 @@ Copy the new `contact.mjs` over the old one and run `sudo systemctl restart kris
 
 ## Local development
 
-1. Copy `server/.env.example` to `server/.env` (it is git-ignored) and set `CONTACT_ORIGIN=http://localhost:3000` and `CONTACT_PORT=8787`. Use a real Resend key only if you want real emails; with a fake key every valid send answers 502, which is enough to work on the form.
+1. Copy `server/.env.example` to `server/.env` (it is git-ignored) and set `CONTACT_ORIGIN=http://localhost:3000` and `CONTACT_PORT=8787`. To try the form without a Resend key, add `CONTACT_DRY_RUN=1`: valid messages are answered as sent and nothing is emailed (the service refuses this setting unless the origin is localhost). Use a real Resend key only if you want real emails.
 2. Run `npm run contact`. It listens on http://127.0.0.1:8787 and answers CORS preflight for http://localhost:3000.
-3. Start the site with the form pointed at it:
-
-```sh
-NEXT_PUBLIC_CONTACT_URL=http://127.0.0.1:8787/api/contact npm run dev
-```
+3. Point the form at it: put `NEXT_PUBLIC_CONTACT_URL=http://127.0.0.1:8787/api/contact` in `.env.development.local` (git-ignored) and start `npm run dev`.
 
 Without `NEXT_PUBLIC_CONTACT_URL` the form posts to `/api/contact` on the same host, which is what production uses.
 

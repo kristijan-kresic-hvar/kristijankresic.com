@@ -14,9 +14,14 @@ const EMAIL = /^[^\s@,;<>"]+@[^\s@,;<>"]+\.[^\s@,;<>"]+$/;
 // Control characters plus the Unicode line breaks (NEL, line and paragraph separators).
 const CONTROL = /[\u0000-\u001f\u007f\u0085\u2028\u2029]/;
 
+// A dry run answers as if sent and never calls Resend. Only for a site on this machine, so it cannot be left on in production.
+const LOCAL = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
 /** Reads the config from the environment; throws naming every missing variable. */
 export function readConfig(env) {
-  const missing = REQUIRED.filter((key) => !env[key]);
+  const dryRun = env.CONTACT_DRY_RUN === '1';
+  if (dryRun && !LOCAL.test(env.CONTACT_ORIGIN ?? '')) throw new Error('CONTACT_DRY_RUN is for local work only: CONTACT_ORIGIN must be http://localhost or http://127.0.0.1');
+  const missing = (dryRun ? ['CONTACT_ORIGIN'] : REQUIRED).filter((key) => !env[key]);
   if (missing.length) throw new Error(`Missing environment variables: ${missing.join(', ')}`);
   return {
     apiKey: env.RESEND_API_KEY,
@@ -24,6 +29,7 @@ export function readConfig(env) {
     from: env.CONTACT_FROM,
     origin: env.CONTACT_ORIGIN,
     port: Number(env.CONTACT_PORT || 8787),
+    dryRun,
   };
 }
 
@@ -69,6 +75,7 @@ export function createHandler(config, deps = {}) {
   }
 
   async function deliver(v) {
+    if (config.dryRun) return 'dry run, nothing sent';
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), RESEND_TIMEOUT);
     try {
@@ -133,7 +140,7 @@ export function createHandler(config, deps = {}) {
     if (fields.length) return reply(400, `invalid ${fields.join(',')}`, { ok: false, error: 'invalid', fields });
 
     const outcome = await deliver(value);
-    return outcome === 'sent' ? reply(200, 'sent', { ok: true }) : reply(502, outcome, { ok: false, error: 'send_failed' });
+    return outcome === 'sent' || config.dryRun ? reply(200, outcome, { ok: true }) : reply(502, outcome, { ok: false, error: 'send_failed' });
   };
 }
 
@@ -166,7 +173,7 @@ export function start(config) {
   });
   server.requestTimeout = 15_000;
   // Loopback only: nginx is the sole way in, so the X-Real-IP it sets cannot be forged from outside.
-  server.listen(config.port, '127.0.0.1', () => console.log(`contact service on 127.0.0.1:${config.port}, origin ${config.origin}`));
+  server.listen(config.port, '127.0.0.1', () => console.log(`contact service on 127.0.0.1:${config.port}, origin ${config.origin}${config.dryRun ? ', DRY RUN: nothing is sent' : ''}`));
   return server;
 }
 

@@ -198,4 +198,19 @@ describe('contact service', () => {
     expect(() => readConfig({ RESEND_API_KEY: 'x', CONTACT_ORIGIN: ORIGIN })).toThrow('Missing environment variables: CONTACT_TO, CONTACT_FROM');
     expect(readConfig({ RESEND_API_KEY: 'k', CONTACT_TO: 't', CONTACT_FROM: 'f', CONTACT_ORIGIN: 'o' }).port).toBe(8787);
   });
+
+  it('in a dry run answers as sent without calling Resend, and only for a site on this machine', async () => {
+    expect(() => readConfig({ CONTACT_DRY_RUN: '1', CONTACT_ORIGIN: ORIGIN })).toThrow('local work only');
+    const local = readConfig({ CONTACT_DRY_RUN: '1', CONTACT_ORIGIN: 'http://localhost:3000' });
+    const fetchMock = vi.fn();
+    const lines: string[] = [];
+    const handle = createHandler(local, { fetch: fetchMock, log: (line) => lines.push(line) });
+    const res = await handle(json(valid, { origin: 'http://localhost:3000' }));
+    expect(res.status).toBe(200);
+    expect(JSON.parse(res.body)).toEqual({ ok: true });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(lines.at(-1)).toContain('dry run, nothing sent');
+    // invalid input is still refused, so the form's error states can be tried too
+    expect((await handle(json({ ...valid, email: 'nope' }, { origin: 'http://localhost:3000' }))).status).toBe(400);
+  });
 });
