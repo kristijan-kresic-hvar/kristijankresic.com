@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Ending } from '@/components/ending';
 import { Nav } from '@/components/nav';
+import { Reveals } from '@/components/reveals';
 import { PROFILE } from '@/content/profile';
 import './globals.css';
 
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
         <Ending />
+        <Reveals />
       </body>
     </html>
   );
