@@ -60,12 +60,12 @@ export default function About() {
       </div>
 
       <section aria-labelledby="timeline-title" className="mt-20 grid gap-x-12 gap-y-8 lg:mt-28 lg:grid-cols-12">
-        <h2 id="timeline-title" className="text-title leading-[1.08] font-semibold lg:col-span-4">
+        <h2 id="timeline-title" className="rise text-title leading-[1.08] font-semibold lg:col-span-4">
           Timeline
         </h2>
-        <ol className="border-b border-border-default lg:col-span-8">
+        <ol className="lg:col-span-8">
           {TIMELINE.map((t) => (
-            <li key={t.when} className="grid gap-x-8 gap-y-1 border-t border-border-default py-4 sm:grid-cols-[11rem_1fr]">
+            <li key={t.when} className="rise grid gap-x-8 gap-y-1 border-t border-border-default py-4 last:border-b sm:grid-cols-[11rem_1fr]">
               <span className="text-sm leading-6 text-text-muted tabular-nums">{t.when}</span>
               <span>
                 <span className="font-medium text-text-primary">{t.what}</span>
@@ -76,7 +76,7 @@ export default function About() {
         </ol>
       </section>
 
-      <Facts className="mt-20 lg:mt-28" />
+      <Facts className="rise mt-20 lg:mt-28" />
     </Container>
   );
 }
