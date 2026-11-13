@@ -680,6 +680,22 @@ li:first-child > .callout:not([data-active='true']) {
     animation-duration: 320ms;
   }
 }
+/* Every change of page: the window cross-fades from the old page to the new (see page-fade.tsx). */
+.page-fade {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 320ms;
+    animation-timing-function: var(--ease-standard);
+  }
+}
 /* Reduced motion: the browser may still swap the page through a view transition, but nothing moves. */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
