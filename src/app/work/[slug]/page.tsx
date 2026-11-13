@@ -147,15 +147,17 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
 
       {next && (
         <Container>
-          <Link href={`/work/${next.slug}/`} className="ew-cell cs-next">
+          <Link href={`/work/${next.slug}/`} className="cs-next">
             <span>
               <span className="cs-next-label">Next project</span>
               <span className="cs-next-title">
-                {next.title}
-                {/* Two arrows: on hover one leaves to the right as the other arrives from the left. */}
+                <span>{next.title}</span>
+                {/* On hover the arrow runs from the name to the plate, its shaft drawing out behind it. */}
                 <span className="cs-go" aria-hidden="true">
-                  <ArrowRight />
-                  <ArrowRight />
+                  <span>
+                    <i />
+                    <ArrowRight />
+                  </span>
                 </span>
               </span>
               <span className="cs-next-tag">{next.tagline}</span>
