@@ -906,8 +906,9 @@ html:has(.lightbox[open]) {
 }
 .cs-next-title {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.3em;
+  gap: 0 0.22em; /* a word space at this tracking */
   margin-top: 0.5rem;
   font-size: var(--text-display);
   font-weight: 600;
@@ -926,6 +927,7 @@ html:has(.lightbox[open]) {
 .cs-go {
   flex: none;
   width: 0.5em;
+  margin-left: 0.08em;
   overflow: hidden;
   color: var(--color-accent);
 }

@@ -151,7 +151,10 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
             <span>
               <span className="cs-next-label">Next project</span>
               <span className="cs-next-title">
-                <span>{next.title}</span>
+                {/* Word by word, so the arrow's track is whatever room is left after the last word, on its line. */}
+                {next.title.split(' ').map((word, i) => (
+                  <span key={i}>{word} </span>
+                ))}
                 {/* On hover the arrow runs from the name to the plate, its shaft drawing out behind it. */}
                 <span className="cs-go" aria-hidden="true">
                   <span>
@@ -163,8 +166,9 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
               <span className="cs-next-tag">{next.tagline}</span>
             </span>
             <span className="cs-next-plate">
-              {next.featured ? (
-                // The same plate the next page opens on, so a click carries it there.
+              {next.featured && index + 1 < WORK.length ? (
+                // The same plate the next page opens on, so a click carries it there. Not when the list
+                // wraps round to the first project: the landing's hero opens on that plate under the same name.
                 <ViewTransition {...plateMorph(next.slug)}>
                   <Plate study={next} />
                 </ViewTransition>
