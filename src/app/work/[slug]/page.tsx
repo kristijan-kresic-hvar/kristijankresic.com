@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { ViewTransition } from 'react';
 import { AnnotatedShot } from '@/components/annotated-shot';
 import { Container } from '@/components/container';
+import { ContourField } from '@/components/contour-field';
 import { Plate, plateMorph } from '@/components/plate';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from '@/components/icons';
 import { Screens } from '@/components/screens';
@@ -176,8 +177,8 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
               </span>
               <span className="cs-next-tag">{next.tagline}</span>
             </span>
-            {/* The same picture the next page opens on, so a click carries it there. None while that study has no screenshot. */}
-            {next.image && (
+            {/* The same picture the next page opens on, so a click carries it there. */}
+            {next.image ? (
               <span className="cs-next-plate">
                 <ViewTransition {...plateMorph(next.slug)}>
                   {hasPlate(next) ? (
@@ -186,6 +187,16 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
                     <Image src={next.image.src.replace('.webp', '-card.webp')} alt="" width={800} height={500} loading="lazy" className="w-full" />
                   )}
                 </ViewTransition>
+              </span>
+            ) : (
+              // No screenshot exists: a plate of the site's own depth chart in its place, labelled as such. Never a mock screen.
+              <span className="cs-next-plate cs-chart">
+                <ContourField className="cs-chart-field" text=".cs-chart-note" />
+                <span className="cs-chart-note">
+                  <span>{next.period}</span>
+                  <span>{next.stack.join(' · ')}</span>
+                  <b>No public screenshots</b>
+                </span>
               </span>
             )}
           </Link>

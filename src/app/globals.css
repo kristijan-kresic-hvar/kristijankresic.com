@@ -1039,6 +1039,34 @@ html:has(.lightbox[open]) {
   border-radius: var(--radius-lg);
   background: var(--color-bg-elev-1);
 }
+/* A study with no screenshot: the plate holds the site's depth chart and the facts there are,
+   so the arrow still has somewhere to land and nothing poses as a screen. */
+.cs-chart {
+  position: relative;
+  aspect-ratio: 16 / 10;
+}
+.cs-chart-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.cs-chart-note {
+  position: absolute;
+  inset: auto 1rem 0.875rem;
+  display: grid;
+  gap: 0.125rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+.cs-chart-note b {
+  margin-top: 0.375rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
 @media (min-width: 64rem) {
   .cs-next {
     grid-template-columns: 8fr 4fr;
@@ -1051,10 +1079,6 @@ html:has(.lightbox[open]) {
     flex: 1;
     min-width: 0.5em;
     margin-right: -2.25rem; /* across the column gap, stopping just short of the plate */
-  }
-  /* No picture to reach: the arrow runs to the end of the text column instead. */
-  .cs-next:not(:has(.cs-next-plate)) .cs-go {
-    margin-right: 0;
   }
   .cs-go > span {
     /* At rest only the arrowhead end shows, beside the name. */
