@@ -24,8 +24,6 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   };
 }
 
-const row = 'grid grid-cols-[4.5rem_1fr] gap-x-4 border-t border-border-default py-3';
-
 export default async function CaseStudyPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const study = getCaseStudy(slug);
@@ -108,24 +106,30 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
         </div>
       </Container>
 
-      <Container className="grid gap-x-12 gap-y-8 py-20 lg:grid-cols-12 lg:py-28">
-        <h2 className="text-title leading-[1.08] font-semibold lg:col-span-4">What I built</h2>
-        <div className="lg:col-span-7 lg:col-start-6">
-          <p className="text-lead text-text-secondary">{study.summary}</p>
-          <ul className="mt-10">
-            {study.highlights.map((h) => (
-              <li key={h} className="border-t border-border-default py-5 text-text-body">
+      <Container className="py-20 lg:py-28">
+        <div className="cs-built">
+          <div className="cs-side">
+            <h2 className="text-title leading-[1.08] font-semibold">What I built</h2>
+            <p>{study.summary}</p>
+            <dl>
+              <dt>Stack</dt>
+              <dd>{study.stack.join(', ')}</dd>
+            </dl>
+          </div>
+          <ol className="cs-proof">
+            {study.highlights.map((h, i) => (
+              <li key={h}>
+                <span className="cs-num" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 {h}
               </li>
             ))}
-            <li className={`${row} border-b py-5`}>
-              <h3 className="text-sm font-normal tracking-normal text-text-muted">Stack</h3>
-              <p className="text-text-secondary">{study.stack.join(', ')}</p>
-            </li>
-          </ul>
+          </ol>
         </div>
+        {/* Outside the grid above: the pinned column must stop with the highlights, not slide over this. */}
         {study.outcome && (
-          <p className="ruled mt-10 text-title leading-[1.12] font-semibold tracking-tight text-text-primary lg:col-span-10 lg:mt-16">
+          <p className="ruled mt-16 max-w-[26ch] text-title leading-[1.12] font-semibold tracking-tight text-text-primary lg:mt-20">
             {study.outcome}
           </p>
         )}

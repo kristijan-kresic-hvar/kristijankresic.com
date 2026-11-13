@@ -663,6 +663,66 @@ body {
   }
 }
 
+/* Case-study "What I built": heading, summary and stack hold the left (pinned from 1024px) while
+   the highlights, the evidence, run down the right at lead size. */
+.cs-built {
+  display: grid;
+  gap: 2.5rem 3rem;
+}
+.cs-side p {
+  margin-top: 1.25rem;
+  max-width: 46ch;
+  color: var(--color-text-body);
+}
+.cs-side dl {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-default);
+  font-size: 0.875rem;
+}
+.cs-side dt {
+  color: var(--color-text-muted);
+}
+.cs-side dd {
+  margin-top: 0.25rem;
+  color: var(--color-text-secondary);
+}
+.cs-proof li {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  padding-block: 1.75rem;
+  border-top: 1px solid var(--color-border-default);
+  font-size: var(--text-lead);
+  line-height: 1.45;
+  color: var(--color-text-primary);
+}
+.cs-proof li:last-child {
+  border-bottom: 1px solid var(--color-border-default);
+}
+.cs-num {
+  padding-top: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--color-accent);
+}
+@media (min-width: 64rem) {
+  .cs-built {
+    grid-template-columns: 5fr 7fr;
+    align-items: start;
+  }
+  .cs-proof li {
+    padding-block: 2.25rem;
+  }
+}
+/* Pinned only where the window can hold the whole column under the nav. */
+@media (min-width: 64rem) and (min-height: 44rem) {
+  .cs-side {
+    position: sticky;
+    top: 6.5rem;
+  }
+}
+
 /* A short amber rule above a statement set at title scale (case-study outcome, practice statement). */
 .ruled::before {
   content: '';
