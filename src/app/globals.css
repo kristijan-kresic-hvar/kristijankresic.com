@@ -680,20 +680,34 @@ li:first-child > .callout:not([data-active='true']) {
     animation-duration: 320ms;
   }
 }
-/* Every change of page: the window cross-fades from the old page to the new (see page-fade.tsx). */
-.page-fade {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
+/* The About page (see page-fade.tsx) fades in, rising a few pixels, and fades out when it is left.
+   While it is up the nav is its own layer above it, so the page scrolled under the nav never shows
+   over it as it leaves; the layer does not animate, so the nav simply holds still. */
+:root:has(.about-page) .site-nav {
+  view-transition-name: site-nav;
+}
+::view-transition-group(site-nav),
+::view-transition-old(site-nav),
+::view-transition-new(site-nav) {
+  animation: none;
 }
 @media (prefers-reduced-motion: no-preference) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 320ms;
-    animation-timing-function: var(--ease-standard);
+  ::view-transition-old(.page-out) {
+    animation: page-out 180ms var(--ease-standard) both;
+  }
+  ::view-transition-new(.page-in) {
+    animation: page-in 520ms var(--ease-out) both;
+  }
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    translate: 0 1rem;
   }
 }
 /* Reduced motion: the browser may still swap the page through a view transition, but nothing moves. */

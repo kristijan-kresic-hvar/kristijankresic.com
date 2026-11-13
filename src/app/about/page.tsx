@@ -19,7 +19,7 @@ const TIMELINE = [
 
 export default function About() {
   return (
-    <Container className="pt-10 pb-20 sm:pt-16 lg:pb-28">
+    <Container className="about-page pt-10 pb-20 sm:pt-16 lg:pb-28">
       {/* One grid: the statement, the portrait running down beside it and into the text, the text set in from the edge. */}
       <div className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
         <h1 className="text-display leading-[1.04] font-semibold tracking-tighter lg:col-span-8 lg:pt-10">

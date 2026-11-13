@@ -42,11 +42,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <Nav />
         <main id="main" className="flex-1">
-          {children}
+          <PageFade>{children}</PageFade>
         </main>
         <Ending />
         <Reveals />
-        <PageFade />
       </body>
     </html>
   );

@@ -1,20 +1,21 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { ViewTransition } from 'react';
+import { type ReactNode, ViewTransition } from 'react';
 
 /**
- * Makes every change of page a view transition, so the whole window cross-fades from the old page
- * to the new one (styled on `::view-transition-*(root)` in globals.css). React only starts a view
- * transition when a <ViewTransition> boundary enters, leaves or changes; this one is a 1px marker
- * re-keyed by the path, so that happens on every navigation and the fade is left to the root.
- * Projects whose plate travels already did this; now all pages do, the plate travelling on top.
+ * Wraps the page in the layout. The About page fades in when it opens and out when it is left
+ * (`.page-in` and `.page-out` in globals.css); every other page changes as before, so a project's
+ * plate travelling between the hero and its case study is the only motion there.
+ * Keyed by the path, because React animates a boundary that leaves and one that enters, and a
+ * layout's own children never do either. Named pairs inside (the project plates) still travel.
  */
-export function PageFade() {
+export function PageFade({ children }: { children: ReactNode }) {
   const path = usePathname();
+  const fades = path.startsWith('/about');
   return (
-    <ViewTransition key={path}>
-      <i className="page-fade" aria-hidden="true" />
+    <ViewTransition key={path} enter={fades ? 'page-in' : 'none'} exit={fades ? 'page-out' : 'none'} default="none">
+      {children}
     </ViewTransition>
   );
 }
