@@ -265,6 +265,7 @@ export const WORK: CaseStudy[] = [
     stack: ['WordPress', 'PHP', 'Multilingual'],
     summary: 'Rebuilt the multilingual marketing site of Agrivi on WordPress with a custom theme.',
     highlights: ['Custom WordPress theme, multilingual content, performance pass.'],
+    image: { src: '/images/work/agrivi.webp', alt: 'Agrivi marketing site home page, Croatian version', width: 1600, height: 1000 },
     annotations: [],
     screens: 0,
     scroll: false,
