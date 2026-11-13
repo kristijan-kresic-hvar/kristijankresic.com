@@ -61,7 +61,10 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
           {next && (
             <Link href={`/work/${next.slug}/`}>
               {/* On a phone the name would push the row onto two lines. */}
-              Next<span className="max-sm:hidden">: {next.client}</span> <ArrowRight />
+              <span>
+                Next<span className="max-sm:hidden">: {next.client}</span>
+              </span>
+              <ArrowRight />
             </Link>
           )}
         </nav>
