@@ -22,6 +22,9 @@ export function Nav() {
               href={l.href}
               // The CV is a PDF, not a route: prefetching it only logs a 404 for a route payload that never exists.
               prefetch={l.href.endsWith('.pdf') ? false : undefined}
+              // And it opens in a new tab, so the site stays where the visitor left it.
+              target={l.href.endsWith('.pdf') ? '_blank' : undefined}
+              rel={l.href.endsWith('.pdf') ? 'noopener' : undefined}
               className={`text-text-body transition-colors duration-(--duration-instant) hover:text-text-primary ${l.always ? '' : 'hidden sm:inline'}`}
             >
               {l.label}

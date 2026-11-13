@@ -32,10 +32,10 @@ export function Ending() {
               <a href={PROFILE.phoneHref} className="link text-text-secondary tabular-nums">
                 {PROFILE.phone}
               </a>
-              <a href={PROFILE.cv.frontend} className="link inline-flex items-center gap-1.5 text-text-secondary">
+              <a href={PROFILE.cv.frontend} target="_blank" rel="noopener" className="link inline-flex items-center gap-1.5 text-text-secondary">
                 Frontend CV, PDF <Download />
               </a>
-              <a href={PROFILE.cv.fullstack} className="link inline-flex items-center gap-1.5 text-text-secondary">
+              <a href={PROFILE.cv.fullstack} target="_blank" rel="noopener" className="link inline-flex items-center gap-1.5 text-text-secondary">
                 Full-stack CV, PDF <Download />
               </a>
             </div>
@@ -56,12 +56,12 @@ export function Ending() {
           </p>
           <ul className="flex gap-x-6">
             <li>
-              <a href={PROFILE.github} className="link inline-flex items-center gap-1.5 text-text-secondary">
+              <a href={PROFILE.github} target="_blank" rel="noopener" className="link inline-flex items-center gap-1.5 text-text-secondary">
                 GitHub <ArrowUpRight />
               </a>
             </li>
             <li>
-              <a href={PROFILE.linkedin} className="link inline-flex items-center gap-1.5 text-text-secondary">
+              <a href={PROFILE.linkedin} target="_blank" rel="noopener" className="link inline-flex items-center gap-1.5 text-text-secondary">
                 LinkedIn <ArrowUpRight />
               </a>
             </li>

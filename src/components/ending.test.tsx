@@ -23,6 +23,9 @@ describe('Ending', () => {
     const footer = screen.getByRole('contentinfo');
     expect(footer).toContainElement(screen.getByRole('link', { name: /GitHub/ }));
     expect(screen.getByRole('link', { name: /LinkedIn/ })).toHaveAttribute('href', PROFILE.linkedin);
+    // External links and the CVs open in a new tab; the address and phone do not.
+    for (const name of [/GitHub/, /LinkedIn/, /Frontend CV/, /Full-stack CV/]) expect(screen.getByRole('link', { name })).toHaveAttribute('target', '_blank');
+    expect(screen.getByRole('link', { name: PROFILE.email })).not.toHaveAttribute('target');
   });
 
   it('follows the contact details with the form, in reading order', () => {

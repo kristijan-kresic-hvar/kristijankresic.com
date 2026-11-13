@@ -42,10 +42,10 @@ export function Facts({ rows = false, className = '' }: { rows?: boolean; classN
       <div className={row}>
         <dt className={term}>CV</dt>
         <dd className={`flex flex-wrap gap-x-5 gap-y-1 ${rows ? '' : 'sm:flex-col'}`}>
-          <a href={PROFILE.cv.frontend} className={link}>
+          <a href={PROFILE.cv.frontend} target="_blank" rel="noopener" className={link}>
             Frontend, PDF <Download />
           </a>
-          <a href={PROFILE.cv.fullstack} className={link}>
+          <a href={PROFILE.cv.fullstack} target="_blank" rel="noopener" className={link}>
             Full-stack, PDF <Download />
           </a>
         </dd>
@@ -57,10 +57,10 @@ export function Facts({ rows = false, className = '' }: { rows?: boolean; classN
             {PROFILE.email}
           </a>
           <span className="mt-0.5 flex gap-x-4 text-text-body">
-            <a href={PROFILE.github} className={`${link} text-text-body`}>
+            <a href={PROFILE.github} target="_blank" rel="noopener" className={`${link} text-text-body`}>
               GitHub <ArrowUpRight />
             </a>
-            <a href={PROFILE.linkedin} className={`${link} text-text-body`}>
+            <a href={PROFILE.linkedin} target="_blank" rel="noopener" className={`${link} text-text-body`}>
               LinkedIn <ArrowUpRight />
             </a>
           </span>
