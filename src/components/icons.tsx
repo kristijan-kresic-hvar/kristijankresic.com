@@ -28,6 +28,13 @@ export const ArrowRight = (p: IconProps) => (
   </Icon>
 );
 
+/** `pathLength` 1, so `.check` can draw it with a dash offset. */
+export const Check = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 8.5 6.5 12 13 4.5" pathLength={1} />
+  </Icon>
+);
+
 export const ArrowLeft = (p: IconProps) => (
   <Icon {...p}>
     <path d="M13.5 8h-11M7 3.5 2.5 8 7 12.5" />

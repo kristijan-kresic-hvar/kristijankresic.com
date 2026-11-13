@@ -320,6 +320,47 @@ body {
   border-color: var(--color-accent);
 }
 
+/* Confirmation ticks: the one in the copy button and the ringed one on a sent message. Each line
+   has a path length of 1 and draws itself once; under reduced motion it is simply there. */
+.check {
+  color: var(--color-accent);
+}
+.cf-check {
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 1.25rem;
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cf-check circle {
+  /* from twelve o'clock */
+  rotate: -90deg;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .check path,
+  .cf-check :is(circle, path) {
+    stroke-dasharray: 1;
+    animation: tick-draw 320ms var(--ease-out) both;
+  }
+  .cf-check circle {
+    animation-duration: 600ms;
+  }
+  .cf-check path {
+    animation-duration: 380ms;
+    animation-delay: 380ms;
+  }
+}
+@keyframes tick-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
 /* Scroll reveals (.rise). A block below the window waits transparent and a little low, and comes
    up once when it has scrolled in. The script in reveals.tsx marks the ones that wait
    ([data-wait]); a block it never marked is simply there, so nothing depends on it running.

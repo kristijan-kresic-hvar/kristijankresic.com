@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Check } from './icons';
 
 export function CopyButton({ value, label }: { value: string; label: string }) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
@@ -17,6 +18,7 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
 
   return (
     <button type="button" onClick={() => void copy()} aria-live="polite" data-state={state} className="btn-secondary">
+      {state === 'copied' && <Check className="check" />}
       {state === 'copied' ? 'Copied' : state === 'failed' ? 'Select to copy' : label}
     </button>
   );

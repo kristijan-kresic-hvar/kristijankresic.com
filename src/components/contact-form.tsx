@@ -82,6 +82,11 @@ export function ContactForm() {
   if (state.step === 'sent') {
     return (
       <div id="message" className="cf cf-done lg:col-span-5 lg:col-start-8" style={{ minHeight: state.height }}>
+        {/* A ringed check, in the manner of the case-study markers: the ring draws, then the tick. */}
+        <svg className="cf-check" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="14.5" pathLength={1} />
+          <path d="M10 16.5l4.2 4.2L22.5 12" pathLength={1} />
+        </svg>
         <h3 ref={done} tabIndex={-1} className="cf-say cf-thanks">
           Thanks, {state.name.trim().split(/\s+/)[0]}. Your message is with me.
         </h3>
