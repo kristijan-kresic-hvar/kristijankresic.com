@@ -8,8 +8,8 @@ function page() {
   document.body.innerHTML = '<p class="rise" id="seen"></p><p class="rise" id="below"></p>';
   const seen = document.getElementById('seen') as HTMLElement;
   const below = document.getElementById('below') as HTMLElement;
-  seen.getBoundingClientRect = () => ({ top: 100 }) as DOMRect;
-  below.getBoundingClientRect = () => ({ top: 2000 }) as DOMRect;
+  seen.getBoundingClientRect = () => ({ top: 100, bottom: 200 }) as DOMRect;
+  below.getBoundingClientRect = () => ({ top: 2000, bottom: 2100 }) as DOMRect;
   return { seen, below };
 }
 
@@ -42,6 +42,12 @@ describe('armReveals', () => {
     fire([{ isIntersecting: true, target: below }]);
     expect(below).not.toHaveAttribute('data-wait');
     expect(unobserve).toHaveBeenCalledWith(below);
+
+    // jumped past without ever crossing the window: shown the next time anything is revealed
+    below.dataset.wait = '';
+    below.getBoundingClientRect = () => ({ top: -900, bottom: -700 }) as DOMRect;
+    fire([]);
+    expect(below).not.toHaveAttribute('data-wait');
 
     below.dataset.wait = '';
     disarm();

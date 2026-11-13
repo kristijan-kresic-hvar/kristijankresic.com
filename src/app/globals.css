@@ -310,7 +310,8 @@ body {
 
 /* Scroll reveals (.rise). A block below the window waits transparent and a little low, and comes
    up once when it has scrolled in. The script in reveals.tsx marks the ones that wait
-   ([data-wait]); a block it never marked is simply there, so nothing depends on it running. */
+   ([data-wait]); a block it never marked is simply there, so nothing depends on it running.
+   One motion per section: this is for sections that have none of their own. */
 @media (prefers-reduced-motion: no-preference) {
   .rise {
     transition:

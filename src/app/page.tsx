@@ -13,7 +13,7 @@ export default function Home() {
 
       <section aria-labelledby="practice-title" className="practice border-t border-border-subtle py-20 lg:py-32">
         <Container className="practice-grid grid gap-y-8 lg:grid-cols-12">
-          <figure className="practice-figure rise max-w-40 lg:col-span-2 lg:max-w-none">
+          <figure className="practice-figure max-w-40 lg:col-span-2 lg:max-w-none">
             <Image
               src="/images/headshot.webp"
               alt={`Portrait of ${PROFILE.name}`}
@@ -45,7 +45,7 @@ export default function Home() {
                 <strong>AI does the mechanical work;</strong> every architecture call and merged line is mine.
               </span>
             </p>
-            <p className="rise mt-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
+            <p className="mt-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
               <Link href="/about/" className="link inline-flex items-center gap-2 text-text-primary">
                 More about me <ArrowRight />
               </Link>

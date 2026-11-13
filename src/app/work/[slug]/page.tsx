@@ -74,7 +74,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
             <h1 className="text-display leading-[1.04] font-semibold tracking-tighter">{study.title}</h1>
             <p className="max-w-[44ch] text-lead text-text-body">{study.tagline}</p>
           </header>
-          <dl className="cs-credits rise">
+          <dl className="cs-credits">
             <div>
               <dt>Role</dt>
               <dd>{study.role}</dd>
