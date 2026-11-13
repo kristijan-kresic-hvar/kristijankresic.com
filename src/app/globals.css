@@ -343,6 +343,63 @@ body {
   text-decoration-color: var(--color-accent);
 }
 
+/* Contact form, written as a sentence with blanks: name, what it is about, email. Each blank is a
+   hairline that turns amber while it has focus; the message is a ruled area under the sentence. */
+.cf-say {
+  font-size: clamp(1.25rem, 1.6vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-muted);
+}
+.cf-blank {
+  field-sizing: content;
+  min-width: 7ch;
+  max-width: 100%;
+  padding: 0 0.1em;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  outline: none;
+  transition: border-color var(--duration-instant) var(--ease-standard);
+}
+.cf-blank::placeholder {
+  color: var(--color-text-disabled);
+}
+select.cf-blank {
+  appearance: none;
+  cursor: pointer;
+}
+.cf-blank:focus-visible {
+  border-bottom-color: var(--color-accent);
+}
+.cf-note {
+  display: block;
+  width: 100%;
+  min-height: 7rem;
+  margin-top: 1.5rem;
+  padding: 0.75rem 0;
+  border: 0;
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--duration-instant) var(--ease-standard);
+}
+.cf-note:focus-visible {
+  border-bottom-color: var(--color-accent);
+}
+.cf-send {
+  margin-top: 1.25rem;
+}
+
 /* Annotated screenshot: markers, list rows and leader lines share one active state (amber). */
 .marker {
   display: inline-grid;
