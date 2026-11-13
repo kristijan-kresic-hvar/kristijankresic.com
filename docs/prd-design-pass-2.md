@@ -111,7 +111,7 @@ The owner picked one of three variants for each section in the browser (2026-11-
 
 ### The ending
 
-- **S10.** Contact and footer are one `footer`: the closing sentence ends in the email address, which stays on one line without overflowing at every width from 320 to 1920. Copy, phone and both CVs sit under it once; one bar carries the copyright, location, local time, GitHub and LinkedIn and wraps cleanly on phones.
+- **S10.** Contact and footer are one `footer`: the closing sentence ends in the email address, which stays on one line without overflowing at every width from 320 to 1920. Copy and both CVs sit under it once (no phone number: the owner removed it from the site on 2026-11-13); one bar carries the copyright, location, local time, GitHub and LinkedIn and wraps cleanly on phones.
 - **S11.** The contour field runs behind the ending exactly as in the hero: it drifts, leans around the pointer, is dimmed behind the text, is still on touch devices and under reduced motion, and stops when the ending is off screen or the tab is hidden. All text over it meets AA.
 
 ### Housekeeping

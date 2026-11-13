@@ -10,10 +10,10 @@ describe('Ending', () => {
     expect(screen.getByRole('link', { name: PROFILE.email })).toHaveAttribute('href', `mailto:${PROFILE.email}`);
   });
 
-  it('offers copy, phone and both CVs under it, once each', () => {
+  it('offers copy and both CVs under it, once each, and no phone number', () => {
     render(<Ending />);
     expect(screen.getByRole('button', { name: 'Copy email' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: PROFILE.phone })).toHaveAttribute('href', PROFILE.phoneHref);
+    expect(document.querySelector('a[href^="tel:"]')).toBeNull();
     expect(screen.getByRole('link', { name: /Frontend CV/ })).toHaveAttribute('href', PROFILE.cv.frontend);
     expect(screen.getByRole('link', { name: /Full-stack CV/ })).toHaveAttribute('href', PROFILE.cv.fullstack);
   });
@@ -23,7 +23,7 @@ describe('Ending', () => {
     const footer = screen.getByRole('contentinfo');
     expect(footer).toContainElement(screen.getByRole('link', { name: /GitHub/ }));
     expect(screen.getByRole('link', { name: /LinkedIn/ })).toHaveAttribute('href', PROFILE.linkedin);
-    // External links and the CVs open in a new tab; the address and phone do not.
+    // External links and the CVs open in a new tab; the address does not.
     for (const name of [/GitHub/, /LinkedIn/, /Frontend CV/, /Full-stack CV/]) expect(screen.getByRole('link', { name })).toHaveAttribute('target', '_blank');
     expect(screen.getByRole('link', { name: PROFILE.email })).not.toHaveAttribute('target');
   });

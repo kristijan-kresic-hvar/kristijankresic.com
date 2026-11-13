@@ -29,9 +29,6 @@ export function Ending() {
             </h2>
             <div className="end-details mt-8 flex w-fit flex-wrap items-center gap-x-6 gap-y-3 text-sm sm:mt-10">
               <CopyButton value={PROFILE.email} label="Copy email" />
-              <a href={PROFILE.phoneHref} className="link text-text-secondary tabular-nums">
-                {PROFILE.phone}
-              </a>
               <a href={PROFILE.cv.frontend} target="_blank" rel="noopener" className="link inline-flex items-center gap-1.5 text-text-secondary">
                 Frontend CV, PDF <Download />
               </a>
