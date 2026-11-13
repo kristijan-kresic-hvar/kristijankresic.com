@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { PROFILE } from '@/content/profile';
 
@@ -23,6 +24,7 @@ export function ContactForm() {
   const done = useRef<HTMLHeadingElement>(null);
   const [state, setState] = useState<State>({ step: 'idle' });
   const [invalid, setInvalid] = useState<string[]>([]);
+  const onThanks = ['/thanks', '/thanks/'].includes(usePathname());
 
   // Native validation bubbles are the no-JS fallback; with JS the errors sit under the blanks.
   useEffect(() => {
@@ -74,6 +76,9 @@ export function ContactForm() {
     }
   }
 
+  // /thanks/ already confirms a sent message; inviting another one there reads as a reset.
+  if (onThanks) return null;
+
   if (state.step === 'sent') {
     return (
       <div className="cf cf-done lg:col-span-5 lg:col-start-8" style={{ minHeight: state.height }}>
@@ -100,15 +105,17 @@ export function ContactForm() {
         Send a message
       </h3>
       <p className="cf-say">
-        Or write it here. I&rsquo;m{' '}
+        Or write it here. <span id="cf-name-lead">I&rsquo;m</span>{' '}
         <input
+          id="cf-name"
           className="cf-blank"
           type="text"
           autoComplete="name"
           required
           maxLength={100}
           placeholder="your name"
-          aria-label="Your name"
+          aria-label="your name"
+          aria-labelledby="cf-name-lead cf-name"
           {...blankProps('name')}
         />{' '}
         and I&rsquo;m{' '}
@@ -116,8 +123,9 @@ export function ContactForm() {
           <option value="hire">hiring for a role</option>
           <option value="project">starting a project</option>
         </select>
-        . Reach me at{' '}
+        . <span id="cf-email-lead">Reach me at</span>{' '}
         <input
+          id="cf-email"
           className="cf-blank"
           type="email"
           autoComplete="email"
@@ -125,7 +133,8 @@ export function ContactForm() {
           required
           maxLength={254}
           placeholder="your email"
-          aria-label="Your email"
+          aria-label="your email"
+          aria-labelledby="cf-email-lead cf-email"
           {...blankProps('email')}
         />
         .
@@ -139,7 +148,10 @@ export function ContactForm() {
             </p>
           ))}
       </div>
-      <textarea className="cf-note" rows={4} required maxLength={5000} placeholder="What do you need?" aria-label="Message" {...blankProps('message')} />
+      <label htmlFor="cf-message" className="cf-ask">
+        What do you need?
+      </label>
+      <textarea id="cf-message" className="cf-note" rows={4} required maxLength={5000} {...blankProps('message')} />
       <div role="alert" className="cf-errors">
         {invalid.includes('message') && <p id="cf-message-error">{FIELD_ERRORS.message}</p>}
       </div>

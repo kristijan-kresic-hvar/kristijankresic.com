@@ -11,7 +11,8 @@ const RESEND_TIMEOUT = 10_000;
 const REQUIRED = ['RESEND_API_KEY', 'CONTACT_TO', 'CONTACT_FROM', 'CONTACT_ORIGIN'];
 // No whitespace, commas, semicolons or angle brackets, so one address and nothing else.
 const EMAIL = /^[^\s@,;<>"]+@[^\s@,;<>"]+\.[^\s@,;<>"]+$/;
-const CONTROL = /[\u0000-\u001f\u007f]/;
+// Control characters plus the Unicode line breaks (NEL, line and paragraph separators).
+const CONTROL = /[\u0000-\u001f\u007f\u0085\u2028\u2029]/;
 
 /** Reads the config from the environment; throws naming every missing variable. */
 export function readConfig(env) {

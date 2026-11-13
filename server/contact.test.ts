@@ -88,6 +88,9 @@ describe('contact service', () => {
   it.each([
     ['name', { name: 'Ada\r\nBcc: victim@example.com' }],
     ['name', { name: 'Ada\nX' }],
+    ['name', { name: 'Ada\u2028Bcc: victim@example.com' }],
+    ['name', { name: 'Ada\u2029X' }],
+    ['email', { email: 'ada@example.com\u2028Bcc: victim@example.com' }],
     ['email', { email: 'ada@example.com\r\nBcc: victim@example.com' }],
     ['email', { email: 'ada@example.com, victim@example.com' }],
     ['email', { email: 'Ada <ada@example.com>' }],

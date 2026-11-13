@@ -3,20 +3,26 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ContactForm } from './contact-form';
 import { PROFILE } from '@/content/profile';
 
+const nav = vi.hoisted(() => ({ pathname: '/' }));
+vi.mock('next/navigation', () => ({ usePathname: () => nav.pathname }));
+
 function reply(status: number, body: unknown) {
   return Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }));
 }
 
 function fill() {
-  fireEvent.change(screen.getByLabelText('Your name'), { target: { value: 'Ana' } });
+  fireEvent.change(screen.getByRole('textbox', { name: 'I’m your name' }), { target: { value: 'Ana' } });
   fireEvent.change(screen.getByLabelText('What it is about'), { target: { value: 'project' } });
-  fireEvent.change(screen.getByLabelText('Your email'), { target: { value: 'ana@example.com' } });
-  fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'A new site.' } });
+  fireEvent.change(screen.getByRole('textbox', { name: 'Reach me at your email' }), { target: { value: 'ana@example.com' } });
+  fireEvent.change(screen.getByLabelText('What do you need?'), { target: { value: 'A new site.' } });
 }
 
 const send = () => fireEvent.click(screen.getByRole('button', { name: /Send/ }));
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  nav.pathname = '/';
+});
 
 describe('ContactForm', () => {
   it('posts natively to the contact endpoint when JavaScript is off', () => {
@@ -24,7 +30,26 @@ describe('ContactForm', () => {
     const form = screen.getByRole('form', { name: 'Send a message' });
     expect(form).toHaveAttribute('action', '/api/contact');
     expect(form).toHaveAttribute('method', 'post');
-    expect(screen.getByLabelText('Your email')).toHaveAttribute('type', 'email');
+    expect(screen.getByRole('textbox', { name: 'Reach me at your email' })).toHaveAttribute('type', 'email');
+  });
+
+  it('names each field with words a sighted visitor also sees', () => {
+    render(<ContactForm />);
+    // Name and email take their names from the sentence around them plus their placeholder.
+    expect(screen.getByText('I’m')).toHaveAttribute('id', 'cf-name-lead');
+    expect(screen.getByText('Reach me at')).toHaveAttribute('id', 'cf-email-lead');
+    expect(screen.getByRole('textbox', { name: 'I’m your name' })).toHaveAttribute('placeholder', 'your name');
+    expect(screen.getByRole('textbox', { name: 'Reach me at your email' })).toHaveAttribute('placeholder', 'your email');
+    // The message has a real label, so the question stays once the visitor starts typing.
+    const message = screen.getByLabelText('What do you need?');
+    expect(screen.getByText('What do you need?').tagName).toBe('LABEL');
+    expect(message).not.toHaveAttribute('placeholder');
+  });
+
+  it.each(['/thanks', '/thanks/'])('is not offered again on %s, where a message was just sent', (path) => {
+    nav.pathname = path;
+    const { container } = render(<ContactForm />);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('offers the intent as a choice between a role and a project', () => {
@@ -64,12 +89,12 @@ describe('ContactForm', () => {
     render(<ContactForm />);
     fill();
     send();
-    const email = screen.getByLabelText('Your email');
+    const email = screen.getByRole('textbox', { name: 'Reach me at your email' });
     await waitFor(() => expect(email).toHaveFocus());
     expect(email).toHaveAttribute('aria-invalid', 'true');
     expect(email).toHaveAccessibleDescription(/email address does not look right/);
-    expect(screen.getByLabelText('Message')).toHaveAccessibleDescription(/what you need/);
-    expect(screen.getByLabelText('Your name')).not.toHaveAttribute('aria-invalid');
+    expect(screen.getByLabelText('What do you need?')).toHaveAccessibleDescription(/what you need/);
+    expect(screen.getByRole('textbox', { name: 'I’m your name' })).not.toHaveAttribute('aria-invalid');
     expect(screen.getAllByRole('alert').map((a) => a.textContent).join(' ')).toMatch(/does not look right.*what you need/);
   });
 
@@ -79,8 +104,8 @@ describe('ContactForm', () => {
     render(<ContactForm />);
     send();
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(screen.getByLabelText('Your name')).toHaveFocus();
-    expect(screen.getByLabelText('Your name')).toHaveAccessibleDescription('Add your name.');
+    expect(screen.getByRole('textbox', { name: 'I’m your name' })).toHaveFocus();
+    expect(screen.getByRole('textbox', { name: 'I’m your name' })).toHaveAccessibleDescription('Add your name.');
   });
 
   it.each([
@@ -94,8 +119,8 @@ describe('ContactForm', () => {
     send();
     expect(await screen.findByRole('status')).toHaveTextContent(copy);
     expect(screen.getByRole('link', { name: PROFILE.email })).toHaveAttribute('href', `mailto:${PROFILE.email}`);
-    expect(screen.getByLabelText('Your name')).toHaveValue('Ana');
-    expect(screen.getByLabelText('Message')).toHaveValue('A new site.');
+    expect(screen.getByRole('textbox', { name: 'I’m your name' })).toHaveValue('Ana');
+    expect(screen.getByLabelText('What do you need?')).toHaveValue('A new site.');
     expect(screen.getByRole('button', { name: 'Send message' })).not.toHaveAttribute('aria-disabled');
   });
 });
