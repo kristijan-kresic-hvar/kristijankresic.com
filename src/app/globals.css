@@ -519,7 +519,12 @@ body {
   scale: 1.15;
 }
 .callout {
+  border-top: 1px solid var(--color-border-default);
   transition: border-color var(--duration-instant) var(--ease-standard);
+}
+/* Rules only between rows. The first keeps a clear one so its lit state still has a line to colour. */
+li:first-child > .callout:not([data-active='true']) {
+  border-top-color: transparent;
 }
 .callout[data-active='true'] {
   border-top-color: var(--color-accent);
@@ -691,13 +696,19 @@ body {
   display: grid;
   grid-template-columns: 3rem 1fr;
   padding-block: 1.75rem;
-  border-top: 1px solid var(--color-border-default);
   font-size: var(--text-lead);
   line-height: 1.45;
   color: var(--color-text-primary);
 }
+/* Rules only between items: nothing above the first or below the last. */
+.cs-proof li + li {
+  border-top: 1px solid var(--color-border-default);
+}
+.cs-proof li:first-child {
+  padding-top: 0;
+}
 .cs-proof li:last-child {
-  border-bottom: 1px solid var(--color-border-default);
+  padding-bottom: 0;
 }
 .cs-num {
   padding-top: 0.5em;

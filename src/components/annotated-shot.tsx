@@ -124,14 +124,14 @@ export function AnnotatedShot({
       <div className="lg:col-span-4 lg:self-center">
         <h2 className="text-lg font-semibold tracking-normal">The decisions behind this screen</h2>
         <p className="mt-1 text-sm text-text-muted">Hover, tap or tab through the numbers.</p>
-        <ol className="mt-5 border-b border-border-default">
+        <ol className="mt-5">
           {annotations.map((a, i) => (
             <li key={i}>
               <button
                 type="button"
                 id={`callout-${i}`}
                 {...pair(i)}
-                className="callout grid w-full grid-cols-[2.5rem_1fr] border-t border-border-default py-4 text-left"
+                className="callout grid w-full grid-cols-[2.5rem_1fr] py-4 text-left"
               >
                 <span
                   ref={(n) => {

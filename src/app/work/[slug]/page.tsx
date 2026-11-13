@@ -136,32 +136,34 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
       </Container>
 
       {screens.length > 0 && (
-        <Container className="pb-20 lg:pb-28">
-          <h2 className="text-title leading-[1.08] font-semibold">More screens</h2>
-          <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:mt-10 lg:gap-4">
-            {screens.map((s, i) => (
-              <li key={s} className={i === 0 ? 'col-span-2 sm:col-span-1' : ''}>
-                <a
-                  href={s}
-                  target="_blank"
-                  rel="noopener"
-                  aria-label={`${study.title} screen ${i + 1}, opens full size`}
-                  className="frame block overflow-hidden rounded-md border border-border-default bg-bg-elev-1"
-                >
-                  <Image
-                    src={s.replace('.webp', '-thumb.webp')}
-                    alt=""
-                    width={640}
-                    height={400}
-                    loading="lazy"
-                    sizes="(min-width: 640px) 33vw, 100vw"
-                    className="w-full"
-                  />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Container>
+        <div className="cs-screens">
+          <Container className="pb-20 lg:pb-28">
+            <h2 className="text-title leading-[1.08] font-semibold">More screens</h2>
+            <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:mt-10 lg:gap-4">
+              {screens.map((s, i) => (
+                <li key={s} className={i === 0 ? 'col-span-2 sm:col-span-1' : ''}>
+                  <a
+                    href={s}
+                    target="_blank"
+                    rel="noopener"
+                    aria-label={`${study.title} screen ${i + 1}, opens full size`}
+                    className="frame block overflow-hidden rounded-md border border-border-default bg-bg-elev-1"
+                  >
+                    <Image
+                      src={s.replace('.webp', '-thumb.webp')}
+                      alt=""
+                      width={640}
+                      height={400}
+                      loading="lazy"
+                      sizes="(min-width: 640px) 33vw, 100vw"
+                      className="w-full"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Container>
+        </div>
       )}
 
       {next && (
