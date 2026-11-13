@@ -8,7 +8,7 @@ import { Container } from '@/components/container';
 import { Plate, plateMorph } from '@/components/plate';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from '@/components/icons';
 import { Screens } from '@/components/screens';
-import { FEATURED, WORK, getCaseStudy } from '@/content/work';
+import { EARLIER, FEATURED, WORK, getCaseStudy } from '@/content/work';
 
 type Params = { slug: string };
 
@@ -34,7 +34,9 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
 
   const index = WORK.findIndex((w) => w.slug === study.slug);
   const next = WORK[(index + 1) % WORK.length];
-  const featuredIndex = FEATURED.findIndex((f) => f.slug === study.slug);
+  // Two sets, as on the landing: the six in the hero, numbered as the hero numbers them, and the earlier work.
+  const set = study.featured ? FEATURED : EARLIER;
+  const place = set.findIndex((w) => w.slug === study.slug);
   // Featured projects are annotated on their plate, the image the hero shows, so the hero's plate lands on the same picture.
   const lead = study.featured
     ? { src: `/images/work/${study.slug}-plate.webp`, small: `/images/work/${study.slug}-plate-sm.webp`, width: 1920, height: 1200 }
@@ -48,18 +50,18 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
           <Link href="/#work">
             <ArrowLeft /> All work
           </Link>
-          {featuredIndex >= 0 && (
-            <span>
-              <span className="cs-count">
-                {String(featuredIndex + 1).padStart(2, '0')} / {String(FEATURED.length).padStart(2, '0')}
-              </span>
-              {/* The title is below the plate on desktop, so the row names the project. */}
-              <span className="ml-3 max-lg:hidden">{study.client}</span>
+          <span>
+            {!study.featured && <span className="mr-3 max-sm:hidden">Earlier work</span>}
+            <span className="cs-count">
+              {String(place + 1).padStart(2, '0')} / {String(set.length).padStart(2, '0')}
             </span>
-          )}
+            {/* A featured title is below the plate on desktop, so the row names the project. */}
+            {study.featured && <span className="ml-3 max-lg:hidden">{study.client}</span>}
+          </span>
           {next && (
             <Link href={`/work/${next.slug}/`}>
-              Next: {next.client} <ArrowRight />
+              {/* On a phone the name would push the row onto two lines. */}
+              Next<span className="max-sm:hidden">: {next.client}</span> <ArrowRight />
             </Link>
           )}
         </nav>
