@@ -543,11 +543,12 @@ body {
     border-color var(--duration-instant) var(--ease-standard),
     box-shadow var(--duration-instant) var(--ease-standard);
 }
+/* Focus as on the blanks: the rule under the field turns amber and doubles. The rule above stays
+   grey, and the corners stay square (the global focus style rounds them, which bent the ends). */
 .cf-note:focus-visible {
-  border-color: var(--color-accent);
-  box-shadow:
-    inset 0 1px 0 var(--color-accent),
-    inset 0 -1px 0 var(--color-accent);
+  border-bottom-color: var(--color-accent);
+  border-radius: 0;
+  box-shadow: inset 0 -1px 0 var(--color-accent);
 }
 .cf-send {
   margin-top: 1.25rem;
