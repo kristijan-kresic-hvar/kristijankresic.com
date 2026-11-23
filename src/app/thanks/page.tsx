@@ -14,7 +14,7 @@ export default function Thanks() {
     <Container className="py-24 lg:py-36">
       <h1 className="text-display leading-[1.04] font-semibold tracking-tighter">Thanks. Your message is with me.</h1>
       <p className="mt-5 text-lead text-text-body">I will reply to the address you gave, usually the same day.</p>
-      <Link href="/" className="link mt-8 inline-flex items-center gap-2 text-text-primary">
+      <Link href="/" className="page-back link mt-8 inline-flex items-center gap-2 text-text-primary">
         <ArrowLeft /> Back to the start
       </Link>
     </Container>

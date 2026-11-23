@@ -45,7 +45,11 @@ export function Nav() {
           )}
           {/* To the form at the foot of every page; /thanks/ has no form, so there it goes to the address. */}
           <a href={path.startsWith('/thanks') ? '#contact' : '#message'} className="btn-primary">
-            Email me
+            {/* Under 375px the bar only fits the short word; the long one stays a single text node for desktop. */}
+            <span className="nav-long">Email me</span>
+            <span className="nav-short">
+              Email<span className="sr-only"> me</span>
+            </span>
           </a>
         </nav>
       </Container>

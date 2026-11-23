@@ -11,6 +11,7 @@
      desktop layout    (min-width: 64rem)
      wide              (min-width: 100.01rem)                             above 1600px
      touch             (hover: none) and (pointer: coarse)                at any width
+     small phone       (max-width: 23.43rem)                              under 375px, the nav only
    Tailwind's `sm:` is the 640px line and `lg:` the 1024px line.
    Hover looks sit inside `(hover: hover)`, so a tap never leaves one stuck; a pressed look is `:active`.
    Sizes for small screens and fingers are the --tap and --text-phone tokens in :root below. */
@@ -585,6 +586,56 @@ body {
   }
 }
 
+/* Nav on touch: each link gets a finger-high hit box as an invisible ::after, so the bar keeps its
+   height and spacing; text links reach half the gap to each side (--reach). */
+.nav-short {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .site-nav a {
+    position: relative;
+  }
+  .site-nav a::after {
+    content: '';
+    position: absolute;
+    inset-inline: var(--reach, 0);
+    top: 50%;
+    height: var(--tap);
+    transform: translateY(-50%);
+  }
+  .site-nav nav > a:not(.btn-primary) {
+    --reach: -0.5rem;
+  }
+}
+@media (hover: none) and (pointer: coarse) and (min-width: 40rem) {
+  .site-nav nav > a:not(.btn-primary) {
+    --reach: -0.8125rem;
+  }
+}
+/* Small phones: name, Work, About and the button on one line in 280px. The CV stays on the
+   landing's first screen and in the ending. */
+@media (max-width: 23.43rem) {
+  .site-nav > div,
+  .site-nav nav {
+    column-gap: 0.75rem;
+  }
+  .site-nav > div > a {
+    white-space: nowrap;
+  }
+  .site-nav nav > a:not(.btn-primary) {
+    --reach: -0.375rem;
+  }
+  .site-nav .btn-primary {
+    padding-inline: 0.625rem;
+  }
+  .nav-long {
+    display: none;
+  }
+  .nav-short {
+    display: inline;
+  }
+}
+
 /* The ending (contact and footer in one). The contour chart from the hero returns behind it,
    surfacing from the top edge; the closing sentence is set like the hero statement and its last
    line is the address. */
@@ -847,6 +898,8 @@ body {
 /* Touch at any width: every link on the landing that stands on its own is a finger's height. */
 @media (hover: none) and (pointer: coarse) {
   .end-details > *,
+  .end-bar a,
+  .page-back,
   .practice-more > a,
   .facts a {
     min-height: var(--tap);

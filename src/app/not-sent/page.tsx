@@ -21,7 +21,7 @@ export default function NotSent() {
         </a>
         .
       </p>
-      <Link href="/" className="link mt-8 inline-flex items-center gap-2 text-text-primary">
+      <Link href="/" className="page-back link mt-8 inline-flex items-center gap-2 text-text-primary">
         <ArrowLeft /> Back to the start
       </Link>
     </Container>
