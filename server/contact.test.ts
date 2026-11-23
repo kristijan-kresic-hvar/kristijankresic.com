@@ -123,6 +123,31 @@ describe('contact service', () => {
     expect(fetchMock).toHaveBeenCalledTimes(7);
   });
 
+  it('refuses link spam: any link in the name, or more than two in the message', async () => {
+    const { handle, fetchMock } = setup();
+    const links = (n: number) => Array.from({ length: n }, (_, i) => `https://site${String(i)}.example`).join(' ');
+    const ok = await handle(json({ ...valid, message: `Role at ${links(1)}, my profile www.linkedin.com/in/me` }));
+    expect(ok.status).toBe(200);
+    const spam = await handle(json({ ...valid, message: `Cheap SEO ${links(3)}` }, { 'x-real-ip': '203.0.113.50' }));
+    expect(spam.status).toBe(400);
+    // no field named: the form falls back to "did not go through, email me", so a real person still has a way in
+    expect(JSON.parse(spam.body)).toEqual({ ok: false, error: 'links' });
+    expect((await handle(json({ ...valid, name: 'Visit http://spam.example' }, { 'x-real-ip': '203.0.113.51' }))).status).toBe(400);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops sending after 20 messages in a day, whatever addresses they come from', async () => {
+    let t = Date.UTC(2026, 0, 1);
+    const fetchMock = vi.fn(() => Promise.resolve(new Response('{}')));
+    const handle = createHandler(config, { fetch: fetchMock, now: () => t, log: () => {} });
+    const from = (i: number) => json(valid, { 'x-real-ip': `198.51.100.${String(i)}` });
+    for (let i = 0; i < 20; i++) expect((await handle(from(i))).status).toBe(200);
+    expect((await handle(from(20))).status).toBe(503);
+    expect(fetchMock).toHaveBeenCalledTimes(20);
+    t += 24 * 60 * 60 * 1000 + 1;
+    expect((await handle(from(21))).status).toBe(200);
+  });
+
   it('refuses other origins and a missing origin', async () => {
     const { handle, fetchMock } = setup();
     expect((await handle(json(valid, { origin: 'https://evil.test' }))).status).toBe(403);

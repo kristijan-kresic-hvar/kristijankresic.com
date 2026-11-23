@@ -11,7 +11,8 @@ The service is one file, `server/contact.mjs`. It needs Node 22 or later and not
 - Accepts `POST /api/contact` as JSON or as a normal form post, with the fields `intent` (`hire` or `project`), `name`, `email`, `message` and `website`. `website` is a hidden trap field: real people leave it empty.
 - Limits: body 10 KB, name 100 characters, email 254, message 5000.
 - Sends one plain-text email with the subject `[Hire] <name>` or `[Project] <name>`. Replying to it goes to the sender.
-- Allows 5 requests per client address per hour. The count is kept in memory, so it starts over when the service restarts.
+- Allows 5 requests per client address per hour, and sends at most 20 messages a day in total. Both counts are kept in memory, so they start over when the service restarts.
+- Refuses a message with a link in the name or more than two links in the text. The form then shows its "did not go through" note with your email address, so a person with a long list of links can still write to you.
 - Only accepts requests whose `Origin` header is your site.
 - Logs one line per request: time, client address, method, status and outcome. Never the message, name or email.
 
@@ -138,9 +139,11 @@ Expect `HTTP/1.1 200` and `{"ok":true}`, then the email within a minute. Other a
 | 400 | `{"ok":false,"error":"invalid","fields":[...]}` | The listed fields are missing, too long or malformed |
 | 400 | `{"ok":false,"error":"invalid_body"}` | The body is not a JSON object |
 | 403 | `{"ok":false,"error":"origin"}` | `Origin` header missing or not `CONTACT_ORIGIN` |
+| 400 | `{"ok":false,"error":"links"}` | A link in the name, or more than two in the message |
 | 413 | `{"ok":false,"error":"too_large"}` | Body over 10 KB |
 | 415 | `{"ok":false,"error":"content_type"}` | Neither JSON nor a form post |
 | 429 | `{"ok":false,"error":"rate_limited"}` | More than 5 requests from this address in the last hour |
+| 503 | `{"ok":false,"error":"busy"}` | 20 messages were already sent in the last 24 hours |
 | 502 | `{"ok":false,"error":"send_failed"}` | Resend refused the message or took over 10 seconds. The reason is in the journal as `resend <status>` |
 
 A form post (`-d 'intent=hire&name=...'` without the JSON header) gets a `303` redirect to `/thanks/` on success and to `/not-sent/` on any failure.

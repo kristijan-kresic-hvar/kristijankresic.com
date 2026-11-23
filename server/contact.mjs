@@ -8,6 +8,12 @@ const LIMITS = { name: 100, email: 254, message: 5000 };
 const RATE_MAX = 5;
 const RATE_WINDOW = 60 * 60 * 1000;
 const RESEND_TIMEOUT = 10_000;
+// Across all visitors, so a flood from many addresses still cannot fill the inbox or use up the Resend quota.
+const DAY_MAX = 20;
+const DAY = 24 * 60 * 60 * 1000;
+// Form spam is nearly always links. A person with more than two can still write to the address on the page.
+const LINK = /https?:\/\/|www\./gi;
+const LINK_MAX = 2;
 const REQUIRED = ['RESEND_API_KEY', 'CONTACT_TO', 'CONTACT_FROM', 'CONTACT_ORIGIN'];
 // No whitespace, commas, semicolons or angle brackets, so one address and nothing else.
 const EMAIL = /^[^\s@,;<>"]+@[^\s@,;<>"]+\.[^\s@,;<>"]+$/;
@@ -70,6 +76,7 @@ function parseBody(contentType, body) {
 export function createHandler(config, deps = {}) {
   const { fetch: send = globalThis.fetch, now = Date.now, log = console.log } = deps;
   const hits = new Map();
+  let sent = [];
 
   function limited(ip) {
     const t = now();
@@ -147,7 +154,13 @@ export function createHandler(config, deps = {}) {
     const { fields, value } = validate(data);
     if (fields.length) return reply(400, `invalid ${fields.join(',')}`, { ok: false, error: 'invalid', fields });
 
+    const links = (text) => (text.match(LINK) ?? []).length;
+    if (links(value.name) || links(value.message) > LINK_MAX) return reply(400, 'links', { ok: false, error: 'links' });
+    sent = sent.filter((at) => at > now() - DAY);
+    if (sent.length >= DAY_MAX) return reply(503, 'daily cap', { ok: false, error: 'busy' });
+
     const outcome = await deliver(value);
+    if (outcome === 'sent') sent.push(now());
     return outcome === 'sent' || config.dryRun ? reply(200, outcome, { ok: true }) : reply(502, outcome, { ok: false, error: 'send_failed' });
   };
 }
