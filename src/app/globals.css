@@ -1218,6 +1218,68 @@ li + li > .callout {
   }
 }
 
+/* Case study under 1024px. Slate: each of its three parts is a finger-sized row. */
+@media (hover: none) and (pointer: coarse) {
+  .cs-slate {
+    align-items: center;
+  }
+  .cs-slate > * {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+  }
+  /* The live address gets a finger-tall hit area without moving the credits. */
+  .cs-credits a {
+    position: relative;
+  }
+  .cs-credits a::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: var(--tap);
+    transform: translateY(-50%);
+  }
+}
+@media (max-width: 63.99rem) {
+  /* Break a long address between its parts, not inside a word. */
+  .cs-credits dd {
+    overflow-wrap: break-word;
+  }
+}
+/* Phones: credits read as a list of label and value, one per row. */
+@media (max-width: 39.99rem) {
+  .cs-credits {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+  .cs-credits > div {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .cs-credits dd {
+    margin-top: 0;
+  }
+}
+/* Tablet portrait: summary and stack beside the highlights, as on desktop, in a narrower split. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .cs-built {
+    grid-template-columns: 5fr 7fr;
+    align-items: start;
+    column-gap: 2.5rem;
+  }
+  .cs-proof li {
+    grid-template-columns: 2.5rem 1fr;
+  }
+}
+@media (min-width: 40rem) and (max-width: 63.99rem) and (min-height: 44rem) {
+  .cs-side {
+    position: sticky;
+    top: 6.5rem;
+  }
+}
+
 /* Case-study "More screens": one capture large with the rest stacked beside it. Phone captures
    stand whole, side by side. */
 .sc-grid {
@@ -1513,6 +1575,11 @@ html:has(.lightbox[open]) {
   border-radius: var(--radius-lg);
   background: var(--color-bg-elev-1);
 }
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .cs-chart-lead {
+    aspect-ratio: 5 / 2;
+  }
+}
 @media (min-width: 64rem) {
   .cs-chart-lead {
     aspect-ratio: 3 / 1;
@@ -1601,6 +1668,36 @@ html:has(.lightbox[open]) {
     transition:
       border-color var(--duration-normal) var(--ease-standard) 400ms,
       --sweep 1200ms var(--ease-standard) 600ms;
+  }
+}
+/* Under 1024 the plate sits below the name and a long name would wrap the arrow onto a line of its
+   own, so the arrow stands still at the end of the label row. */
+@media (max-width: 63.99rem) {
+  .cs-next > span:first-child {
+    position: relative;
+  }
+  .cs-go {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    font-size: var(--text-title);
+  }
+}
+/* Touch with the plate beside the name: no hover, so the arrow runs to the plate once, after the
+   block has risen into view. A block the reveal script never held back shows the arrow arrived. */
+@media (min-width: 64rem) and (hover: none) and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  .cs-go {
+    flex: 1;
+    min-width: 0.5em;
+    margin-right: -2.25rem;
+  }
+  .cs-go > span {
+    transition: translate 900ms var(--ease-out) 500ms;
+  }
+  .cs-next[data-wait] .cs-go > span {
+    translate: calc(-100% + 0.5em) 0;
+    transition: none;
   }
 }
 

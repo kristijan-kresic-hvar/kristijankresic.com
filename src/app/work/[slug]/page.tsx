@@ -174,7 +174,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
         </div>
         {/* Outside the grid above: the pinned column must stop with the highlights, not slide over this. */}
         {study.outcome && (
-          <p className="ruled rise mt-16 max-w-[26ch] text-title leading-[1.12] font-semibold tracking-tight text-text-primary lg:mt-20">
+          <p className="ruled rise mt-16 max-w-[26ch] text-title sm:max-lg:max-w-[36ch] leading-[1.12] font-semibold tracking-tight text-text-primary lg:mt-20">
             {study.outcome}
           </p>
         )}
