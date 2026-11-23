@@ -1081,6 +1081,61 @@ li + li > .callout {
     animation-duration: 320ms;
   }
 }
+/* About on phones: the portrait runs edge to edge as a set crop and fades into the page under its
+   caption, the bio is set a size up on a measure of about 40 characters, and each period is a mono
+   label above its role, as in the landing's earlier work. */
+@media (max-width: 39.99rem) {
+  .about-figure {
+    max-width: none;
+    margin-inline: calc(-1 * var(--gutter));
+  }
+  .about-figure .portrait {
+    aspect-ratio: 4 / 3;
+    object-position: 50% 30%;
+    border-radius: 0;
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  }
+  .about-figure figcaption {
+    position: relative;
+    margin-top: -2rem;
+    padding-inline: var(--gutter);
+    font-size: var(--text-phone-body);
+    color: var(--color-text-secondary);
+  }
+  .about-bio {
+    max-width: 19.5rem;
+  }
+  .about-bio p:not(:first-child) {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+  .about-when {
+    font-family: var(--font-mono);
+    font-size: var(--text-phone-meta);
+  }
+  .about-page .facts {
+    font-size: var(--text-phone-body);
+  }
+}
+/* About at tablet portrait: the portrait is a narrow first column beside the bio, so the bio keeps
+   a reading measure and nothing leaves an empty half; the facts fill three columns. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .about-intro {
+    grid-template-columns: clamp(9rem, 22vw, 13rem) minmax(0, 1fr);
+  }
+  .about-intro h1 {
+    grid-column: 1 / -1;
+  }
+  .about-figure {
+    max-width: none;
+  }
+  .about-bio {
+    max-width: 31rem;
+  }
+  .about-page .facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 /* The About page (see page-fade.tsx) fades in, rising a few pixels, and fades out when it is left.
    While it is up the nav is its own layer above it, so the page scrolled under the nav never shows
    over it as it leaves; the layer does not animate, so the nav simply holds still. */
