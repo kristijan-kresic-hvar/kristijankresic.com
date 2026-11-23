@@ -32,7 +32,8 @@ export default function About() {
             alt={`Portrait of ${PROFILE.name}`}
             width={800}
             height={800}
-            priority
+            loading="eager"
+            fetchPriority="high"
             sizes="(min-width: 1024px) 30vw, 256px"
             className="portrait aspect-[4/5] w-full rounded-md object-cover"
           />

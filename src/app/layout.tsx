@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             type="module"
             src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon={JSON.stringify({ token: BEACON })}
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
         )}
       </body>

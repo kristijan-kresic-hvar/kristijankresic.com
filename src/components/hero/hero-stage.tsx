@@ -127,8 +127,9 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
               <span className="stage-name">{study.client}</span>
               <span className="stage-short">{study.short}</span>
               <span className="stage-thumb frame">
-                {/* The first one is the largest paint on a phone, so it does not wait to be lazy-loaded. */}
-                <Plate study={study} eager={i === 0} priority={i === 0} />
+                {/* The first one is the largest paint on a phone, so it does not wait to be lazy-loaded.
+                    From 1024px the rail is hidden: it names the stage's width so both ask for the same file. */}
+                <Plate study={study} sizes="(min-width: 64rem) 61vw, 46vw" eager={i === 0} priority={i === 0} />
               </span>
             </Link>
           </li>
@@ -151,7 +152,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
                     style={{ '--i': i } as CSSProperties}
                   >
                     {/* The first plate is what the opening lands on and what a late opening shows, so it must not arrive last. */}
-                    <Plate study={study} eager priority={i === 0} wideOnly />
+                    <Plate study={study} sizes="61vw" eager priority={i === 0} wideOnly />
                   </div>
                 </ViewTransition>
               ))}

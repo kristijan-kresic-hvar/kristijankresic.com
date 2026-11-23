@@ -104,13 +104,22 @@ export function AnnotatedShot({
   }, [annotations]);
 
   // The LCP element on this page: fetched first, and phones get the half-size crop (same framing,
-  // so the marker positions still hold).
+  // so the marker positions still hold). Wider screens take that file too when it covers the width
+  // the picture is drawn at (a plain desktop screen), and the full one otherwise.
   const { props } = getImageProps({ src, alt, width, height, loading: 'eager', fetchPriority: 'high', decoding: 'sync' });
+  const half = small ?? src.replace('.webp', '-card.webp');
   const picture = (
     <div className="overflow-hidden rounded-lg border border-border-default bg-bg-elev-1">
       <picture>
-        <source media="(max-width: 40rem)" srcSet={small ?? src.replace('.webp', '-card.webp')} />
-        <img {...props} ref={pic} alt={alt} className="w-full" />
+        <source media="(max-width: 40rem)" srcSet={half} />
+        <img
+          {...props}
+          srcSet={`${half} ${String(small ? 960 : 800)}w, ${src} ${String(width)}w`}
+          sizes="(min-width: 64rem) 62vw, 94vw"
+          ref={pic}
+          alt={alt}
+          className="w-full"
+        />
       </picture>
     </div>
   );

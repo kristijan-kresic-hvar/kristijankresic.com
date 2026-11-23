@@ -212,7 +212,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
               <span className="cs-next-plate">
                 <ViewTransition {...plateMorph(next.slug)}>
                   {hasPlate(next) ? (
-                    <Plate study={next} />
+                    <Plate study={next} sizes="(min-width: 64rem) 31vw, 94vw" />
                   ) : (
                     <Image src={next.image.src.replace('.webp', '-card.webp')} alt="" width={800} height={500} loading="lazy" className="w-full" />
                   )}

@@ -6,16 +6,21 @@ const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAI
 
 /**
  * A project's lead image: a 16:10 plate cut from the Figma design export, the same size and crop
- * rule for every project. Phones get the 960px file, larger screens the 1920px one.
+ * rule for every project. Phones get the 960px file. Larger screens choose between it and the
+ * 1920px one by how wide the plate is drawn (`sizes`), so a plain desktop screen does not download
+ * four times the pixels it can show.
  */
 export function Plate({
   study,
+  sizes,
   eager = false,
   priority = false,
   wideOnly = false,
   className = '',
 }: {
   study: CaseStudy;
+  /** How wide the plate is drawn from 768px up, as a `sizes` value. */
+  sizes: string;
   eager?: boolean;
   /** Fetch ahead of the other images on the page. */
   priority?: boolean;
@@ -36,7 +41,7 @@ export function Plate({
     <picture>
       {wideOnly && <source media="(max-width: 63.99rem)" srcSet={BLANK} />}
       <source media="(max-width: 48rem)" srcSet={`${base}-sm.webp`} />
-      <img {...props} alt={study.image?.alt ?? ''} draggable={false} className={`block aspect-[16/10] w-full object-cover ${className}`} />
+      <img {...props} srcSet={`${base}-sm.webp 960w, ${base}.webp 1920w`} sizes={sizes} alt={study.image?.alt ?? ''} draggable={false} className={`block aspect-[16/10] w-full object-cover ${className}`} />
     </picture>
   );
 }
