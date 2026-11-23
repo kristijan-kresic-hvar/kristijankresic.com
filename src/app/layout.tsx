@@ -60,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Cloudflare Web Analytics: page views and referrers, no cookies, so no consent banner. Off unless the build is given a token. */}
         {BEACON && (
           <Script
+            type="module"
             src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon={JSON.stringify({ token: BEACON })}
             strategy="afterInteractive"
