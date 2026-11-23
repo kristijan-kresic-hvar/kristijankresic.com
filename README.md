@@ -37,4 +37,6 @@ public/
 
 Push to `main` deploys via `.github/workflows/deploy.yml` once the `DEPLOY_ENABLED` repo variable is `true` and the `DEPLOY_HOST` / `DEPLOY_USER` / `DEPLOY_KEY` / `DEPLOY_PATH` secrets exist. From a laptop: `DEPLOY_TARGET=user@host:/var/www/kristijankresic.com npm run deploy`.
 
+Analytics: set `NEXT_PUBLIC_CF_BEACON_TOKEN` at build time to the token of the site in Cloudflare Web Analytics. Without it the build ships no analytics script.
+
 nginx serves the `out/` folder as static files; `trailingSlash: true` means every route is a directory with an `index.html`.

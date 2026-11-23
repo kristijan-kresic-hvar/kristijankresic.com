@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Script from 'next/script';
 import { Ending } from '@/components/ending';
 import { Nav } from '@/components/nav';
 import { PageFade } from '@/components/page-fade';
@@ -10,6 +11,9 @@ import './globals.css';
 const geist = Geist({ subsets: ['latin', 'latin-ext'], variable: '--font-geist', display: 'swap' });
 // Mono only sets small data (frame numbers, markers), so it is not worth a preload ahead of the LCP.
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap', preload: false });
+
+/** The site's Cloudflare Web Analytics token. Public by nature (it is in the page), and unset in development, so local visits are not counted. */
+const BEACON = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
 
 /**
  * The site has one palette. Declaring it dark tells the browser to draw its own parts dark too (form
@@ -53,6 +57,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <Ending />
         <Reveals />
+        {/* Cloudflare Web Analytics: page views and referrers, no cookies, so no consent banner. Off unless the build is given a token. */}
+        {BEACON && (
+          <Script
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={JSON.stringify({ token: BEACON })}
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );
