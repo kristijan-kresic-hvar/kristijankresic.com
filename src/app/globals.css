@@ -866,7 +866,9 @@ body {
   .end-details > a {
     min-height: var(--tap);
   }
-  .end-where {
+  .end-where,
+  .cf-errors p,
+  .cf-failed p {
     font-size: var(--text-phone-body);
   }
   .cf-say {
@@ -1424,6 +1426,15 @@ li + li > .callout {
   .cs-side {
     position: sticky;
     top: 6.5rem;
+  }
+}
+/* Tablet portrait with a single highlight: a half-width statement left a column empty beside the stack, so the two stack. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .cs-built-one {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cs-built-one .cs-side {
+    position: static;
   }
 }
 

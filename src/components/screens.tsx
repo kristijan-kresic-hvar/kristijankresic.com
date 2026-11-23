@@ -90,7 +90,8 @@ export function Screens({
     setShown(i);
     setZoom(null);
     const t = track.current;
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // A wrap cuts straight to the other end: gliding back would run the counter through every picture between.
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches || Math.abs(i - (shown ?? i)) > 1;
     t?.scrollTo({ left: i * t.clientWidth, behavior: still ? 'instant' : 'smooth' });
   }
   const step = (by: number) => {

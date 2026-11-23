@@ -145,7 +145,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
       </Container>
 
       <Container className="py-20 lg:py-28">
-        <div className="cs-built">
+        <div className={study.highlights.length === 1 ? 'cs-built cs-built-one' : 'cs-built'}>
           <div className="cs-side rise">
             <h2 className="text-title leading-[1.08] font-semibold">What I built</h2>
             <p>{study.summary}</p>

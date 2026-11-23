@@ -51,6 +51,18 @@ describe('currentAt (the reading line)', () => {
   it('a decision jumped to (top at GAP under the cover) is the one at the line, not the next', () => {
     const cover = 260;
     expect(currentAt([cover + GAP, cover + GAP + 60], cover + READ)).toBe(0);
+    expect(currentAt([cover + GAP, cover + GAP + 60], cover + READ, cover)).toBe(0);
+  });
+  it('with the cover given, the next decision takes over once the current heading slides under it', () => {
+    const cover = 300;
+    // A 170px tall decision: the old rule kept 0 current with its heading 100px under the cover.
+    expect(currentAt([200, 370, 540], cover + READ, cover)).toBe(1);
+    expect(currentAt([200, 370, 540], cover + READ)).toBe(0);
+    // Still the first before it passes the line, and nothing before that.
+    expect(currentAt([320, 490], cover + READ, cover)).toBe(0);
+    expect(currentAt([400, 570], cover + READ, cover)).toBeNull();
+    // The last keeps its turn as the list leaves.
+    expect(currentAt([-400, -230, -60], cover + READ, cover)).toBe(2);
   });
 });
 

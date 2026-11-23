@@ -21,14 +21,16 @@ export const GAP = 8;
 
 /**
  * The decision being read: the last one whose top has passed the reading line, or none before the first.
- * One boundary per position, so scrolling never lights two and never flickers between them.
+ * Given the bottom of what covers the window, the next one takes over as soon as the current one's heading
+ * slides under it, so a tall decision on a small phone is not read with its heading hidden.
+ * Both boundaries only move one way as the page scrolls, so scrolling never lights two and never flickers.
  */
-export function currentAt(tops: number[], line: number): number | null {
-  let at: number | null = null;
-  tops.forEach((t, i) => {
-    if (t <= line) at = i;
-  });
-  return at;
+export function currentAt(tops: number[], line: number, cover?: number): number | null {
+  const last = tops.findLastIndex((t) => t <= line);
+  const at = last === -1 ? null : last;
+  if (at === null || cover === undefined || (tops[at] ?? 0) >= cover) return at;
+  const shown = tops.findIndex((t) => t >= cover);
+  return shown === -1 ? at : shown;
 }
 
 /**
@@ -149,8 +151,8 @@ export function AnnotatedShot({
     function track() {
       frame = 0;
       if (!mq.matches || held.current !== null || !pin.current) return;
-      const line = pin.current.getBoundingClientRect().bottom + READ;
-      setCurrent(currentAt(rows.current.map((r) => r?.getBoundingClientRect().top ?? Infinity), line));
+      const cover = pin.current.getBoundingClientRect().bottom;
+      setCurrent(currentAt(rows.current.map((r) => r?.getBoundingClientRect().top ?? Infinity), cover + READ, cover));
     }
     function onScroll() {
       if (!frame) frame = requestAnimationFrame(track);

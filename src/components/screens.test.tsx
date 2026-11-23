@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { OPEN_LEAD, Screens, slideAt, zoomFactor, zoomScroll } from './screens';
 
@@ -34,6 +34,19 @@ describe('Screens', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByRole('img', { name: /Demo screen/ })).not.toBeInTheDocument();
+  });
+
+  it('glides to the next picture, but cuts straight across on a wrap', () => {
+    const calls: unknown[] = [];
+    const spy = vi.spyOn(Element.prototype, 'scrollTo').mockImplementation(function (o?: unknown) {
+      calls.push((o as ScrollToOptions | undefined)?.behavior);
+    });
+    render(<Screens title="Demo" screens={screens} />);
+    fireEvent.click(screen.getByRole('link', { name: 'Demo screen 2, view full size' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next screen' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next screen' }));
+    spy.mockRestore();
+    expect(calls).toEqual(['smooth', 'instant']);
   });
 
   it('leaves a modified click to the browser, so the capture opens in a new tab', () => {
