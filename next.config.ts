@@ -7,9 +7,6 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   images: { unoptimized: true },
   reactStrictMode: true,
-  // The stylesheet is small (Tailwind) and the host lets browsers cache files for only 10 seconds, so a separate
-  // request buys nothing: put the CSS in the page and save the round trip before first paint.
-  experimental: { inlineCss: true },
 };
 
 export default nextConfig;
