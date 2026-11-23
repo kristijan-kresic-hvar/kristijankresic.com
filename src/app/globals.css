@@ -1,5 +1,20 @@
 @import 'tailwindcss';
 
+/* Responsive conventions (docs/prd-responsive-pass.md). Every stylesheet in the project writes its
+   queries in these exact words, so one search finds every rule for a class of device.
+   Desktop, 1024 to 1600px with a mouse, is signed off and frozen: a width rule may only change
+   things below 1024px or above 1600px, and a touch rule from 1024px up is keyed on input, not width.
+     phone             (max-width: 39.99rem)                              under 640px
+     phone on its side (max-width: 63.99rem) and (max-height: 31.24rem)   under 500px tall
+     tablet portrait   (min-width: 40rem) and (max-width: 63.99rem)       640 to 1023px; add
+                       `and (min-height: 31.25rem)` where the phone-on-its-side layout takes over
+     desktop layout    (min-width: 64rem)
+     wide              (min-width: 100.01rem)                             above 1600px
+     touch             (hover: none) and (pointer: coarse)                at any width
+   Tailwind's `sm:` is the 640px line and `lg:` the 1024px line.
+   Hover looks sit inside `(hover: hover)`, so a tap never leaves one stuck; a pressed look is `:active`.
+   Sizes for small screens and fingers are the --tap and --text-phone tokens in :root below. */
+
 /* Design tokens — dark-only, single amber accent. Mirrors the locked v2 design system. */
 @theme {
   --font-sans: var(--font-geist), system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -56,6 +71,12 @@
   /* The dimmest text tone in use (#818181): 5:1 on the base, and still above 4.5:1 where a dimmed
      contour line of the field passes behind it. */
   --tone-dim: color-mix(in srgb, var(--color-text-muted) 90%, var(--color-bg-base));
+  /* The smallest box a finger is asked to hit, and the taller one for a form's main button on a phone. */
+  --tap: 2.75rem;
+  --tap-lg: 3rem;
+  /* Type floors on phones: reading copy and anything typed into (iOS zooms the page for less), then labels, captions and counters. */
+  --text-phone-body: 1rem;
+  --text-phone-meta: 0.8125rem;
 }
 
 :root {
@@ -216,8 +237,13 @@ body {
   text-underline-offset: 0.22em;
   transition: text-decoration-color var(--duration-instant) var(--ease-standard), color var(--duration-instant) var(--ease-standard);
 }
-.link:hover {
-  color: var(--color-text-primary);
+@media (hover: hover) {
+  .link:hover {
+    color: var(--color-text-primary);
+    text-decoration-color: var(--color-accent);
+  }
+}
+.link:active {
   text-decoration-color: var(--color-accent);
 }
 
@@ -378,8 +404,10 @@ body {
   background: var(--color-accent);
   color: var(--color-bg-base);
 }
-.btn-primary:hover {
-  background: var(--color-accent-hover);
+@media (hover: hover) {
+  .btn-primary:hover {
+    background: var(--color-accent-hover);
+  }
 }
 .btn-primary:active {
   background: var(--color-accent-active);

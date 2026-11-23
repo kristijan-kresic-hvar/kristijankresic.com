@@ -19,6 +19,7 @@ export const OPENING_WAIT = 1000;
  *            runs for `ms`, always at full speed
  *   "late"   they were not loaded within `wait`: no count, the rest just rises in over half of `ms`
  * It ends by setting `data-opening="done"`, at once on the first click, key or scroll.
+ * A layout whose CSS timeline is shorter than `ms` (phones) says so itself, as `--open-ms` on the hero.
  * Self-contained on purpose: it is also inlined into the page as text so it runs before first
  * paint, so it must not reference anything outside its own body.
  */
@@ -44,6 +45,7 @@ export function startOpening(key: string, ms: number, wait: number): void {
     root.style.setProperty('--open-h', `${(plate.height * scale) / 2}px`);
   }
 
+  const length = parseFloat(getComputedStyle(root).getPropertyValue('--open-ms')) || ms;
   const skips = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'];
   let timer: ReturnType<typeof setTimeout> | undefined;
   const end = () => {
@@ -56,7 +58,7 @@ export function startOpening(key: string, ms: number, wait: number): void {
     if (root.dataset.opening !== 'play' || root.dataset.plates !== undefined) return;
     root.dataset.plates = how;
     clearTimeout(timer);
-    timer = setTimeout(end, how === 'count' ? ms : ms / 2);
+    timer = setTimeout(end, how === 'count' ? length : length / 2);
   };
   for (const type of skips) addEventListener(type, end, { capture: true, passive: true });
   root.dataset.opening = 'play';

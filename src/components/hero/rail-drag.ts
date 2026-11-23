@@ -27,6 +27,18 @@ export function restingPlace(rail: HTMLElement, start: number, step: number): nu
 }
 
 /**
+ * Which plate the rail is on at scroll position `left`: the one whose stop is nearest, and the
+ * last one once the rail is at its end, because the last stop can lie past the end.
+ */
+export function plateAt(rail: HTMLElement, left: number): number {
+  const plates = Array.from(rail.children) as HTMLElement[];
+  const end = rail.scrollWidth - rail.clientWidth;
+  if (end > 0 && left >= end - 1) return plates.length - 1;
+  const gap = (plate: HTMLElement | undefined) => Math.abs((plate?.offsetLeft ?? 0) - (plates[0]?.offsetLeft ?? 0) - left);
+  return plates.reduce((best, plate, i) => (gap(plate) < gap(plates[best]) ? i : best), 0);
+}
+
+/**
  * Makes the phone rail of plates move one project at a time under a mouse: a drag pulls it and
  * lets it glide onto the next plate, and a sideways wheel or trackpad swipe moves it one plate
  * per gesture instead of however far the inertia runs. A finger scrolls it natively, with CSS

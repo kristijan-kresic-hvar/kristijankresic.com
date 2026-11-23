@@ -78,6 +78,15 @@ describe('startOpening', () => {
     expect(plates()).toBeUndefined();
   });
 
+  it('ends sooner in a layout whose timeline says it is shorter', () => {
+    hero()?.style.setProperty('--open-ms', '1100'); // what the phone layout sets in hero-stage.css
+    startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);
+    vi.advanceTimersByTime(1099);
+    expect(state()).toBe('play');
+    vi.advanceTimersByTime(1);
+    expect(state()).toBe('done');
+  });
+
   it('holds the count until the plate images are loaded, then runs it at full length', async () => {
     const plate = loadingPlate();
     startOpening(OPENING_KEY, OPENING_MS, OPENING_WAIT);

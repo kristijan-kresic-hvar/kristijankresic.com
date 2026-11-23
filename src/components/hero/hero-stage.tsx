@@ -1,15 +1,17 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, ViewTransition, type CSSProperties } from 'react';
 import { ContourField } from '@/components/contour-field';
 import { Facts } from '@/components/facts';
-import { ArrowUpRight } from '@/components/icons';
+import { ArrowRight, ArrowUpRight, Download } from '@/components/icons';
 import { lastLookedAt, lookedAt, Plate, plateMorph } from '@/components/plate';
+import { PROFILE } from '@/content/profile';
 import type { CaseStudy } from '@/content/work';
 import { OPENING_KEY, OPENING_MS, OPENING_WAIT, startOpening } from './opening';
 import { runStageMotion } from './stage-motion';
-import { dragRail } from './rail-drag';
+import { dragRail, plateAt, restingPlace } from './rail-drag';
 import './hero-stage.css';
 
 /** The statement, split so the first sentence can be set brighter than the rest. */
@@ -44,7 +46,7 @@ function returningTo(studies: CaseStudy[]): number {
  * Hero as a stage. One project plate holds most of the screen and the index beside it chooses
  * which of the six it shows. The plate is a board lying on two more boards: choosing a project
  * dissolves it in over the one it replaces (CSS). On phones the index is a rail of the six plates
- * instead. Server HTML is the finished hero; the opening sequence,
+ * instead, under a status line and one action that only phones show. Server HTML is the finished hero; the opening sequence,
  * the tilt and the reactive type are added on top by script and CSS, and none of them run under
  * reduced motion.
  */
@@ -72,6 +74,12 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
 
   useEffect(() => (rail.current ? dragRail(rail.current) : undefined), []);
 
+  // Back from a case study the rail opens on that project, as the stage does. Where the index is a list there is nothing to scroll.
+  useLayoutEffect(() => {
+    if (rail.current && active > 0) rail.current.scrollLeft = restingPlace(rail.current, 0, active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only where the hero opens: after that the rail leads
+  }, []);
+
   /** False just after the hero arrives, so the pointer can be ignored while a plate may still be travelling back. */
   const settled = useRef(false);
   useEffect(() => {
@@ -91,6 +99,12 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
   const point = (i: number) => {
     if (settled.current) pick(i);
   };
+  /** Choosing by keyboard. On the rail the plate is also brought to the front: the browser leaves a plate that already peeks where it is. */
+  const focus = (i: number, item: HTMLElement) => {
+    pick(i);
+    const el = rail.current;
+    if (el && el.scrollWidth > el.clientWidth && item.matches(':focus-visible')) el.scrollLeft = restingPlace(el, 0, i);
+  };
 
   const current = studies[active];
 
@@ -98,6 +112,9 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
   return (
     <section id="work" className="hero" suppressHydrationWarning>
       <ContourField className="hero-field" text=".stage-statement, .stage-index, .hero-facts" />
+      <p className="hero-status">
+        <span>Available now</span> Remote EU or US-East overlap
+      </p>
       {/* Set letter by letter, which a page translator would translate letter by letter: it is told to leave it. */}
       <h1 ref={statement} translate="no" className="stage-statement" aria-label={STATEMENT.map((part) => part.text).join(' ')}>
         {WORDS.map(({ word, lead }, n) => (
@@ -111,17 +128,29 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
           </Fragment>
         ))}
       </h1>
+      <p className="hero-action">
+        <a href="#message" className="hero-chip">
+          <Image src="/images/headshot.webp" alt="" width={64} height={64} loading="lazy" className="portrait" />
+          Email me
+          <ArrowRight />
+        </a>
+        <a href={PROFILE.cv.frontend} target="_blank" rel="noopener" className="link hero-cv">
+          Frontend CV, PDF <Download />
+        </a>
+      </p>
 
-      <ol ref={rail} className="stage-index">
+      {/* The rail only scrolls on phones, and there the project it has scrolled to is the current one. */}
+      <ol ref={rail} className="stage-index" onScroll={(e) => pick(plateAt(e.currentTarget, e.currentTarget.scrollLeft))}>
         {studies.map((study, i) => (
           <li key={study.slug} style={{ '--i': i } as CSSProperties}>
             <Link
               href={`/work/${study.slug}/`}
               className="stage-item"
               data-active={active === i}
+              aria-current={active === i ? 'true' : undefined}
               onPointerEnter={() => point(i)}
               onPointerMove={() => point(i)}
-              onFocus={() => pick(i)}
+              onFocus={(e) => focus(i, e.currentTarget)}
             >
               <span className="stage-n">{two(i + 1)}</span>
               <span className="stage-name">{study.client}</span>
@@ -135,6 +164,13 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
           </li>
         ))}
       </ol>
+      {/* A list of six already tells a screen reader the position. */}
+      <p className="stage-count" aria-hidden="true" style={{ '--at': active, '--of': studies.length } as CSSProperties}>
+        <span>
+          <b>{two(active + 1)}</b> / {two(studies.length)}
+        </span>
+        <span className="stage-track" />
+      </p>
 
       {current && (
         <Link ref={stage} href={`/work/${current.slug}/`} aria-label={`${current.title}: open the case study`} className="stage">

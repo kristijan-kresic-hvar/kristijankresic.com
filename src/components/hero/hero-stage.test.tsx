@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { renderToString } from 'react-dom/server';
 import { HeroStage } from './hero-stage';
 import { lookedAt } from '@/components/plate';
+import { PROFILE } from '@/content/profile';
 import { FEATURED } from '@/content/work';
 import { OPENING_KEY } from './opening';
 
@@ -68,6 +69,36 @@ describe('HeroStage', () => {
     // the new project is up and the one it replaced stays under it while it dissolves in
     expect(document.querySelector('.stage-face[data-face="a"] img')).toHaveAttribute('alt', third.image?.alt);
     expect(document.querySelector('.stage-face[data-face="b"] img')).toHaveAttribute('alt', first.image?.alt);
+  });
+
+  it('gives phones a first screen that says he is available and leads to contact and the CV', () => {
+    render(<HeroStage studies={FEATURED} />);
+    expect(document.querySelector('.hero-status')).toHaveTextContent('Available now Remote EU or US-East overlap');
+    expect(screen.getByRole('link', { name: 'Email me' })).toHaveAttribute('href', '#message');
+    expect(screen.getByRole('link', { name: /Frontend CV, PDF/ })).toHaveAttribute('href', PROFILE.cv.frontend);
+  });
+
+  it('marks the project the rail has scrolled to as the current one and counts it out of six', () => {
+    render(<HeroStage studies={FEATURED} />);
+    const rail = screen.getByRole('list');
+    const count = document.querySelector('.stage-count');
+    expect(count).toHaveTextContent('01 / 06');
+    // six plates 301px wide and 12px apart in a 390px window, the third at the left edge
+    Array.from(rail.children).forEach((li, i) => {
+      Object.defineProperty(li, 'offsetLeft', { value: 20 + i * 313 });
+    });
+    Object.defineProperty(rail, 'scrollWidth', { value: 1926 });
+    Object.defineProperty(rail, 'clientWidth', { value: 390 });
+    rail.scrollLeft = 626;
+    fireEvent.scroll(rail);
+    expect(count).toHaveTextContent('03 / 06');
+    expect(count).toHaveStyle({ '--at': '2' });
+    const items = within(rail).getAllByRole('link');
+    expect(items.map((item) => item.getAttribute('aria-current'))).toEqual([null, null, 'true', null, null, null]);
+    expect(items[2]).toHaveAttribute('data-active', 'true');
+    rail.scrollLeft = 1536; // the end of the rail, short of the last plate's stop
+    fireEvent.scroll(rail);
+    expect(count).toHaveTextContent('06 / 06');
   });
 
   it('server-renders the finished hero: every word, every project, the first plate up, nothing waiting on script', () => {

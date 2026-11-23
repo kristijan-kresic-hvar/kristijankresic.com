@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { dragRail, restingPlace } from './rail-drag';
+import { dragRail, plateAt, restingPlace } from './rail-drag';
 
 /** A rail of four plates 300px wide, 12px apart, in a 350px window: stops at 0, 312, 624 and 936. */
 function rail(scrollWidth = 1300) {
@@ -38,6 +38,25 @@ describe('restingPlace', () => {
     expect(restingPlace(rail(), 0, -1)).toBe(0);
     expect(restingPlace(rail(), 936, 1)).toBe(936);
     expect(restingPlace(rail(1250), 624, 1)).toBe(900); // 1250 wide in a 350 window: the rail ends at 900, before the last stop
+  });
+});
+
+describe('plateAt', () => {
+  it('names the plate whose stop is nearest to where the rail has scrolled', () => {
+    expect(plateAt(rail(), 0)).toBe(0);
+    expect(plateAt(rail(), 150)).toBe(0);
+    expect(plateAt(rail(), 160)).toBe(1);
+    expect(plateAt(rail(), 624)).toBe(2);
+  });
+
+  it('names the last plate at the end of the rail, even when its stop lies past the end', () => {
+    // 1100 wide in a 350 window: the rail ends at 750, nearer to the third stop (624) than the last (936)
+    expect(plateAt(rail(1100), 740)).toBe(2);
+    expect(plateAt(rail(1100), 750)).toBe(3);
+  });
+
+  it('stays on the first plate where the index is a list with nothing to scroll', () => {
+    expect(plateAt(rail(350), 0)).toBe(0);
   });
 });
 
