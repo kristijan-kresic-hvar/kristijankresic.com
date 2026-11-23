@@ -44,7 +44,7 @@ export function Ending() {
         </div>
         <div className="end-bar mt-16 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-border-default pt-5 text-sm text-text-muted sm:mt-24">
           <p>
-            © {new Date().getFullYear()} {PROFILE.name}
+            © {PROFILE.name}
             <span className="max-sm:hidden"> · </span>
             <br className="sm:hidden" />
             <span className="whitespace-nowrap">

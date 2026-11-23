@@ -107,7 +107,7 @@ Expect `HTTP/1.1 200` and `{"ok":true}`, then the email within a minute. Other a
 | 429 | `{"ok":false,"error":"rate_limited"}` | More than 5 requests from this address in the last hour |
 | 502 | `{"ok":false,"error":"send_failed"}` | Resend refused the message or took over 10 seconds. The reason is in the journal as `resend <status>` |
 
-A form post (`-d 'intent=hire&name=...'` without the JSON header) gets a `303` redirect to `/thanks/` on success and to `/#contact` on any failure.
+A form post (`-d 'intent=hire&name=...'` without the JSON header) gets a `303` redirect to `/thanks/` on success and to `/not-sent/` on any failure.
 
 To check without sending an email, post an empty body. You should get the 400 with all four fields listed.
 

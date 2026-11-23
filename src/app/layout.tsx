@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Ending } from '@/components/ending';
 import { Nav } from '@/components/nav';
@@ -10,6 +10,12 @@ import './globals.css';
 const geist = Geist({ subsets: ['latin', 'latin-ext'], variable: '--font-geist', display: 'swap' });
 // Mono only sets small data (frame numbers, markers), so it is not worth a preload ahead of the LCP.
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap', preload: false });
+
+/**
+ * The site has one palette. Declaring it dark tells the browser to draw its own parts dark too (form
+ * controls, scrollbars, the menu of a select, the toolbar on phones) whatever the visitor's system is set to.
+ */
+export const viewport: Viewport = { colorScheme: 'dark', themeColor: '#0a0a0b' };
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://kristijankresic.com'),
@@ -27,6 +33,8 @@ export const metadata: Metadata = {
     images: [{ url: '/images/og.png', width: 1200, height: 630, alt: `${PROFILE.name}, frontend engineer` }],
   },
   twitter: { card: 'summary_large_image' },
+  // Already dark: asks the Dark Reader extension not to recolour it.
+  other: { 'darkreader-lock': '' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -98,7 +98,8 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
   return (
     <section id="work" className="hero" suppressHydrationWarning>
       <ContourField className="hero-field" text=".stage-statement, .stage-index, .hero-facts" />
-      <h1 ref={statement} className="stage-statement" aria-label={STATEMENT.map((part) => part.text).join(' ')}>
+      {/* Set letter by letter, which a page translator would translate letter by letter: it is told to leave it. */}
+      <h1 ref={statement} translate="no" className="stage-statement" aria-label={STATEMENT.map((part) => part.text).join(' ')}>
         {WORDS.map(({ word, lead }, n) => (
           <Fragment key={n}>
             {n > 0 && ' '}

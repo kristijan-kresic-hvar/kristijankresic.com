@@ -144,13 +144,13 @@ describe('contact service', () => {
     expect((await handle({ ...json(valid), method: 'GET' })).status).toBe(405);
   });
 
-  it('redirects form posts to /thanks/ on success and /#contact on failure', async () => {
+  it('redirects form posts to /thanks/ on success and /not-sent/ on failure', async () => {
     const { handle, fetchMock } = setup();
     const ok = await handle(form(valid));
     expect(ok).toMatchObject({ status: 303, headers: { location: `${ORIGIN}/thanks/` } });
     expect(sentPayload(fetchMock).subject).toBe('[Hire] Ada Lovelace');
     const bad = await handle(form({ ...valid, email: 'nope' }));
-    expect(bad).toMatchObject({ status: 303, headers: { location: `${ORIGIN}/#contact` } });
+    expect(bad).toMatchObject({ status: 303, headers: { location: `${ORIGIN}/not-sent/` } });
   });
 
   it('answers 502 without leaking Resend errors', async () => {

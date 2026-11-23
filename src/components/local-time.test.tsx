@@ -5,7 +5,7 @@ import { LocalTime } from './local-time';
 
 describe('LocalTime', () => {
   it('shows the zone alone before hydration, so the page is complete without scripts', () => {
-    expect(renderToString(<LocalTime />)).toContain('>CET<');
+    expect(renderToString(<LocalTime />)).toContain('>Central European time<');
   });
 
   it('shows the current Croatian time with its zone once mounted', () => {

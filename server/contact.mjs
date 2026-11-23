@@ -114,7 +114,7 @@ export function createHandler(config, deps = {}) {
       log(`${new Date(now()).toISOString()} ${ip} ${req.method} ${status} ${outcome}`);
       // JavaScript off: always send the browser back to the site, never to a bare JSON page.
       if (isForm) {
-        const location = `${config.origin}${payload.ok ? '/thanks/' : '/#contact'}`;
+        const location = `${config.origin}${payload.ok ? '/thanks/' : '/not-sent/'}`;
         return { status: 303, headers: { ...cors, location }, body: '' };
       }
       return { status, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(payload) };

@@ -59,7 +59,86 @@
 }
 
 :root {
-  color-scheme: dark;
+  /* `only`: the browser may not apply a light scheme or its own automatic recolouring. */
+  color-scheme: only dark;
+}
+
+/* Reduced motion, the net under everything else. Each effect already has its own guard; this
+   catches whatever is added later without one. Nothing animates, nothing transitions, nothing
+   glides. Colours and layout are untouched, so the page is the same page in its final state. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scripts off: the page is complete as served. The one control that does nothing without a script goes. */
+@media (scripting: none) {
+  .end-details button {
+    display: none;
+  }
+}
+
+/* Forced colours (Windows high contrast): the system repaints text, backgrounds and borders, and
+   drops shadows. What the site drew with those gets a system-coloured equivalent. */
+@media (forced-colors: active) {
+  .btn-primary {
+    border: 1px solid ButtonText;
+  }
+  /* Focus on the form's blanks is a shadow and a border colour, both lost here. */
+  :is(.cf-blank, .cf-note):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+  /* The numbered markers keep their own amber, or the lit one cannot be told from the rest. */
+  .marker {
+    forced-color-adjust: none;
+  }
+}
+
+/* Print and "Save as PDF". Browsers drop backgrounds on paper, which would leave light text on
+   white, so the palette turns to ink on paper and the parts that only work on a screen go. */
+@media print {
+  :root {
+    --color-bg-base: #fff;
+    --color-bg-elev-1: #fff;
+    --color-bg-elev-2: #f4f4f5;
+    --color-bg-elev-3: #e4e4e7;
+    --color-text-primary: #000;
+    --color-text-secondary: #18181b;
+    --color-text-body: #27272a;
+    --color-text-muted: #52525b;
+    --color-border-subtle: #d4d4d8;
+    --color-border-default: #a1a1aa;
+    --color-border-strong: #71717a;
+    --color-accent: #92400e;
+    --color-accent-text: #92400e;
+    color-scheme: only light;
+  }
+  canvas,
+  .site-nav,
+  .cf,
+  .lightbox,
+  .stage-deck {
+    display: none !important;
+  }
+  /* Whatever was waiting to be revealed, or mid-opening, prints in its final state. */
+  .rise[data-wait],
+  .hero * {
+    opacity: 1 !important;
+    translate: none !important;
+    animation: none !important;
+  }
+  a {
+    text-decoration: underline;
+  }
 }
 
 html {
@@ -486,6 +565,13 @@ body {
 .cf-pick option {
   background: var(--color-bg-elev-1);
   color: var(--color-text-primary);
+}
+/* A browser's autofill paints its own background box over a field. Clipping that background to
+   the text keeps the blank a line with words on it, in the site's own text colour. */
+:is(.cf-blank, .cf-note):is(:autofill, :-webkit-autofill) {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: var(--color-text-primary);
 }
 .cf-blank:focus-visible {
   border-bottom-color: var(--color-accent);
