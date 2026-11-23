@@ -276,9 +276,17 @@ body {
   background: var(--color-accent);
   transition: width var(--duration-slow) var(--ease-out);
 }
-.ew-cell:hover::before,
-.ew-cell:focus-visible::before {
+.ew-cell:focus-visible::before,
+.ew-cell:active::before {
   width: 100%;
+}
+@media (hover: hover) {
+  .ew-cell:hover::before {
+    width: 100%;
+  }
+}
+.ew-go {
+  display: none;
 }
 .ew-years {
   font-family: var(--font-mono);
@@ -300,6 +308,29 @@ body {
 @media (min-width: 64rem) {
   .ew-strip {
     flex-direction: row;
+  }
+}
+/* Phones: each project is one row to tap, with an arrow beside its title saying where it goes. */
+@media (max-width: 39.99rem) {
+  .ew-strip {
+    gap: 0;
+  }
+  .ew-cell {
+    padding-block: 1rem 1.5rem;
+  }
+  .ew-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .ew-go {
+    display: block;
+    flex: none;
+    color: var(--color-text-muted);
+  }
+  .ew-cell:active .ew-go {
+    color: var(--color-accent);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -328,6 +359,28 @@ body {
 .practice-para strong {
   font-weight: 600;
   color: var(--color-text-primary);
+}
+/* Phones: the portrait is a byline, small with the caption beside it, so it leaves no empty
+   column next to it; the hero's contact chip already carries the face at first sight. */
+@media (max-width: 39.99rem) {
+  .practice-figure {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: none;
+  }
+  .practice-figure .portrait {
+    flex: none;
+    width: 4rem;
+  }
+  .practice-figure figcaption {
+    margin-top: 0;
+    font-size: var(--text-phone-body);
+    color: var(--color-text-secondary);
+  }
+  .practice-more > a {
+    min-height: var(--tap);
+  }
 }
 @media (min-width: 64rem) {
   /* Geist at line-height 1.24: the cap top of the first line sits 0.265em below the line box. */
@@ -690,6 +743,71 @@ body {
   }
   .cf-send {
     min-height: 2.75rem;
+  }
+}
+
+/* Phones: the ways to reach me make one even block (copy across, the two CVs side by side), and
+   the sentence breaks into its parts, each words-above-field, with filled fields a thumb can hit. */
+@media (max-width: 39.99rem) {
+  .end-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+    width: auto;
+  }
+  .end-details > button {
+    grid-column: 1 / -1;
+    justify-content: center;
+    min-height: var(--tap);
+  }
+  .end-details > a {
+    min-height: var(--tap);
+  }
+  .cf-say {
+    display: grid;
+    gap: 1.25rem;
+    line-height: 1.4;
+  }
+  .cf-part {
+    display: grid;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: normal;
+  }
+  .cf-stop {
+    display: none;
+  }
+  .cf-blank,
+  .cf-note {
+    border-top: 0;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background-color: var(--color-bg-elev-1);
+    font-size: var(--text-phone-body);
+  }
+  .cf-blank {
+    field-sizing: fixed;
+    width: 100%;
+    min-height: var(--tap-lg);
+    padding: 0 0.875rem;
+    line-height: normal;
+  }
+  .cf-pick {
+    padding-right: 2.5rem;
+    background-position: right 0.875rem center;
+  }
+  .cf-ask {
+    margin-top: 1.25rem;
+  }
+  .cf-note {
+    padding: 0.75rem 0.875rem;
+  }
+  .cf-send {
+    width: 100%;
+    justify-content: center;
+    min-height: var(--tap-lg);
+    font-size: var(--text-phone-body);
   }
 }
 

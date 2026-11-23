@@ -46,6 +46,14 @@ describe('ContactForm', () => {
     expect(message).not.toHaveAttribute('placeholder');
   });
 
+  it('makes the words before each blank a label for it, so tapping them focuses the field', () => {
+    render(<ContactForm />);
+    expect(screen.getByText('I’m')).toHaveAttribute('for', 'cf-name');
+    expect(screen.getByText('and I’m')).toHaveAttribute('for', 'cf-intent');
+    expect(screen.getByText('Reach me at')).toHaveAttribute('for', 'cf-email');
+    expect(screen.getByRole('combobox', { name: 'What it is about' })).toHaveAttribute('id', 'cf-intent');
+  });
+
   it.each(['/thanks', '/thanks/'])('is not offered again on %s, where a message was just sent', (path) => {
     nav.pathname = path;
     const { container } = render(<ContactForm />);

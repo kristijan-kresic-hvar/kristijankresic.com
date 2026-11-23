@@ -48,7 +48,7 @@ export default function Home() {
                 <strong>AI does the mechanical work;</strong> every architecture call and merged line is mine.
               </span>
             </p>
-            <p className="mt-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
+            <p className="practice-more mt-10 flex flex-wrap items-baseline gap-x-8 gap-y-3">
               <Link href="/about/" className="link inline-flex items-center gap-2 text-text-primary">
                 More about me <ArrowRight />
               </Link>
@@ -68,7 +68,10 @@ export default function Home() {
               <li key={study.slug} className="rise">
                 <Link href={`/work/${study.slug}/`} className="ew-cell">
                   <span className="ew-years">{study.period}</span>
-                  <span className="ew-title">{study.title}</span>
+                  <span className="ew-title">
+                    {study.title}
+                    <ArrowRight className="ew-go" />
+                  </span>
                   <span className="ew-tag">{study.tagline}</span>
                 </Link>
               </li>

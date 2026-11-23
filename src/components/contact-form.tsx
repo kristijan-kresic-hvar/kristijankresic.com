@@ -109,40 +109,53 @@ export function ContactForm() {
       <h3 id="cf-title" className="sr-only">
         Send a message
       </h3>
+      {/* The parts are spans so a phone can stack them as labelled fields; on wider screens they read as one sentence. */}
       <p className="cf-say">
-        Or write it here. <span id="cf-name-lead">I&rsquo;m</span>{' '}
-        <input
-          id="cf-name"
-          className="cf-blank"
-          type="text"
-          autoComplete="name"
-          required
-          maxLength={100}
-          placeholder="your name"
-          aria-label="your name"
-          aria-labelledby="cf-name-lead cf-name"
-          {...blankProps('name')}
-        />{' '}
-        and I&rsquo;m{' '}
-        <select className="cf-blank cf-pick" aria-label="What it is about" defaultValue="hire" {...blankProps('intent')}>
-          <option value="hire">hiring for a role</option>
-          <option value="project">starting a project</option>
-        </select>
-        . <span id="cf-email-lead">Reach me at</span>{' '}
-        <input
-          id="cf-email"
-          className="cf-blank"
-          type="email"
-          autoComplete="email"
-          inputMode="email"
-          required
-          maxLength={254}
-          placeholder="your email"
-          aria-label="your email"
-          aria-labelledby="cf-email-lead cf-email"
-          {...blankProps('email')}
-        />
-        .
+        <span className="cf-intro">Or write it here.</span>{' '}
+        <span className="cf-part">
+          <label id="cf-name-lead" htmlFor="cf-name">
+            I&rsquo;m
+          </label>{' '}
+          <input
+            id="cf-name"
+            className="cf-blank"
+            type="text"
+            autoComplete="name"
+            required
+            maxLength={100}
+            placeholder="your name"
+            aria-label="your name"
+            aria-labelledby="cf-name-lead cf-name"
+            {...blankProps('name')}
+          />
+        </span>{' '}
+        <span className="cf-part">
+          <label htmlFor="cf-intent">and I&rsquo;m</label>{' '}
+          <select id="cf-intent" className="cf-blank cf-pick" aria-label="What it is about" defaultValue="hire" {...blankProps('intent')}>
+            <option value="hire">hiring for a role</option>
+            <option value="project">starting a project</option>
+          </select>
+          <span className="cf-stop">.</span>
+        </span>{' '}
+        <span className="cf-part">
+          <label id="cf-email-lead" htmlFor="cf-email">
+            Reach me at
+          </label>{' '}
+          <input
+            id="cf-email"
+            className="cf-blank"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            required
+            maxLength={254}
+            placeholder="your email"
+            aria-label="your email"
+            aria-labelledby="cf-email-lead cf-email"
+            {...blankProps('email')}
+          />
+          <span className="cf-stop">.</span>
+        </span>
       </p>
       <div role="alert" className="cf-errors">
         {invalid
