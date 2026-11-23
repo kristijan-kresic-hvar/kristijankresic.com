@@ -1,6 +1,9 @@
 import { getImageProps } from 'next/image';
 import type { CaseStudy } from '@/content/work';
 
+/** A 1px transparent GIF: what a plate that is hidden at this width loads in place of its picture. */
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+
 /**
  * A project's lead image: a 16:10 plate cut from the Figma design export, the same size and crop
  * rule for every project. Phones get the 960px file, larger screens the 1920px one.
@@ -9,12 +12,15 @@ export function Plate({
   study,
   eager = false,
   priority = false,
+  wideOnly = false,
   className = '',
 }: {
   study: CaseStudy;
   eager?: boolean;
   /** Fetch ahead of the other images on the page. */
   priority?: boolean;
+  /** Only ever shown from 1024px (the hero stage): below that it loads nothing, so phones do not fetch six hidden plates. */
+  wideOnly?: boolean;
   className?: string;
 }) {
   const base = `/images/work/${study.slug}-plate`;
@@ -28,6 +34,7 @@ export function Plate({
   });
   return (
     <picture>
+      {wideOnly && <source media="(max-width: 63.99rem)" srcSet={BLANK} />}
       <source media="(max-width: 48rem)" srcSet={`${base}-sm.webp`} />
       <img {...props} alt={study.image?.alt ?? ''} draggable={false} className={`block aspect-[16/10] w-full object-cover ${className}`} />
     </picture>

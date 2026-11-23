@@ -126,7 +126,8 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
               <span className="stage-name">{study.client}</span>
               <span className="stage-short">{study.short}</span>
               <span className="stage-thumb frame">
-                <Plate study={study} />
+                {/* The first one is the largest paint on a phone, so it does not wait to be lazy-loaded. */}
+                <Plate study={study} eager={i === 0} priority={i === 0} />
               </span>
             </Link>
           </li>
@@ -149,7 +150,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
                     style={{ '--i': i } as CSSProperties}
                   >
                     {/* The first plate is what the opening lands on and what a late opening shows, so it must not arrive last. */}
-                    <Plate study={study} eager priority={i === 0} />
+                    <Plate study={study} eager priority={i === 0} wideOnly />
                   </div>
                 </ViewTransition>
               ))}
