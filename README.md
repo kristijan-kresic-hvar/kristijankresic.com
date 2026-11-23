@@ -2,7 +2,7 @@
 
 Portfolio of **Kristijan Krešić**, frontend engineer — React / Next.js / TypeScript. Live at [kristijankresic.com](https://kristijankresic.com).
 
-Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS 4 · Vitest + Testing Library · GitHub Actions. Static export served from a plain VPS: no server runtime, client state is one copy button, a clock and the annotated screenshot.
+Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS 4 · Vitest + Testing Library · GitHub Actions. Static export served from a CDN: no server runtime, client state is one copy button, a clock and the annotated screenshot.
 
 ## Run
 
@@ -35,8 +35,11 @@ public/
 
 ## Deploy
 
-Push to `main` deploys via `.github/workflows/deploy.yml` once the `DEPLOY_ENABLED` repo variable is `true` and the `DEPLOY_HOST` / `DEPLOY_USER` / `DEPLOY_KEY` / `DEPLOY_PATH` secrets exist. From a laptop: `DEPLOY_TARGET=user@host:/var/www/kristijankresic.com npm run deploy`.
+The site runs on DigitalOcean App Platform as one app with two components, both built from this repo on every push to the deployed branch:
 
-Analytics: set `NEXT_PUBLIC_CF_BEACON_TOKEN` at build time to the token of the site in Cloudflare Web Analytics. Without it the build ships no analytics script.
+- a **static site**: build `npm run build`, output directory `out`, served from the CDN. `trailingSlash: true` means every route is a directory with an `index.html`.
+- the **contact service** (`server/`, built from `server/Dockerfile`), routed at `/api/contact`. Setup and settings: [docs/contact-service.md](docs/contact-service.md).
 
-nginx serves the `out/` folder as static files; `trailingSlash: true` means every route is a directory with an `index.html`.
+Analytics: set `NEXT_PUBLIC_CF_BEACON_TOKEN` on the static site component to the token of the site in Cloudflare Web Analytics. Without it the build ships no analytics script.
+
+The older VPS path still works if the site ever moves: `.github/workflows/deploy.yml` (off unless the `DEPLOY_ENABLED` repo variable is `true`), `npm run deploy`, and the nginx and systemd files in `deploy/`.

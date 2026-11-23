@@ -1,6 +1,8 @@
 # Contact service
 
-The contact form posts to `/api/contact`. nginx passes that path to a small Node service on the same VPS, and the service sends the message to you through Resend. The rest of the site stays a static export.
+The contact form posts to `/api/contact`. The host passes that path to a small Node service, and the service sends the message to you through Resend. The rest of the site stays a static export.
+
+The site runs on DigitalOcean App Platform, so start with the App Platform section below. Sections 2 to 5 are for a VPS with nginx instead.
 
 The service is one file, `server/contact.mjs`. It needs Node 22 or later and nothing from npm.
 
@@ -12,6 +14,40 @@ The service is one file, `server/contact.mjs`. It needs Node 22 or later and not
 - Allows 5 requests per client address per hour. The count is kept in memory, so it starts over when the service restarts.
 - Only accepts requests whose `Origin` header is your site.
 - Logs one line per request: time, client address, method, status and outcome. Never the message, name or email.
+
+## On DigitalOcean App Platform
+
+The service is a second component of the same app as the static site. Set up Resend first (section 1), then add the component:
+
+- Source: this repo, source directory `server`. App Platform finds `server/Dockerfile` and builds that.
+- Size: the smallest shared container, one instance.
+- Public HTTP port `8787`, HTTP request route `/api/contact`.
+- Environment variables:
+
+| Key | Value |
+| --- | --- |
+| `RESEND_API_KEY` | The key from Resend. Tick Encrypt. |
+| `CONTACT_TO` | The inbox that receives the messages |
+| `CONTACT_FROM` | `Website <contact@kristijankresic.com>` |
+| `CONTACT_ORIGIN` | Every address the site answers on, comma-separated: `https://kristijankresic.com,https://www.kristijankresic.com` plus the app's `ondigitalocean.app` address while you test there |
+| `CONTACT_HOST` | `0.0.0.0` |
+| `CONTACT_IP_HEADER` | `do-connecting-ip` |
+| `CONTACT_PORT` | `8787` |
+
+After the component exists, open Settings, App Spec, and add `preserve_path_prefix: true` to its ingress rule:
+
+```yaml
+- component:
+    name: kristijankresic-com-server
+    preserve_path_prefix: true
+  match:
+    path:
+      prefix: /api/contact
+```
+
+Without that line the platform strips `/api/contact` from the path and the service answers every request with 404 `not_found`. The dashboard form has no field for it.
+
+Then try it as in section 6. The log lines are under Runtime Logs for the component.
 
 ## 1. Set up Resend (once)
 
