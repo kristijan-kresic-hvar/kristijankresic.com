@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AnnotatedShot, currentAt, GAP, jumpTo, READ } from './annotated-shot';
+import { OPEN_LEAD } from './screens';
 
 const annotations = [
   { x: 10, y: 20, title: 'Search', text: 'Debounced autocomplete.' },
@@ -97,5 +98,35 @@ describe('AnnotatedShot on touch and narrow screens', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
     expect(document.querySelector('.hint-touch')?.textContent).not.toMatch(/hover/i);
     expect(document.querySelector('.hint-mouse')).toHaveTextContent('Hover, tap or tab through the numbers.');
+  });
+});
+
+describe('tapping the lead picture', () => {
+  it('asks the lightbox to open on a tap on the picture, and never on a tap on a marker', () => {
+    const asked = vi.fn((e: Event) => {
+      e.preventDefault();
+    });
+    window.addEventListener(OPEN_LEAD, asked);
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    fireEvent.click(screen.getByRole('button', { name: '1. Search' }));
+    expect(asked).not.toHaveBeenCalled();
+    const link = screen.getByRole('link', { name: 'shot, view full size' });
+    expect(link).toHaveAttribute('href', '/x.webp');
+    expect(fireEvent.click(screen.getByRole('img', { name: 'shot' }))).toBe(false); // the lightbox took it
+    expect(asked).toHaveBeenCalledTimes(1);
+    window.removeEventListener(OPEN_LEAD, asked);
+  });
+
+  it('stays a plain link to the file with no lightbox, or when the visitor asks for a new tab', () => {
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={[]} />);
+    const link = screen.getByRole('link', { name: 'shot, view full size' });
+    expect(fireEvent.click(link)).toBe(true);
+    const asked = vi.fn((e: Event) => {
+      e.preventDefault();
+    });
+    window.addEventListener(OPEN_LEAD, asked);
+    expect(fireEvent.click(link, { metaKey: true })).toBe(true);
+    expect(asked).not.toHaveBeenCalled();
+    window.removeEventListener(OPEN_LEAD, asked);
   });
 });

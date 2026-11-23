@@ -183,7 +183,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
       {screens.length > 0 && (
         <Container className="pb-20 lg:pb-28">
           <h2 className="rise text-title leading-[1.08] font-semibold">More screens</h2>
-          <Screens title={study.title} screens={screens} phone={study.phone} />
+          <Screens title={study.title} screens={screens} phone={study.phone} lead={lead ?? undefined} />
         </Container>
       )}
 

@@ -1332,14 +1332,80 @@ html:has(.lightbox[open]) {
     background-color var(--duration-instant) var(--ease-standard),
     color var(--duration-instant) var(--ease-standard);
 }
-.lb-btn:hover {
+@media (hover: hover) {
+  .lb-btn:hover {
+    background: var(--color-bg-elev-2);
+    color: var(--color-text-primary);
+  }
+}
+.lb-btn:active {
   background: var(--color-bg-elev-2);
   color: var(--color-text-primary);
 }
+/* One slide per picture on a horizontal snap track: a swipe changes picture with the browser's own scroll physics. */
+.lb-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  grid-template-rows: minmax(0, 1fr);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
 .lb-stage {
   overflow: auto;
-  overscroll-behavior: contain;
+  /* Sideways a fitted picture hands the swipe on to the track; zoomed, it keeps it (below). */
+  overscroll-behavior-x: auto;
+  overscroll-behavior-y: contain;
   padding: 0.5rem var(--gutter) 2rem;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.lb-stage img {
+  cursor: zoom-in;
+}
+/* Zoomed by a tap: the picture at 2x or more, panned inside its slide; the slide's edges hold, so a pan never changes picture. */
+.lb-stage[data-zoom] {
+  padding: 0;
+  overscroll-behavior-x: contain;
+}
+.lightbox[open] .lb-stage[data-zoom] img {
+  width: var(--zw);
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border-radius: 0;
+  cursor: zoom-out;
+}
+/* Under 1024px the window is solid, so the page's own words do not read through around a small picture,
+   and a fitted picture sits in the middle; a taller one still starts at its top. */
+@media (max-width: 63.99rem) {
+  .lightbox {
+    background: var(--color-bg-base);
+  }
+  .lb-stage:not([data-zoom]) {
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+  }
+  .lb-stage img {
+    flex-shrink: 0;
+  }
+}
+/* Phones: the controls sit at the bottom, under the thumb. */
+@media (max-width: 39.99rem) {
+  .lightbox[open] {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .lb-bar {
+    order: 1;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  }
+  .sc-grid:not([data-phone]) {
+    grid-template-columns: 1fr;
+  }
 }
 .lb-stage img {
   display: block;

@@ -3,6 +3,7 @@
 import { getImageProps } from 'next/image';
 import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState, ViewTransition } from 'react';
 import { lookedAt, plateMorph } from '@/components/plate';
+import { OPEN_LEAD } from '@/components/screens';
 import type { Annotation } from '@/content/work';
 
 type Line = { x1: number; y1: number; x2: number; y2: number; ex: number; mx: number };
@@ -213,7 +214,23 @@ export function AnnotatedShot({
       </picture>
     </div>
   );
-  const frame = morph ? <ViewTransition {...plateMorph(morph)}>{picture}</ViewTransition> : picture;
+  const morphed = morph ? <ViewTransition {...plateMorph(morph)}>{picture}</ViewTransition> : picture;
+  // The picture is a link to its file; with a lightbox on the page a click opens it there. Markers are siblings, so a tap on one never lands here.
+  const frame = (
+    <a
+      href={src}
+      target="_blank"
+      rel="noopener"
+      aria-label={`${alt}, view full size`}
+      className="lead-open block"
+      onClick={(e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (!window.dispatchEvent(new Event(OPEN_LEAD, { cancelable: true }))) e.preventDefault();
+      }}
+    >
+      {morphed}
+    </a>
+  );
 
   if (annotations.length === 0) return frame;
 
