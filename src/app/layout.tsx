@@ -14,20 +14,19 @@ const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono'
 export const metadata: Metadata = {
   metadataBase: new URL('https://kristijankresic.com'),
   title: {
-    default: `${PROFILE.name} — Frontend engineer (React / Next.js / TypeScript)`,
-    template: `%s — ${PROFILE.name}`,
+    default: `${PROFILE.name} · Frontend engineer (React / Next.js / TypeScript)`,
+    template: `%s · ${PROFILE.name}`,
   },
   description:
     'Frontend engineer with 4+ years shipping production React, Next.js, TypeScript and React Native products for North American clients. Based in Croatia, available now.',
   openGraph: {
     type: 'website',
     siteName: PROFILE.name,
-    title: `${PROFILE.name} — Frontend engineer`,
+    title: `${PROFILE.name} · Frontend engineer`,
     description: '4+ years shipping production web and mobile products. React · Next.js · TypeScript. Available now.',
-    images: [{ url: '/images/og.png', width: 1200, height: 630, alt: `${PROFILE.name} — frontend engineer` }],
+    images: [{ url: '/images/og.png', width: 1200, height: 630, alt: `${PROFILE.name}, frontend engineer` }],
   },
   twitter: { card: 'summary_large_image' },
-  alternates: { canonical: '/' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

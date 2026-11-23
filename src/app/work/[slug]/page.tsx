@@ -24,7 +24,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title: study.title,
     description: study.tagline,
-    openGraph: { title: study.title, description: study.tagline, ...(study.image ? { images: [{ url: study.image.src }] } : {}) },
+    // Each page is its own canonical address. The share image stays the site's PNG: LinkedIn does not take WebP.
+    alternates: { canonical: `/work/${study.slug}/` },
+    openGraph: { title: study.title, description: study.tagline, url: `/work/${study.slug}/`, images: ['/images/og.png'] },
   };
 }
 

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Container } from '@/components/container';
@@ -5,6 +6,8 @@ import { HeroStage } from '@/components/hero/hero-stage';
 import { ArrowRight } from '@/components/icons';
 import { PROFILE } from '@/content/profile';
 import { FEATURED, EARLIER } from '@/content/work';
+
+export const metadata: Metadata = { alternates: { canonical: '/' } };
 
 export default function Home() {
   return (

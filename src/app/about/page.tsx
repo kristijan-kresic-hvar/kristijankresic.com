@@ -7,11 +7,12 @@ import { PROFILE } from '@/content/profile';
 export const metadata: Metadata = {
   title: 'About',
   description: 'Frontend engineer based on Hvar, Croatia. 4+ years professional, building for the web since 2016.',
+  alternates: { canonical: '/about/' },
 };
 
 const TIMELINE = [
   { when: 'Jan 2023 – Aug 2026', what: 'Frontend Developer, Agilno (remote)', note: 'Embedded in six North American client teams: BioCirV, OnCallable, Suello, Vetster, Naitur, BuddyIns.' },
-  { when: 'Apr 2022 – Nov 2022', what: 'Frontend Web Developer, amondi GmbH (Zagreb, hybrid)', note: 'CMS-driven React apps.' },
+  { when: 'Apr 2022 – Nov 2022', what: 'Frontend Web Developer, amondi GmbH (Zagreb, hybrid)', note: 'Car Catcher and BuildMyCareer, two CMS-driven React apps.' },
   { when: 'Jul 2020 – Mar 2021', what: 'Web Developer, Reroot (contract)', note: 'Agrivi marketing site redesign.' },
   { when: '2019 – 2021', what: 'Freelance web developer, Hvar', note: 'Robinson Restaurant and local businesses.' },
   { when: '2016 – 2018', what: 'Algebra Bernays University, Zagreb', note: 'Certificate programmes: Frontend Development & Graphic Design; PHP & MySQL Backend Development.' },
@@ -65,7 +66,7 @@ export default function About() {
         </h2>
         <ol className="lg:col-span-8">
           {TIMELINE.map((t) => (
-            <li key={t.when} className="rise grid gap-x-8 gap-y-1 border-t border-border-default py-4 last:border-b sm:grid-cols-[11rem_1fr]">
+            <li key={t.when} className="rise grid gap-x-8 gap-y-1 border-t border-border-default py-4 first:border-t-0 first:pt-0 sm:grid-cols-[11rem_1fr]">
               <span className="text-sm leading-6 text-text-muted tabular-nums">{t.when}</span>
               <span>
                 <span className="font-medium text-text-primary">{t.what}</span>
