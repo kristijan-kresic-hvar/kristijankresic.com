@@ -513,9 +513,11 @@ body {
   border: 1px solid var(--color-border-default);
   color: var(--color-text-primary);
 }
-.btn-secondary:hover {
-  border-color: var(--color-border-strong);
-  background: var(--color-bg-elev-1);
+@media (hover: hover) {
+  .btn-secondary:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-bg-elev-1);
+  }
 }
 .btn-secondary:active {
   background: var(--color-bg-elev-2);
@@ -741,8 +743,10 @@ body {
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238e8e8e' stroke-width='1.25'/%3E%3C/svg%3E")
     no-repeat right 0.1em bottom 0.64em / 0.55em auto; /* centred on the text line, also when touch pads the top */
 }
-.cf-pick:hover {
-  border-bottom-color: var(--color-text-muted);
+@media (hover: hover) {
+  .cf-pick:hover {
+    border-bottom-color: var(--color-text-muted);
+  }
 }
 .cf-pick option {
   background: var(--color-bg-elev-1);
@@ -1228,7 +1232,12 @@ li + li > .callout {
   gap: 0.5rem;
   transition: color var(--duration-instant) var(--ease-standard);
 }
-.cs-slate a:hover {
+@media (hover: hover) {
+  .cs-slate a:hover {
+    color: var(--color-text-primary);
+  }
+}
+.cs-slate a:active {
   color: var(--color-text-primary);
 }
 .cs-count {
@@ -1860,7 +1869,13 @@ html:has(.lightbox[open]) {
 .frame {
   transition: border-color var(--duration-instant) var(--ease-standard);
 }
-a.frame:hover,
-a:hover .frame {
+@media (hover: hover) {
+  a.frame:hover,
+  a:hover .frame {
+    border-color: var(--color-border-strong);
+  }
+}
+a.frame:active,
+a:active .frame {
   border-color: var(--color-border-strong);
 }
