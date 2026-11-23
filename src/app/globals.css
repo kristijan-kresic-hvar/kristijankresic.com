@@ -844,11 +844,34 @@ body {
   }
 }
 
-/* Touch at any width: the ways to reach me and the fact sheet's links are a finger's height. */
+/* Touch at any width: every link on the landing that stands on its own is a finger's height. */
 @media (hover: none) and (pointer: coarse) {
   .end-details > *,
-  .facts a:not([href^='mailto']) {
+  .practice-more > a,
+  .facts a {
     min-height: var(--tap);
+  }
+  /* The fact sheet's address is inline text, which takes no min-height. No specificity, so the
+     phone layout's own display still wins. */
+  :where(.facts a[href^='mailto']) {
+    display: inline-flex;
+    align-items: center;
+  }
+  /* The big address keeps its size and place: the extra height is an invisible box around it. */
+  .end-mail {
+    position: relative;
+  }
+  .end-mail::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: var(--tap);
+    transform: translateY(-50%);
+  }
+  /* A link inside a sentence: 24px of height without moving the lines. */
+  .cf-failed a {
+    padding-block: 0.25rem;
   }
 }
 
