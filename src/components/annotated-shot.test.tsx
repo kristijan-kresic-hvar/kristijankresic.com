@@ -61,8 +61,16 @@ describe('currentAt (the reading line)', () => {
     // Still the first before it passes the line, and nothing before that.
     expect(currentAt([320, 490], cover + READ, cover)).toBe(0);
     expect(currentAt([400, 570], cover + READ, cover)).toBeNull();
-    // The last keeps its turn as the list leaves.
-    expect(currentAt([-400, -230, -60], cover + READ, cover)).toBe(2);
+  });
+  it('with the cover given, the last stays current while its heading shows and lets go once it slides under', () => {
+    const cover = 300;
+    expect(currentAt([-200, 100, cover], cover + READ, cover)).toBe(2);
+    expect(currentAt([-200, 100, cover - 1], cover + READ, cover)).toBeNull();
+    expect(currentAt([-400, -230, -60], cover + READ, cover)).toBeNull();
+    // A last decision shorter than the gap to the line still gets its turn between the one before and none.
+    expect(currentAt([100, cover + READ + 10], cover + READ, cover)).toBe(1);
+    // Scrolling back up, it is current again as soon as its heading is back out.
+    expect(currentAt([-30, cover + 5], cover + READ, cover)).toBe(1);
   });
 });
 

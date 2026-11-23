@@ -22,7 +22,8 @@ export const GAP = 8;
 /**
  * The decision being read: the last one whose top has passed the reading line, or none before the first.
  * Given the bottom of what covers the window, the next one takes over as soon as the current one's heading
- * slides under it, so a tall decision on a small phone is not read with its heading hidden.
+ * slides under it, so a tall decision on a small phone is not read with its heading hidden, and once the last
+ * one's heading is under it nothing is current.
  * Both boundaries only move one way as the page scrolls, so scrolling never lights two and never flickers.
  */
 export function currentAt(tops: number[], line: number, cover?: number): number | null {
@@ -30,7 +31,7 @@ export function currentAt(tops: number[], line: number, cover?: number): number 
   const at = last === -1 ? null : last;
   if (at === null || cover === undefined || (tops[at] ?? 0) >= cover) return at;
   const shown = tops.findIndex((t) => t >= cover);
-  return shown === -1 ? at : shown;
+  return shown === -1 ? null : shown;
 }
 
 /**
