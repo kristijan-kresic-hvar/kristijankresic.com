@@ -5,6 +5,10 @@ export interface ContactConfig {
   from: string;
   origin: string;
   port: number;
+  /** Address to listen on. Default 127.0.0.1. */
+  host?: string;
+  /** Lower-case name of the header the proxy sets to the visitor's address. Default x-real-ip. */
+  ipHeader?: string;
   /** Answer as if sent without calling Resend. Local work only. */
   dryRun?: boolean;
 }

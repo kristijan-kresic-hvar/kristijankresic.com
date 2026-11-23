@@ -29,6 +29,10 @@ export function readConfig(env) {
     from: env.CONTACT_FROM,
     origin: env.CONTACT_ORIGIN,
     port: Number(env.CONTACT_PORT || 8787),
+    // Where to listen and which header the proxy in front sets to the visitor's address. The defaults fit nginx on the
+    // same machine; a managed platform routes from outside, so it needs 0.0.0.0 and its own header.
+    host: env.CONTACT_HOST || '127.0.0.1',
+    ipHeader: (env.CONTACT_IP_HEADER || 'x-real-ip').toLowerCase(),
     dryRun,
   };
 }
@@ -101,7 +105,7 @@ export function createHandler(config, deps = {}) {
 
   /** @param {{ method: string, path: string, headers: Record<string, string | undefined>, body: string, remoteAddress?: string }} req */
   return async function handle(req) {
-    const ip = req.headers['x-real-ip'] || req.remoteAddress || 'unknown';
+    const ip = req.headers[config.ipHeader ?? 'x-real-ip'] || req.remoteAddress || 'unknown';
     const cors = { 'access-control-allow-origin': config.origin, vary: 'Origin' };
     const contentType = (req.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
     const isForm = contentType === 'application/x-www-form-urlencoded';
@@ -172,8 +176,8 @@ export function start(config) {
     }
   });
   server.requestTimeout = 15_000;
-  // Loopback only: nginx is the sole way in, so the X-Real-IP it sets cannot be forged from outside.
-  server.listen(config.port, '127.0.0.1', () => console.log(`contact service on 127.0.0.1:${config.port}, origin ${config.origin}${config.dryRun ? ', DRY RUN: nothing is sent' : ''}`));
+  // Loopback by default: nginx is then the sole way in, so the X-Real-IP it sets cannot be forged from outside.
+  server.listen(config.port, config.host, () => console.log(`contact service on ${config.host}:${config.port}, origin ${config.origin}${config.dryRun ? ', DRY RUN: nothing is sent' : ''}`));
   return server;
 }
 

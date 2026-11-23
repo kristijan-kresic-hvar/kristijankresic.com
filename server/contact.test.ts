@@ -199,6 +199,17 @@ describe('contact service', () => {
     expect(readConfig({ RESEND_API_KEY: 'k', CONTACT_TO: 't', CONTACT_FROM: 'f', CONTACT_ORIGIN: 'o' }).port).toBe(8787);
   });
 
+  it('counts the rate limit by the header its proxy is said to set', async () => {
+    expect(readConfig({ RESEND_API_KEY: 'k', CONTACT_TO: 't', CONTACT_FROM: 'f', CONTACT_ORIGIN: 'o' })).toMatchObject({ host: '127.0.0.1', ipHeader: 'x-real-ip' });
+    const cfg = readConfig({ RESEND_API_KEY: 'k', CONTACT_TO: 't', CONTACT_FROM: 'f', CONTACT_ORIGIN: ORIGIN, CONTACT_HOST: '0.0.0.0', CONTACT_IP_HEADER: 'DO-Connecting-IP' });
+    expect(cfg).toMatchObject({ host: '0.0.0.0', ipHeader: 'do-connecting-ip' });
+    const handle = createHandler(cfg, { fetch: vi.fn(() => Promise.resolve(new Response('{}'))), log: () => {} });
+    // six posts from one visitor, each claiming a different X-Real-IP: the sixth is still refused
+    let last = 0;
+    for (let i = 0; i < 6; i++) last = (await handle(json(valid, { 'do-connecting-ip': '198.51.100.7', 'x-real-ip': `10.0.0.${i}` }))).status;
+    expect(last).toBe(429);
+  });
+
   it('in a dry run answers as sent without calling Resend, and only for a site on this machine', async () => {
     expect(() => readConfig({ CONTACT_DRY_RUN: '1', CONTACT_ORIGIN: ORIGIN })).toThrow('local work only');
     const local = readConfig({ CONTACT_DRY_RUN: '1', CONTACT_ORIGIN: 'http://localhost:3000' });
