@@ -2,7 +2,18 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, ViewTransition, type CSSProperties } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  ViewTransition,
+  type CSSProperties,
+  type MouseEvent,
+  type PointerEvent,
+} from 'react';
 import { ContourField } from '@/components/contour-field';
 import { Facts } from '@/components/facts';
 import { ArrowRight, ArrowUpRight, Download } from '@/components/icons';
@@ -23,6 +34,9 @@ const WORDS = STATEMENT.flatMap((part) => part.text.split(' ').map((word) => ({ 
 
 /** Milliseconds after the hero arrives before the pointer may change the project: the plate takes 700 to travel back. */
 const SETTLE = 900;
+
+/** Where the stage is showing (hero-stage.css): everywhere but the phone layouts. */
+const STAGED = '(min-width: 64rem), (min-width: 40rem) and (min-height: 31.25rem)';
 
 const noop = () => () => {};
 const two = (n: number) => String(n).padStart(2, '0');
@@ -95,9 +109,21 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
     setActive(i);
     lookedAt(studies[i]?.slug ?? '');
   };
-  /** Choosing by pointer. Held off just after arriving: a pointer left over the index would swap the project out from under the plate travelling back. */
-  const point = (i: number) => {
-    if (settled.current) pick(i);
+  /** Choosing by pointer. Held off just after arriving: a pointer left over the index would swap the project out from under the plate travelling back. A finger chooses by tapping instead. */
+  const point = (i: number, e: PointerEvent) => {
+    if (settled.current && e.pointerType !== 'touch') pick(i);
+  };
+  /** The row a finger went down on, when that tap should only put its project on the stage; -1 when the tap opens it. */
+  const tapped = useRef(-1);
+  const press = (i: number, e: PointerEvent) => {
+    tapped.current = e.pointerType === 'touch' && i !== active && matchMedia(STAGED).matches ? i : -1;
+  };
+  /** A first tap on a project shows it on the stage; the selected row, the plate and the keyboard (detail 0) open it. */
+  const open = (i: number, e: MouseEvent) => {
+    if (tapped.current !== i || e.detail === 0) return;
+    tapped.current = -1;
+    e.preventDefault();
+    pick(i);
   };
   /** Choosing by keyboard. On the rail the plate is also brought to the front: the browser leaves a plate that already peeks where it is. */
   const focus = (i: number, item: HTMLElement) => {
@@ -148,13 +174,19 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
               className="stage-item"
               data-active={active === i}
               aria-current={active === i ? 'true' : undefined}
-              onPointerEnter={() => point(i)}
-              onPointerMove={() => point(i)}
+              onPointerEnter={(e) => point(i, e)}
+              onPointerMove={(e) => point(i, e)}
+              onPointerDown={(e) => press(i, e)}
+              onClick={(e) => open(i, e)}
               onFocus={(e) => focus(i, e.currentTarget)}
             >
               <span className="stage-n">{two(i + 1)}</span>
               <span className="stage-name">{study.client}</span>
               <span className="stage-short">{study.short}</span>
+              {/* Shown on touch for the selected row only: the link already names where it goes. */}
+              <span className="stage-open" aria-hidden="true">
+                Open case study <ArrowRight />
+              </span>
               <span className="stage-thumb frame">
                 {/* The first one is the largest paint on a phone, so it does not wait to be lazy-loaded.
                     From 1024px the rail is hidden: it names the stage's width so both ask for the same file. */}
@@ -188,7 +220,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
                     style={{ '--i': i } as CSSProperties}
                   >
                     {/* The first plate is what the opening lands on and what a late opening shows, so it must not arrive last. */}
-                    <Plate study={study} sizes="61vw" eager priority={i === 0} wideOnly />
+                    <Plate study={study} sizes="(min-width: 64rem) 61vw, 94vw" eager priority={i === 0} wideOnly />
                   </div>
                 </ViewTransition>
               ))}

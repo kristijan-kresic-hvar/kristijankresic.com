@@ -71,6 +71,65 @@ describe('HeroStage', () => {
     expect(document.querySelector('.stage-face[data-face="b"] img')).toHaveAttribute('alt', first.image?.alt);
   });
 
+  describe('on touch', () => {
+    /** A finger going down on the element: React reads the pointer type off the native event. */
+    const touch = (el: Element) => fireEvent(el, Object.assign(new MouseEvent('pointerdown', { bubbles: true }), { pointerType: 'touch' }));
+    /** True when the hero let the click through to navigate (jsdom cannot navigate, so it is stopped after React). */
+    const click = (el: Element, detail: number) => {
+      let through = false;
+      const stop = (e: Event) => {
+        through = !e.defaultPrevented;
+        e.preventDefault();
+      };
+      document.addEventListener('click', stop);
+      fireEvent.click(el, { detail });
+      document.removeEventListener('click', stop);
+      return through;
+    };
+    const tap = (el: Element) => {
+      touch(el);
+      return click(el, 1);
+    };
+    const rows = () => within(screen.getByRole('list')).getAllByRole('link');
+    const stageShowing = (showing: boolean) =>
+      vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({ matches: showing, media: query }) as MediaQueryList);
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('selects a project on the first tap without opening it, and opens it on the next', () => {
+      stageShowing(true);
+      render(<HeroStage studies={FEATURED} />);
+      const third = rows()[2];
+      if (!third) throw new Error('index item missing');
+      fireEvent(third, Object.assign(new MouseEvent('pointerenter'), { pointerType: 'touch' }));
+      expect(third).not.toHaveAttribute('aria-current');
+      expect(tap(third)).toBe(false);
+      expect(third).toHaveAttribute('aria-current', 'true');
+      expect(path(screen.getByRole('link', { name: `${FEATURED[2]?.title ?? ''}: open the case study` }))).toBe(`/work/${FEATURED[2]?.slug ?? ''}`);
+      expect(tap(third)).toBe(true);
+    });
+
+    it('leaves the mouse and the keyboard opening a project at once', () => {
+      stageShowing(true);
+      render(<HeroStage studies={FEATURED} />);
+      const [, second, third] = rows();
+      if (!second || !third) throw new Error('index items missing');
+      expect(click(second, 1)).toBe(true);
+      touch(third); // a touch that turned into a scroll, then Enter on the same row
+      expect(click(third, 0)).toBe(true);
+    });
+
+    it('opens a project at once where there is no stage, on the phone rail', () => {
+      stageShowing(false);
+      render(<HeroStage studies={FEATURED} />);
+      const third = rows()[2];
+      if (!third) throw new Error('index item missing');
+      expect(tap(third)).toBe(true);
+    });
+  });
+
   it('gives phones a first screen that says he is available and leads to contact and the CV', () => {
     render(<HeroStage studies={FEATURED} />);
     expect(document.querySelector('.hero-status')).toHaveTextContent('Available now Remote EU or US-East overlap');

@@ -310,7 +310,15 @@ body {
     flex-direction: row;
   }
 }
-/* Phones: each project is one row to tap, with an arrow beside its title saying where it goes. */
+/* Tablet portrait: the four in two columns of two. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .ew-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem var(--gutter);
+  }
+}
+/* Phones: each project is one row to tap. Below the desktop an arrow beside each title says where it goes. */
 @media (max-width: 39.99rem) {
   .ew-strip {
     gap: 0;
@@ -318,6 +326,8 @@ body {
   .ew-cell {
     padding-block: 1rem 1.5rem;
   }
+}
+@media (max-width: 63.99rem) {
   .ew-title {
     display: flex;
     align-items: center;
@@ -377,6 +387,23 @@ body {
     margin-top: 0;
     font-size: var(--text-phone-body);
     color: var(--color-text-secondary);
+  }
+  .practice-more > a {
+    min-height: var(--tap);
+  }
+}
+/* Tablet portrait: the portrait is a narrow first column and the paragraph takes the rest, so
+   neither leaves an empty half beside it. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .practice-grid {
+    grid-template-columns: clamp(7rem, 16vw, 10rem) minmax(0, 1fr);
+  }
+  .practice-figure {
+    max-width: none;
+    margin-top: calc(var(--practice-size) * 0.265);
+  }
+  .practice-para {
+    max-width: 34ch;
   }
   .practice-more > a {
     min-height: var(--tap);

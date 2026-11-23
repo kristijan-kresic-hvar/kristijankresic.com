@@ -24,7 +24,7 @@ export function Plate({
   eager?: boolean;
   /** Fetch ahead of the other images on the page. */
   priority?: boolean;
-  /** Only ever shown from 1024px (the hero stage): below that it loads nothing, so phones do not fetch six hidden plates. */
+  /** Never shown in the phone layouts (the hero stage): there it loads nothing, so phones do not fetch six hidden plates. */
   wideOnly?: boolean;
   className?: string;
 }) {
@@ -39,7 +39,7 @@ export function Plate({
   });
   return (
     <picture>
-      {wideOnly && <source media="(max-width: 63.99rem)" srcSet={BLANK} />}
+      {wideOnly && <source media="(max-width: 39.99rem), (max-width: 63.99rem) and (max-height: 31.24rem)" srcSet={BLANK} />}
       <source media="(max-width: 48rem)" srcSet={`${base}-sm.webp`} />
       <img {...props} srcSet={`${base}-sm.webp 960w, ${base}.webp 1920w`} sizes={sizes} alt={study.image?.alt ?? ''} draggable={false} className={`block aspect-[16/10] w-full object-cover ${className}`} />
     </picture>
