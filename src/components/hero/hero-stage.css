@@ -468,7 +468,7 @@
   }
   .stage-short {
     grid-column: 1;
-    font-size: 0.875rem;
+    font-size: var(--text-phone-body);
   }
   /* The same leaning board as the desktop stage, held still. */
   .stage-thumb {

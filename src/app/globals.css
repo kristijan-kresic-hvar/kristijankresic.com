@@ -1776,6 +1776,11 @@ html:has(.lightbox[open]) {
   font-weight: 500;
   color: var(--color-text-secondary);
 }
+@media (max-width: 39.99rem) {
+  .cs-chart-note {
+    font-size: var(--text-phone-meta);
+  }
+}
 @media (min-width: 64rem) {
   .cs-next {
     grid-template-columns: 8fr 4fr;
