@@ -11,12 +11,43 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
 
 const MARKER = 14; // marker radius in px; lines start and end at the marker's edge
 
+/** Where the picture pins above its decisions: phones and tablet portrait, never under 500px tall. Mirrors `.shot-pin` in globals.css. */
+export const PINNED = '(max-width: 63.99rem) and (min-height: 31.25rem)';
+/** The reading line sits this far below the pinned picture; a decision jumped to lands above it, at `GAP`. */
+export const READ = 32;
+/** Room between whatever covers the top of the window (nav, pinned picture) and a decision jumped to. */
+export const GAP = 8;
+
+/**
+ * The decision being read: the last one whose top has passed the reading line, or none before the first.
+ * One boundary per position, so scrolling never lights two and never flickers between them.
+ */
+export function currentAt(tops: number[], line: number): number | null {
+  let at: number | null = null;
+  tops.forEach((t, i) => {
+    if (t <= line) at = i;
+  });
+  return at;
+}
+
+/**
+ * Where to scroll so a decision sits just below what covers the window, or null when it is already in full view
+ * and nothing is pinned. Pinned, it always moves to the same place, so `currentAt` then picks that one.
+ */
+export function jumpTo(row: { top: number; bottom: number }, o: { scrollY: number; cover: number; viewH: number; pinned: boolean }): number | null {
+  const want = o.cover + GAP;
+  if (!o.pinned && row.top >= want && row.bottom <= o.viewH) return null;
+  return o.scrollY + row.top - want;
+}
+
 /**
  * Hero screenshot marked up like a proof: numbered markers on the image, the decision behind each
  * one listed beside it, and a leader line from the image's edge, at the marker's height, to its decision.
  * From 1024px: image left, list right, SVG lines measured from the DOM.
  * Below that: markers on the image, numbered list underneath, no lines.
  * Markers and list rows are buttons: hover or focus either one to light the pair.
+ * Touch (and anything under 1024px): a marker jumps to its decision and makes it current, a decision makes itself
+ * current, and while the picture is pinned the decision at the reading line is current.
  */
 export function AnnotatedShot({
   src,
@@ -44,6 +75,12 @@ export function AnnotatedShot({
   const labels = useRef<(HTMLSpanElement | null)[]>([]);
   const [lines, setLines] = useState<Line[]>([]);
   const [active, setActive] = useState<number | null>(null);
+  const [current, setCurrent] = useState<number | null>(null);
+  const pin = useRef<HTMLDivElement>(null);
+  const rows = useRef<(HTMLButtonElement | null)[]>([]);
+  const input = useRef('');
+  // A jump holds its decision current until the scroll it started ends, so the rows it glides past never light.
+  const held = useRef<number | null>(null);
   const pic = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
 
@@ -103,6 +140,59 @@ export function AnnotatedShot({
     return () => ro.disconnect();
   }, [annotations]);
 
+  // While pinned, the decision at the reading line is current.
+  useEffect(() => {
+    if (annotations.length === 0) return;
+    const mq = window.matchMedia(PINNED);
+    let frame = 0;
+    function track() {
+      frame = 0;
+      if (!mq.matches || held.current !== null || !pin.current) return;
+      const line = pin.current.getBoundingClientRect().bottom + READ;
+      setCurrent(currentAt(rows.current.map((r) => r?.getBoundingClientRect().top ?? Infinity), line));
+    }
+    function onScroll() {
+      if (!frame) frame = requestAnimationFrame(track);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [annotations]);
+
+  // A tap, a pen or anything under 1024px; a mouse or a key on the desktop layout keeps the desktop's behaviour.
+  function tapped() {
+    const by = input.current;
+    input.current = '';
+    return by === 'touch' || by === 'pen' || !window.matchMedia('(min-width: 64rem)').matches;
+  }
+
+  function jump(i: number) {
+    const row = rows.current[i];
+    if (!row) return;
+    setCurrent(i);
+    row.focus({ preventScroll: true });
+    const pinned = window.matchMedia(PINNED).matches;
+    const nav = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    const top = jumpTo(row.getBoundingClientRect(), {
+      scrollY: window.scrollY,
+      cover: nav + (pinned && pin.current ? pin.current.offsetHeight : 0),
+      viewH: window.innerHeight,
+      pinned,
+    });
+    if (top === null) return;
+    held.current = i;
+    const release = () => {
+      held.current = null;
+      window.removeEventListener('scrollend', release);
+    };
+    window.addEventListener('scrollend', release);
+    setTimeout(release, 1200); // scrollend never fires when the page is already there, or in older Safari
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top, behavior: still ? 'instant' : 'smooth' });
+  }
+
   // The LCP element on this page: fetched first, and phones get the half-size crop (same framing,
   // so the marker positions still hold). Wider screens take that file too when it covers the width
   // the picture is drawn at (a plain desktop screen), and the full one otherwise.
@@ -127,43 +217,73 @@ export function AnnotatedShot({
 
   if (annotations.length === 0) return frame;
 
+  // Once something is current (a tap, or the reading line) it is the lit pair; hover and focus light it otherwise.
+  const lit = current ?? active;
   const pair = (i: number) => ({
-    onMouseEnter: () => setActive(i),
-    onMouseLeave: () => setActive(null),
+    // Pointer events, so the mouse events a tap fakes never leave a pair lit.
+    onPointerEnter: (e: { pointerType: string }) => {
+      if (e.pointerType === 'mouse') setActive(i);
+    },
+    onPointerLeave: (e: { pointerType: string }) => {
+      if (e.pointerType === 'mouse') setActive(null);
+    },
+    onPointerDown: (e: { pointerType: string }) => {
+      input.current = e.pointerType;
+    },
     onFocus: () => setActive(i),
     onBlur: () => setActive(null),
-    'data-active': active === i,
+    'data-active': lit === i,
   });
 
   return (
-    <div ref={wrap} data-ready={ready || undefined} className="shot relative grid gap-x-12 gap-y-8 lg:grid-cols-12">
-      <div ref={img} className="relative self-start lg:col-span-8">
-        {frame}
-        {annotations.map((a, i) => (
-          <button
-            key={i}
-            type="button"
-            aria-label={`${i + 1}. ${a.title}`}
-            aria-describedby={`callout-${i}`}
-            {...pair(i)}
-            style={{ left: `${a.x}%`, top: `${a.y}%`, '--i': i } as CSSProperties}
-            className="marker absolute z-10 -translate-x-1/2 -translate-y-1/2"
-          >
-            {i + 1}
-          </button>
-        ))}
+    <div
+      ref={wrap}
+      data-ready={ready || undefined}
+      style={{ '--ratio': width / height } as CSSProperties}
+      className="shot relative grid gap-x-12 gap-y-8 lg:grid-cols-12"
+    >
+      <div ref={pin} className="shot-pin self-start lg:col-span-8">
+        <div ref={img} className="relative">
+          {frame}
+          {annotations.map((a, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`${i + 1}. ${a.title}`}
+              aria-describedby={`callout-${i}`}
+              {...pair(i)}
+              onClick={() => {
+                if (tapped()) jump(i);
+              }}
+              style={{ left: `${a.x}%`, top: `${a.y}%`, '--i': i } as CSSProperties}
+              className="marker absolute z-10 -translate-x-1/2 -translate-y-1/2"
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="lg:col-span-4 lg:self-center">
         <h2 className="text-lg font-semibold tracking-normal">The decisions behind this screen</h2>
-        <p className="mt-1 text-sm text-text-muted">Hover, tap or tab through the numbers.</p>
+        <p className="mt-1 text-sm text-text-muted">
+          <span className="hint-mouse">Hover, tap or tab through the numbers.</span>
+          <span className="hint-touch">Tap a number to go to its decision.</span>
+        </p>
         <ol className="mt-5">
           {annotations.map((a, i) => (
             <li key={i}>
               <button
                 type="button"
                 id={`callout-${i}`}
+                ref={(n) => {
+                  rows.current[i] = n;
+                }}
                 {...pair(i)}
+                onClick={() => {
+                  if (tapped()) setCurrent(i);
+                }}
+                aria-current={current === i || undefined}
                 className="callout grid w-full grid-cols-[2.5rem_1fr] py-4 text-left"
               >
                 <span
@@ -177,7 +297,7 @@ export function AnnotatedShot({
                 </span>
                 <span>
                   <span className="block font-semibold text-text-primary">{a.title}</span>
-                  <span className="mt-1 block text-sm text-text-body">{a.text}</span>
+                  <span className="callout-text mt-1 block text-sm text-text-body">{a.text}</span>
                 </span>
               </button>
             </li>
@@ -191,7 +311,7 @@ export function AnnotatedShot({
             // Real length, so the draw-in can dash the whole path without normalising it.
             const len = Math.abs(l.mx - l.ex) + Math.abs(l.y2 - l.y1) + Math.abs(l.x2 - l.mx);
             return (
-              <g key={i} data-active={active === i}>
+              <g key={i} data-active={lit === i}>
                 {/* Across the screenshot only while the pair is lit, so no line sits on the UI it explains. */}
                 <path d={`M ${l.x1} ${l.y1} H ${l.ex}`} className="leader leader-across" />
                 <path

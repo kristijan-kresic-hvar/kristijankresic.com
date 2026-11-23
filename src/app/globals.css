@@ -929,6 +929,56 @@ li + li > .callout {
   opacity: 1;
 }
 
+/* The helper line names the input in hand: no hover on a touch screen. */
+.hint-touch {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  /* The hit box starts inside the 1.5px ring, so it reaches a full 44px only from 10px out. */
+  .marker:not(.marker-static)::before {
+    inset: -0.625rem;
+  }
+  .hint-mouse {
+    display: none;
+  }
+  .hint-touch {
+    display: inline;
+  }
+}
+/* The decision current after a tap or at the reading line: its number fills (data-active) and its text comes up. */
+.callout-text {
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.callout[aria-current='true'] .callout-text {
+  color: var(--color-text-secondary);
+}
+/* Phones and tablet portrait: the picture holds under the nav while its decisions scroll up beneath
+   it, so a number and its note are on screen together. At most 45% of the window tall; off on a
+   phone on its side, where it would leave no room to read. */
+@media (max-width: 63.99rem) and (min-height: 31.25rem) {
+  .shot-pin {
+    position: sticky;
+    top: var(--nav-h);
+    z-index: 20;
+    padding-block: 0.75rem;
+    margin-block: -0.75rem;
+    background: var(--color-bg-base);
+  }
+  .shot-pin > div {
+    max-width: calc((44svh - 1.5rem) * var(--ratio));
+  }
+  /* Text sliding under the picture fades out instead of meeting a hard edge. */
+  .shot-pin::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    height: 1.25rem;
+    background: linear-gradient(var(--color-bg-base), transparent);
+    pointer-events: none;
+  }
+}
+
 /* ---------------------------------------------------------------------------------------------
    Motion outside the hero, all CSS, all behind prefers-reduced-motion:
    1. once the screenshot has loaded its markers arrive, then leader lines draw from the image's
