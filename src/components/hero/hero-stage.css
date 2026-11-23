@@ -128,6 +128,14 @@
     --open-ms: 1100; /* how long the opening runs here (opening.ts reads it): the phone timeline at the foot of this file ends inside it */
     padding-block: 1.25rem 2.5rem;
   }
+  .hero-status {
+    font-size: var(--text-phone-body);
+    line-height: 1.5rem;
+  }
+  /* Always two lines: at 16px the one-line version only just fits at 390, and the fallback font breaks it, so the page jumps when Geist arrives. */
+  .hero-status span {
+    flex-basis: 100%;
+  }
   /* The rail runs out to both screen edges, so the next plate is cut by the edge of the screen. */
   .stage-index {
     display: flex;
@@ -163,7 +171,14 @@
     font-variant-numeric: tabular-nums;
     color: var(--color-text-muted);
   }
+  /* Sized in Geist Mono advances (0.6em a character), so nothing on the line moves when the font swaps in. */
+  .stage-count > :first-child {
+    flex: none;
+    width: 4.2em;
+  }
   .stage-count b {
+    display: inline-block;
+    width: 1.2em;
     font-weight: 400;
     color: var(--color-text-primary);
   }
@@ -592,6 +607,13 @@
   position: relative;
   --back: max(-54px, -2.8vw); /* in step with the perspective, which follows the grid */
   perspective: clamp(800px, 76vw, 1460px);
+}
+/* Touch: nothing moves the pose, so the plate rests flat instead of holding a lean a pointer would explain. */
+@media (hover: none) and (pointer: coarse) {
+  .stage {
+    --rx: 0deg;
+    --ry: 0deg;
+  }
 }
 /* At least 16:10 from its own width, taller when the statement and index need the room. */
 .stage::before {

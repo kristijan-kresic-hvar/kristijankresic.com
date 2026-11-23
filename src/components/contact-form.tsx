@@ -135,8 +135,9 @@ export function ContactForm() {
             <option value="hire">hiring for a role</option>
             <option value="project">starting a project</option>
           </select>
-          <span className="cf-stop">.</span>
-        </span>{' '}
+          {/* The space shares the stop's text node: split apart they measure a hair wider and move the desktop sentence. */}
+          <span className="cf-stop">. </span>
+        </span>
         <span className="cf-part">
           <label id="cf-email-lead" htmlFor="cf-email">
             Reach me at

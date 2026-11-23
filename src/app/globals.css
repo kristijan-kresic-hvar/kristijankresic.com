@@ -391,6 +391,9 @@ body {
   .practice-more > a {
     min-height: var(--tap);
   }
+  .practice-more > span {
+    font-size: var(--text-phone-body);
+  }
 }
 /* Tablet portrait: the portrait is a narrow first column and the paragraph takes the rest, so
    neither leaves an empty half beside it. */
@@ -790,6 +793,9 @@ body {
   .end-details > a {
     min-height: var(--tap);
   }
+  .end-where {
+    font-size: var(--text-phone-body);
+  }
   .cf-say {
     display: grid;
     gap: 1.25rem;
@@ -835,6 +841,14 @@ body {
     justify-content: center;
     min-height: var(--tap-lg);
     font-size: var(--text-phone-body);
+  }
+}
+
+/* Touch at any width: the ways to reach me and the fact sheet's links are a finger's height. */
+@media (hover: none) and (pointer: coarse) {
+  .end-details > *,
+  .facts a:not([href^='mailto']) {
+    min-height: var(--tap);
   }
 }
 

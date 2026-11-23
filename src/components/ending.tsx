@@ -30,10 +30,18 @@ export function Ending() {
             <div className="end-details mt-8 flex w-fit flex-wrap items-center gap-x-6 gap-y-3 text-sm sm:mt-10">
               <CopyButton value={PROFILE.email} label="Copy email" />
               <a href={PROFILE.cv.frontend} target="_blank" rel="noopener" className="link inline-flex items-center gap-1.5 text-text-secondary">
-                Frontend CV<span className="max-sm:sr-only">, PDF</span> <Download />
+                <span className="max-sm:hidden">Frontend CV, PDF</span>
+                <span className="sm:hidden">
+                  Frontend CV<span className="sr-only">, PDF</span>
+                </span>
+                <Download />
               </a>
               <a href={PROFILE.cv.fullstack} target="_blank" rel="noopener" className="link inline-flex items-center gap-1.5 text-text-secondary">
-                Full-stack CV<span className="max-sm:sr-only">, PDF</span> <Download />
+                <span className="max-sm:hidden">Full-stack CV, PDF</span>
+                <span className="sm:hidden">
+                  Full-stack CV<span className="sr-only">, PDF</span>
+                </span>
+                <Download />
               </a>
             </div>
             <p className="end-where mt-6 max-w-[62ch] text-sm text-text-body">

@@ -13,7 +13,7 @@ export function Facts({ rows = false, className = '' }: { rows?: boolean; classN
   const row = `grid grid-cols-[4.5rem_1fr] gap-x-3 border-t border-border-default py-2.5 ${rows ? '' : 'sm:block sm:pb-0 sm:pt-3'}`;
   const term = `text-sm leading-6 text-text-muted ${rows ? '' : 'sm:mb-1.5'}`;
   return (
-    <dl className={`grid text-[0.9375rem] ${rows ? '' : 'gap-x-6 sm:grid-cols-2 sm:gap-y-8 lg:grid-cols-5'} ${className}`}>
+    <dl className={`facts grid text-[0.9375rem] ${rows ? '' : 'gap-x-6 sm:grid-cols-2 sm:gap-y-8 lg:grid-cols-5'} ${className}`}>
       <div className={row}>
         <dt className={term}>Status</dt>
         <dd>

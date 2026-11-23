@@ -199,7 +199,8 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
       {/* A list of six already tells a screen reader the position. */}
       <p className="stage-count" aria-hidden="true" style={{ '--at': active, '--of': studies.length } as CSSProperties}>
         <span>
-          <b>{two(active + 1)}</b> / {two(studies.length)}
+          <b>{two(active + 1)}</b>
+          {` / ${two(studies.length)}`}
         </span>
         <span className="stage-track" />
       </p>
