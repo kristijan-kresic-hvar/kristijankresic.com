@@ -604,16 +604,10 @@ body {
 .marker:not(.marker-static)[data-active='true'] {
   scale: 1.15;
 }
-.callout {
+/* Rules only between rows, and they never light: an amber rule above the lit row read as an
+   underline of the row before it. The filled number and the amber line mark the lit pair. */
+li + li > .callout {
   border-top: 1px solid var(--color-border-default);
-  transition: border-color var(--duration-instant) var(--ease-standard);
-}
-/* Rules only between rows. The first keeps a clear one so its lit state still has a line to colour. */
-li:first-child > .callout:not([data-active='true']) {
-  border-top-color: transparent;
-}
-.callout[data-active='true'] {
-  border-top-color: var(--color-accent);
 }
 .leader {
   fill: none;
