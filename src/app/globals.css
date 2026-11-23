@@ -530,6 +530,13 @@ body {
 .cf-thanks {
   color: var(--color-text-primary);
 }
+/* Safari draws its contacts button inside the blank, over the end of the placeholder. Suggestions still come up while typing. */
+.cf-blank::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+  pointer-events: none;
+}
 .cf-blank {
   field-sizing: content;
   min-width: 7ch;
