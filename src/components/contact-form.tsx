@@ -186,7 +186,7 @@ export function ContactForm() {
           <p>
             {state.limited ? 'That is more messages than I accept from one connection in an hour.' : 'Your message did not go through.'} What you wrote is
             still here. You can also email me at{' '}
-            <a href={`mailto:${PROFILE.email}`} className="link text-text-primary">
+            <a href={`mailto:${PROFILE.email}`} className="link link-in-text text-text-primary">
               {PROFILE.email}
             </a>
             .

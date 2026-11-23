@@ -16,7 +16,7 @@ export default function NotSent() {
       <h1 className="text-display leading-[1.04] font-semibold tracking-tighter">Your message did not go through.</h1>
       <p className="mt-5 max-w-[52ch] text-lead text-text-body">
         Something was missing or the mail service did not answer. The form is below to try again, or write to me at{' '}
-        <a href={`mailto:${PROFILE.email}`} className="link text-text-primary">
+        <a href={`mailto:${PROFILE.email}`} className="link link-in-text text-text-primary">
           {PROFILE.email}
         </a>
         .

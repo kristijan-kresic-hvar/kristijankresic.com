@@ -830,6 +830,11 @@ body {
 /* Phones: the ways to reach me make one even block (copy across, the two CVs side by side), and
    the sentence breaks into its parts, each words-above-field, with filled fields a thumb can hit. */
 @media (max-width: 39.99rem) {
+  /* The bar stacks at every phone width by rule; wrapping alone left it one row from 400px up. */
+  .end-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
   .end-details {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -903,6 +908,10 @@ body {
   .practice-more > a,
   .facts a {
     min-height: var(--tap);
+  }
+  /* A link inside a sentence: block padding on an inline box grows the hit area without moving a line. */
+  .link-in-text {
+    padding-block: 0.25rem;
   }
   /* The fact sheet's address is inline text, which takes no min-height. No specificity, so the
      phone layout's own display still wins. */
