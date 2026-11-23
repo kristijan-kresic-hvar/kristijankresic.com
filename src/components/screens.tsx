@@ -5,7 +5,7 @@ import { type MouseEvent, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight } from '@/components/icons';
 
 /**
- * The extra captures of a case study: one large with the rest beside it, or, for phone captures,
+ * The extra captures of a case study: one large with the rest beside it (two sit side by side), or, for phone captures,
  * each one whole and side by side. Every capture is a plain link to its file; with JavaScript a
  * click opens it in a lightbox instead. The lightbox is a native dialog, so Escape closes it, focus
  * stays inside it and goes back to the capture that opened it.
@@ -32,7 +32,7 @@ export function Screens({ title, screens, phone }: { title: string; screens: str
 
   return (
     <>
-      <ul className="sc-grid" data-phone={phone || undefined}>
+      <ul className="sc-grid" data-phone={phone || undefined} data-pair={screens.length === 2 || undefined}>
         {screens.map((s, i) => (
           <li key={s} className="rise">
             <a

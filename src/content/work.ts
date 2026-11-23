@@ -18,14 +18,12 @@ export type CaseStudy = {
   image?: { src: string; alt: string; width: number; height: number };
   /** Hotspots on the hero image, in percent of width/height, with the decision or feature they point at. */
   annotations: Annotation[];
-  /** Extra screens for the case-study page: /images/work/<slug>-screen-N.webp */
+  /** Extra screens for the case-study page: /images/work/<slug>-screen-N.webp. None of them repeats the opening picture. */
   screens: number;
   /** The screens are whole phone captures: shown uncropped, in portrait. */
   phone?: boolean;
   /** A 16:10 plate exists at /images/work/<slug>-plate.webp beside the image. Every featured study has one. */
   plate?: boolean;
-  /** Whether a tall /images/work/<slug>-full.webp exists for the hover-scroll card. */
-  scroll: boolean;
   featured: boolean;
 };
 
@@ -59,7 +57,6 @@ export const WORK: CaseStudy[] = [
       { x: 35.75, y: 76, title: 'The component system others built on', text: 'Typed cards, forms (React Hook Form + Zod) and tables that two other developers extended; I reviewed their pull requests.' },
     ],
     screens: 3,
-    scroll: true,
     featured: true,
   },
   {
@@ -87,8 +84,7 @@ export const WORK: CaseStudy[] = [
       { x: 61, y: 10.4, title: 'Sections you can reorder and A/B test', text: 'Each block is a schema type with variants, so marketing runs experiments, popups and redirects from the CMS.' },
       { x: 34, y: 71.5, title: 'Forms defined in the CMS', text: 'Lead capture reads its fields and destination from Sanity; adding a form is content, not code.' },
     ],
-    screens: 3,
-    scroll: true,
+    screens: 2,
     featured: true,
   },
   {
@@ -118,7 +114,6 @@ export const WORK: CaseStudy[] = [
     ],
     screens: 3,
     phone: true,
-    scroll: true,
     featured: true,
   },
   {
@@ -146,8 +141,7 @@ export const WORK: CaseStudy[] = [
       { x: 29.3, y: 33.3, title: 'Profile data from Laravel', text: 'Controllers and migrations I wrote back the vet profile fields; PostgreSQL underneath.' },
       { x: 65, y: 55, title: '100k+ users, zero downtime changes', text: 'Every change went through code review and staged rollout on a 24/7 video-consultation platform.' },
     ],
-    screens: 3,
-    scroll: true,
+    screens: 2,
     featured: true,
   },
   {
@@ -175,8 +169,7 @@ export const WORK: CaseStudy[] = [
       { x: 29.5, y: 40.6, title: 'Multi-party e-signature', text: 'Consent documents move through signer roles with pending/complete states, all on HIPAA-compliant infrastructure.' },
       { x: 82.5, y: 54, title: 'Scheduling and magic-link auth', text: 'Sessions sync to calendars; users sign in with JWT magic links instead of passwords.' },
     ],
-    screens: 3,
-    scroll: true,
+    screens: 2,
     featured: true,
   },
   {
@@ -204,7 +197,6 @@ export const WORK: CaseStudy[] = [
       { x: 20.6, y: 95.5, title: 'PayPal subscriptions gate the tools', text: 'Subscription checkout integrated end-to-end; the tier on the account unlocks sales tools.' },
     ],
     screens: 3,
-    scroll: true,
     featured: true,
   },
   {
@@ -230,8 +222,7 @@ export const WORK: CaseStudy[] = [
       { x: 42.5, y: 45.8, title: 'Bidding on a running auction', text: 'The current highest bid, a field for a new bid, a bidding agent and an instant purchase price, with the time left beside the title.' },
       { x: 9.8, y: 77.8, title: 'Vehicle data from the CMS', text: 'Consignor, distance, pickup and transport cost in one row, then the full vehicle-data table, all rendered from CMS content.' },
     ],
-    screens: 3,
-    scroll: false,
+    screens: 2,
     featured: false,
   },
   {
@@ -249,7 +240,6 @@ export const WORK: CaseStudy[] = [
     highlights: ['Job-pipeline dashboard where admins managed jobs and applications.', 'Careers portal frontend with CMS-managed content.'],
     annotations: [],
     screens: 0,
-    scroll: false,
     featured: false,
   },
   {
@@ -268,7 +258,6 @@ export const WORK: CaseStudy[] = [
     image: { src: '/images/work/agrivi.webp', alt: 'Agrivi marketing site home page, Croatian version', width: 1600, height: 1000 },
     annotations: [],
     screens: 3,
-    scroll: false,
     featured: false,
   },
   {
@@ -287,7 +276,6 @@ export const WORK: CaseStudy[] = [
     image: { src: '/images/work/robinson.webp', alt: 'Robinson Restaurant website', width: 1600, height: 1000 },
     annotations: [],
     screens: 3,
-    scroll: false,
     featured: false,
   },
 ];

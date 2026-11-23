@@ -23,10 +23,8 @@ describe('work content', () => {
       const card = hero.replace('.webp', '-card.webp');
       expect(existsSync(hero), `${w.slug} hero`).toBe(true);
       expect(existsSync(card), `${w.slug} card`).toBe(true);
-      if (w.scroll) expect(existsSync(hero.replace('.webp', '-full.webp')), `${w.slug} full`).toBe(true);
       for (let i = 1; i <= w.screens; i++) {
         expect(existsSync(path.join(process.cwd(), 'public/images/work', `${w.slug}-screen-${i}.webp`)), `${w.slug} screen ${i}`).toBe(true);
-        expect(existsSync(path.join(process.cwd(), 'public/images/work', `${w.slug}-screen-${i}-thumb.webp`)), `${w.slug} thumb ${i}`).toBe(true);
       }
     }
   });

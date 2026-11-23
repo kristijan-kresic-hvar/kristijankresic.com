@@ -905,6 +905,23 @@ li:first-child > .callout:not([data-active='true']) {
     height: 100%;
   }
 }
+/* Two captures: equal halves from 640px, one under the other below. */
+.sc-grid[data-pair] {
+  grid-template-columns: 1fr;
+}
+.sc-grid[data-pair] li:first-child {
+  grid-column: auto;
+  grid-row: auto;
+}
+.sc-grid[data-pair] li .sc-frame {
+  aspect-ratio: 16 / 10;
+  height: auto;
+}
+@media (min-width: 40rem) {
+  .sc-grid[data-pair] {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 .sc-grid[data-phone] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   max-width: 54rem;
