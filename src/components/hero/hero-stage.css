@@ -878,3 +878,14 @@
     opacity: 0;
   }
 }
+
+/* Wide: the plate's depth in rem, so it grows with the root size like the plate itself. */
+@media (min-width: 100.01rem) {
+  .stage {
+    --back: max(-3.375rem, -2.8vw);
+    perspective: clamp(50rem, 76vw, 91.25rem);
+  }
+  .stage-caption {
+    transform: translateZ(3rem);
+  }
+}
