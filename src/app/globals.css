@@ -980,6 +980,7 @@ body {
   content: '';
   position: absolute;
   inset: -0.5rem;
+  clip-path: var(--hit, none);
 }
 .marker[data-active='true'],
 .callout[data-active='true'] .marker {
@@ -1364,7 +1365,8 @@ li + li > .callout {
   .cs-slate {
     align-items: center;
   }
-  .cs-slate > * {
+  .cs-slate > *,
+  .cs-count {
     display: inline-flex;
     align-items: center;
     min-height: var(--tap);
@@ -1435,6 +1437,10 @@ li + li > .callout {
   }
   .cs-built-one .cs-side {
     position: static;
+  }
+  /* Stacked, both use the width, the paragraph at no more than about 75 characters a line. */
+  .cs-built-one .cs-side p {
+    max-width: 55ch;
   }
 }
 

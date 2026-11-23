@@ -35,6 +35,44 @@ export function currentAt(tops: number[], line: number, cover?: number): number 
 }
 
 /**
+ * The part of marker `i`'s square hit area (half-size `half`) that is nearer to it than to any other marker, as a
+ * polygon in px from the square's top-left corner, or null when no neighbour's square reaches into it.
+ * Two close markers split the space between them along their bisector, so a tap always lands on the nearest one.
+ */
+export function hitArea(centres: { x: number; y: number }[], i: number, half: number): [number, number][] | null {
+  const a = centres[i];
+  if (!a) return null;
+  let poly: [number, number][] = [
+    [-half, -half],
+    [half, -half],
+    [half, half],
+    [-half, half],
+  ];
+  let cut = false;
+  for (const [j, b] of centres.entries()) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    if (j === i || Math.abs(dx) >= 2 * half || Math.abs(dy) >= 2 * half) continue;
+    cut = true;
+    // Clip to the half-plane nearer `a` (Sutherland-Hodgman, one edge), in coordinates centred on `a`.
+    const side = ([x, y]: [number, number]) => x * dx + y * dy - (dx * dx + dy * dy) / 2;
+    const next: [number, number][] = [];
+    poly.forEach((p, k) => {
+      const q = poly[(k + 1) % poly.length] ?? p;
+      const sp = side(p);
+      const sq = side(q);
+      if (sp <= 0) next.push(p);
+      if ((sp < 0 && sq > 0) || (sp > 0 && sq < 0)) {
+        const t = sp / (sp - sq);
+        next.push([p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1])]);
+      }
+    });
+    poly = next;
+  }
+  return cut ? poly.map(([x, y]) => [x + half, y + half]) : null;
+}
+
+/**
  * Where to scroll so a decision sits just below what covers the window, or null when it is already in full view
  * and nothing is pinned. Pinned, it always moves to the same place, so `currentAt` then picks that one.
  */
@@ -78,6 +116,7 @@ export function AnnotatedShot({
   const img = useRef<HTMLDivElement>(null);
   const labels = useRef<(HTMLSpanElement | null)[]>([]);
   const [lines, setLines] = useState<Line[]>([]);
+  const [hits, setHits] = useState<(string | undefined)[]>([]);
   const [active, setActive] = useState<number | null>(null);
   const [current, setCurrent] = useState<number | null>(null);
   const pin = useRef<HTMLDivElement>(null);
@@ -115,6 +154,17 @@ export function AnnotatedShot({
 
     function measure() {
       if (!el || !im) return;
+      // Markers close together on a narrow picture would overlap their finger-sized hit areas: split them.
+      const ib0 = im.getBoundingClientRect();
+      const m0 = im.querySelector<HTMLElement>('.marker');
+      const half = m0 ? m0.clientWidth / 2 - parseFloat(getComputedStyle(m0, '::before').top) : 0;
+      const centres = annotations.map((a) => ({ x: (a.x / 100) * ib0.width, y: (a.y / 100) * ib0.height }));
+      setHits(
+        annotations.map((_, i) => {
+          const p = hitArea(centres, i, half);
+          return p ? `polygon(${p.map(([x, y]) => `${String(x)}px ${String(y)}px`).join(', ')})` : undefined;
+        }),
+      );
       if (!window.matchMedia('(min-width: 1024px)').matches) {
         setLines([]);
         return;
@@ -275,7 +325,7 @@ export function AnnotatedShot({
               onClick={() => {
                 if (tapped()) jump(i);
               }}
-              style={{ left: `${a.x}%`, top: `${a.y}%`, '--i': i } as CSSProperties}
+              style={{ left: `${a.x}%`, top: `${a.y}%`, '--i': i, '--hit': hits[i] } as CSSProperties}
               className="marker absolute z-10 -translate-x-1/2 -translate-y-1/2"
             >
               {i + 1}

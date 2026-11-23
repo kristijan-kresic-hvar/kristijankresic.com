@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ViewTransition } from 'react';
+import { Fragment, ViewTransition } from 'react';
 import { AnnotatedShot } from '@/components/annotated-shot';
 import { Container } from '@/components/container';
 import { ContourField } from '@/components/contour-field';
@@ -114,8 +114,25 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
               <div>
                 <dt>Live</dt>
                 <dd>
-                  <a href={study.url} target="_blank" rel="noopener" className="link inline-flex items-center gap-1.5">
-                    {study.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')} <ArrowUpRight />
+                  <a href={study.url} target="_blank" rel="noopener" className="link inline-flex max-w-full items-center gap-1.5">
+                    {/* Shrinks and breaks after a slash, so a long address never widens a phone page. */}
+                    <span className="min-w-0">
+                      {study.url
+                        .replace(/^https?:\/\/(www\.)?/, '')
+                        .replace(/\/$/, '')
+                        .split('/')
+                        .map((part, i) => (
+                          <Fragment key={i}>
+                            {i > 0 && (
+                              <>
+                                /<wbr />
+                              </>
+                            )}
+                            {part}
+                          </Fragment>
+                        ))}
+                    </span>{' '}
+                    <ArrowUpRight />
                   </a>
                 </dd>
               </div>
@@ -156,7 +173,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
           </div>
           {study.highlights.length === 1 ? (
             // One point is a statement, not a list: set at title size so it holds its half of the page.
-            <p className="ruled rise max-w-[22ch] text-title leading-[1.12] font-semibold tracking-tight text-text-primary">
+            <p className="ruled rise max-w-[22ch] text-title sm:max-lg:max-w-[36ch] leading-[1.12] font-semibold tracking-tight text-text-primary">
               {study.highlights[0]}
             </p>
           ) : (

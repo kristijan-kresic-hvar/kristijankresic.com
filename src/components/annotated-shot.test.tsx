@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { AnnotatedShot, currentAt, GAP, jumpTo, READ } from './annotated-shot';
+import { AnnotatedShot, currentAt, GAP, hitArea, jumpTo, READ } from './annotated-shot';
 import { OPEN_LEAD } from './screens';
 
 const annotations = [
@@ -148,5 +148,22 @@ describe('tapping the lead picture', () => {
     expect(fireEvent.click(link, { metaKey: true })).toBe(true);
     expect(asked).not.toHaveBeenCalled();
     window.removeEventListener(OPEN_LEAD, asked);
+  });
+});
+
+describe('hitArea (markers close together)', () => {
+  it('leaves a marker with no neighbour in reach its whole square', () => {
+    expect(hitArea([{ x: 0, y: 0 }, { x: 100, y: 0 }], 0, 24)).toBeNull();
+  });
+
+  it('splits two neighbours along the line halfway between them', () => {
+    const centres = [{ x: 0, y: 0 }, { x: 30, y: 0 }];
+    expect(hitArea(centres, 0, 24)).toEqual([[0, 0], [39, 0], [39, 48], [0, 48]]);
+    expect(hitArea(centres, 1, 24)).toEqual([[9, 0], [48, 0], [48, 48], [9, 48]]);
+  });
+
+  it('cuts only the corner facing a diagonal neighbour', () => {
+    // Suello's markers 2 and 3 on a 280px picture: the bottom edge keeps 24 to 29.25px, so 21.5px straight down stays marker 2's.
+    expect(hitArea([{ x: 0, y: 0 }, { x: 18, y: 45 }], 0, 24)).toEqual([[0, 0], [48, 0], [48, 40.5], [29.25, 48], [0, 48]]);
   });
 });
