@@ -9,7 +9,7 @@ import { ContourField } from '@/components/contour-field';
 import { Plate, plateMorph } from '@/components/plate';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from '@/components/icons';
 import { Screens } from '@/components/screens';
-import { EARLIER, FEATURED, WORK, getCaseStudy, hasPlate } from '@/content/work';
+import { EARLIER, FEATURED, WORK, getCaseStudy, hasPlate, type CaseStudy } from '@/content/work';
 
 type Params = { slug: string };
 
@@ -28,6 +28,20 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     alternates: { canonical: `/work/${study.slug}/` },
     openGraph: { title: study.title, description: study.tagline, url: `/work/${study.slug}/`, images: ['/images/og.png'] },
   };
+}
+
+/** Stands in for a picture that does not exist: the site's own depth chart, labelled as such. Never a mock screen. */
+function ChartNote({ study }: { study: CaseStudy }) {
+  return (
+    <>
+      <ContourField className="cs-chart-field" text=".cs-chart-note" />
+      <span className="cs-chart-note">
+        <span>{study.period}</span>
+        <span>{study.stack.join(' · ')}</span>
+        <b>No public screenshots</b>
+      </span>
+    </>
+  );
 }
 
 export default async function CaseStudyPage({ params }: { params: Promise<Params> }) {
@@ -107,7 +121,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
               </div>
             )}
           </dl>
-          {lead && (
+          {lead ? (
             <div className="cs-shot">
               <AnnotatedShot
                 src={lead.src}
@@ -119,6 +133,13 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
                 morph={study.slug}
               />
             </div>
+          ) : (
+            // No screenshot exists: the chart plate its link shows, as a band, so the link's plate lands on it.
+            <ViewTransition {...plateMorph(study.slug)}>
+              <div className="cs-shot cs-chart cs-chart-lead">
+                <ChartNote study={study} />
+              </div>
+            </ViewTransition>
           )}
         </div>
       </Container>
@@ -133,16 +154,23 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
               <dd>{study.stack.join(', ')}</dd>
             </dl>
           </div>
-          <ol className="cs-proof">
-            {study.highlights.map((h, i) => (
-              <li key={h} className="rise">
-                <span className="cs-num" aria-hidden="true">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                {h}
-              </li>
-            ))}
-          </ol>
+          {study.highlights.length === 1 ? (
+            // One point is a statement, not a list: set at title size so it holds its half of the page.
+            <p className="ruled rise max-w-[22ch] text-title leading-[1.12] font-semibold tracking-tight text-text-primary">
+              {study.highlights[0]}
+            </p>
+          ) : (
+            <ol className="cs-proof">
+              {study.highlights.map((h, i) => (
+                <li key={h} className="rise">
+                  <span className="cs-num" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  {h}
+                </li>
+              ))}
+            </ol>
+          )}
         </div>
         {/* Outside the grid above: the pinned column must stop with the highlights, not slide over this. */}
         {study.outcome && (
@@ -191,15 +219,11 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
                 </ViewTransition>
               </span>
             ) : (
-              // No screenshot exists: a plate of the site's own depth chart in its place, labelled as such. Never a mock screen.
-              <span className="cs-next-plate cs-chart">
-                <ContourField className="cs-chart-field" text=".cs-chart-note" />
-                <span className="cs-chart-note">
-                  <span>{next.period}</span>
-                  <span>{next.stack.join(' · ')}</span>
-                  <b>No public screenshots</b>
+              <ViewTransition {...plateMorph(next.slug)}>
+                <span className="cs-next-plate cs-chart">
+                  <ChartNote study={next} />
                 </span>
-              </span>
+              </ViewTransition>
             )}
           </Link>
         </Container>
