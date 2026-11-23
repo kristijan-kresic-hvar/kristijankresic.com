@@ -2,7 +2,7 @@
 import { createHandler, readConfig, BODY_LIMIT, type ContactRequest } from './contact.mjs';
 
 const ORIGIN = 'https://site.test';
-const config = { apiKey: 're_test', to: 'owner@site.test', from: 'Site <contact@site.test>', origin: ORIGIN, port: 0 };
+const config = { apiKey: 're_test', to: 'owner@site.test', from: 'Site <contact@site.test>', origins: [ORIGIN], port: 0 };
 const valid = { intent: 'hire', name: 'Ada Lovelace', email: 'ada@example.com', message: 'Hello there.', website: '' };
 
 function setup(fetchImpl: typeof fetch = vi.fn(() => Promise.resolve(new Response('{}', { status: 200 })))) {
@@ -136,6 +136,15 @@ describe('contact service', () => {
     expect(res.status).toBe(204);
     expect(res.headers).toMatchObject({ 'access-control-allow-origin': ORIGIN, 'access-control-allow-methods': 'POST', 'access-control-allow-headers': 'Content-Type' });
     expect((await handle({ ...json('', { origin: 'https://evil.test' }), method: 'OPTIONS' })).status).toBe(403);
+  });
+
+  it('serves a site that answers on two addresses, replying to the one that asked', async () => {
+    const www = 'https://www.site.test';
+    const handle = createHandler(readConfig({ RESEND_API_KEY: 'k', CONTACT_TO: 't', CONTACT_FROM: 'f', CONTACT_ORIGIN: `${ORIGIN}, ${www}` }), { fetch: vi.fn(() => Promise.resolve(new Response('{}'))), log: () => {} });
+    expect((await handle(json(valid, { origin: www }))).headers['access-control-allow-origin']).toBe(www);
+    expect((await handle({ ...form(valid), headers: { ...form(valid).headers, origin: www } })).headers.location).toBe(`${www}/thanks/`);
+    expect((await handle(json(valid))).status).toBe(200);
+    expect((await handle(json(valid, { origin: 'https://evil.test' }))).status).toBe(403);
   });
 
   it('answers 404 for other paths and 405 for other methods', async () => {

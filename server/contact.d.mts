@@ -3,7 +3,8 @@ export interface ContactConfig {
   apiKey: string;
   to: string;
   from: string;
-  origin: string;
+  /** Site addresses allowed to post. Failed form posts from anywhere else go back to the first. */
+  origins: string[];
   port: number;
   /** Address to listen on. Default 127.0.0.1. */
   host?: string;

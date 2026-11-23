@@ -20,14 +20,16 @@ const LOCAL = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 /** Reads the config from the environment; throws naming every missing variable. */
 export function readConfig(env) {
   const dryRun = env.CONTACT_DRY_RUN === '1';
-  if (dryRun && !LOCAL.test(env.CONTACT_ORIGIN ?? '')) throw new Error('CONTACT_DRY_RUN is for local work only: CONTACT_ORIGIN must be http://localhost or http://127.0.0.1');
+  // The site can answer on more than one address (with and without www), so this is a comma-separated list.
+  const origins = (env.CONTACT_ORIGIN ?? '').split(',').map((o) => o.trim()).filter(Boolean);
+  if (dryRun && !origins.every((o) => LOCAL.test(o))) throw new Error('CONTACT_DRY_RUN is for local work only: CONTACT_ORIGIN must be http://localhost or http://127.0.0.1');
   const missing = (dryRun ? ['CONTACT_ORIGIN'] : REQUIRED).filter((key) => !env[key]);
   if (missing.length) throw new Error(`Missing environment variables: ${missing.join(', ')}`);
   return {
     apiKey: env.RESEND_API_KEY,
     to: env.CONTACT_TO,
     from: env.CONTACT_FROM,
-    origin: env.CONTACT_ORIGIN,
+    origins,
     port: Number(env.CONTACT_PORT || 8787),
     // Where to listen and which header the proxy in front sets to the visitor's address. The defaults fit nginx on the
     // same machine; a managed platform routes from outside, so it needs 0.0.0.0 and its own header.
@@ -106,7 +108,9 @@ export function createHandler(config, deps = {}) {
   /** @param {{ method: string, path: string, headers: Record<string, string | undefined>, body: string, remoteAddress?: string }} req */
   return async function handle(req) {
     const ip = req.headers[config.ipHeader ?? 'x-real-ip'] || req.remoteAddress || 'unknown';
-    const cors = { 'access-control-allow-origin': config.origin, vary: 'Origin' };
+    const allowed = config.origins.includes(req.headers.origin);
+    const origin = allowed ? req.headers.origin : config.origins[0];
+    const cors = { 'access-control-allow-origin': origin, vary: 'Origin' };
     const contentType = (req.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
     const isForm = contentType === 'application/x-www-form-urlencoded';
 
@@ -114,14 +118,14 @@ export function createHandler(config, deps = {}) {
       log(`${new Date(now()).toISOString()} ${ip} ${req.method} ${status} ${outcome}`);
       // JavaScript off: always send the browser back to the site, never to a bare JSON page.
       if (isForm) {
-        const location = `${config.origin}${payload.ok ? '/thanks/' : '/not-sent/'}`;
+        const location = `${origin}${payload.ok ? '/thanks/' : '/not-sent/'}`;
         return { status: 303, headers: { ...cors, location }, body: '' };
       }
       return { status, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(payload) };
     };
 
     if (req.path !== '/api/contact') return reply(404, 'not found', { ok: false, error: 'not_found' });
-    if (req.headers.origin !== config.origin) return reply(403, 'bad origin', { ok: false, error: 'origin' });
+    if (!allowed) return reply(403, 'bad origin', { ok: false, error: 'origin' });
     if (req.method === 'OPTIONS') {
       log(`${new Date(now()).toISOString()} ${ip} OPTIONS 204 preflight`);
       return {
@@ -177,7 +181,7 @@ export function start(config) {
   });
   server.requestTimeout = 15_000;
   // Loopback by default: nginx is then the sole way in, so the X-Real-IP it sets cannot be forged from outside.
-  server.listen(config.port, config.host, () => console.log(`contact service on ${config.host}:${config.port}, origin ${config.origin}${config.dryRun ? ', DRY RUN: nothing is sent' : ''}`));
+  server.listen(config.port, config.host, () => console.log(`contact service on ${config.host}:${config.port}, origin ${config.origins.join(', ')}${config.dryRun ? ', DRY RUN: nothing is sent' : ''}`));
   return server;
 }
 
