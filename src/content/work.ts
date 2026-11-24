@@ -110,17 +110,17 @@ export const WORK: CaseStudy[] = [
     url: 'https://www.linkedin.com/company/suello/',
     stack: ['React Native 0.78', 'TypeScript', 'Bluetooth Low Energy'],
     summary:
-      'The planter talks to the phone over Bluetooth Low Energy. I built the companion app from an empty project: the BLE pairing and device-communication layer, authentication, and an onboarding flow with custom animations.',
+      'I built the companion app from scratch: the Bluetooth Low Energy pairing and device-communication layer, authentication, and onboarding with custom animations. The project ended before a hardware prototype was ready, so it never ran on a real planter.',
     highlights: [
-      'BLE device layer that survives connection drops and app backgrounding, with retries that keep onboarding feeling instant.',
+      'BLE device layer with reconnects and retries for connection drops and app backgrounding, tested against a test device.',
       'Authentication and account flows wired to the backend.',
       'Onboarding with custom animations that explain pairing without a manual.',
     ],
     image: { src: '/images/work/suello.webp', alt: 'Three Suello app screens: adding a plant, the home screen with a connected planter, and a plant’s sensor readings', width: 1600, height: 1000 },
     annotations: [
-      { x: 37.5, y: 27, title: 'Reminders from device state', text: 'Soil-moisture readings arrive over Bluetooth Low Energy (BLE). Watering prompts are computed on the phone, so they work offline.' },
-      { x: 49.6, y: 41.3, title: 'Live planter status', text: 'The “Doing well” badge is driven by sensor characteristics subscribed through the BLE layer I built from scratch.' },
-      { x: 56, y: 66.7, title: 'A connection that survives real life', text: 'Reconnect and retry logic handles drops and app backgrounding so pairing and onboarding feel instant.' },
+      { x: 37.5, y: 27, title: 'Reminders from device state', text: 'Built for soil-moisture data over Bluetooth Low Energy (BLE), with watering prompts computed offline on the phone. UI only: no planter sent any.' },
+      { x: 49.6, y: 41.3, title: 'Planter status', text: 'The “Doing well” badge is designed to follow the sensor readings subscribed through the BLE layer I built from scratch.' },
+      { x: 56, y: 66.7, title: 'Connection and battery status', text: 'Reconnect and retry logic handles drops and app backgrounding so pairing and onboarding feel instant. Tested against a test device, not a real planter.' },
     ],
     screens: [
       'Suello profile screen with settings and help menus',

@@ -48,7 +48,7 @@ export default function About() {
           <p>
             The pattern repeats: join a team, own the frontend end to end, leave behind a foundation other people can build on. On
             BioCirV that meant the component system, data layer and pull request reviews for two other developers; on OnCallable it meant
-            editors shipping pages without a deploy; on Suello it meant a Bluetooth device layer that survives dropped connections.
+            editors shipping pages without a deploy; on Suello it meant a Bluetooth device layer that recovers from dropped connections.
           </p>
           <p>
             I use AI coding tools daily for the mechanical parts of the job. Architecture, security decisions and every merged line
