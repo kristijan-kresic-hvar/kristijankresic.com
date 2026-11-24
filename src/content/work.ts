@@ -205,7 +205,7 @@ export const WORK: CaseStudy[] = [
     url: 'https://buddyins.com',
     stack: ['Next.js', 'React', 'Django REST API', 'PayPal API'],
     summary:
-      'Insurance agents manage clients and plans on BuddyIns. I built the Next.js frontend over the Django REST API: authentication flows, PayPal subscription checkout, CRUD screens, data tables and CSV export.',
+      'BuddyIns ran everything by hand in Excel. We moved all of it into a web app where insurance agents manage clients and plans. I built the Next.js frontend over the Django REST API: authentication flows, PayPal subscription checkout, CRUD screens, data tables and CSV export.',
     highlights: [
       'PayPal subscription checkout integrated end to end with the Django REST API.',
       'Authentication flows, CRUD screens and data tables with export for agents.',

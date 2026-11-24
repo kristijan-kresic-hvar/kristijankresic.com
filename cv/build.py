@@ -121,7 +121,7 @@ PROJECTS = [
         "hook": 'US long-term-care insurance platform (<a href="https://buddyins.com">buddyins.com</a>)',
         "dates": "Jan 2023 – Jul 2023",
         "bullets": [
-            "Built the Next.js frontend: authentication flows, PayPal subscription checkout, CRUD screens, data tables and CSV export.",
+            "Built the Next.js frontend of the web app that replaced the company’s manual Excel process: authentication flows, PayPal subscription checkout, CRUD screens, data tables and CSV export.",
         ],
         "stack": "Next.js · React · Django REST API · PayPal API",
     },
