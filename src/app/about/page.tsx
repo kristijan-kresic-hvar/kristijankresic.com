@@ -41,14 +41,14 @@ export default function About() {
         </figure>
         <div className="about-bio max-w-reading space-y-5 text-text-body lg:col-span-6 lg:col-start-3">
           <p className="text-lead text-text-secondary">
-            I&apos;ve been building for the web since {PROFILE.since} and shipping it professionally for {PROFILE.yearsProfessional}{' '}
+            I&apos;ve been building for the web since {PROFILE.since} and shipping professionally for {PROFILE.yearsProfessional}{' '}
             years. For the last three and a half of those I was at Agilno, a product agency, embedded in six North American client
             teams across insurance, HIPAA healthcare, telehealth and IoT.
           </p>
           <p>
-            The pattern repeats: join a team, own the frontend end-to-end, leave behind a foundation other people can build on. On
+            The pattern repeats: join a team, own the frontend end to end, leave behind a foundation other people can build on. On
             BioCirV that meant the component system, data layer and PR reviews for two other developers; on OnCallable it meant
-            editors shipping pages without a deploy; on Suello it meant a Bluetooth device layer that just works.
+            editors shipping pages without a deploy; on Suello it meant a Bluetooth device layer that survives dropped connections.
           </p>
           <p>
             I use AI coding tools daily for the mechanical parts of the job. Architecture, security decisions and every merged line
