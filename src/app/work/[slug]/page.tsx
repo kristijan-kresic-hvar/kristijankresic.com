@@ -62,7 +62,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
     : hasPlate(study)
       ? { src: `/images/work/${study.slug}-plate.webp`, small: `/images/work/${study.slug}-plate-sm.webp`, width: 1920, height: 1200, alt: shot.alt }
       : { src: shot.src, small: undefined, width: shot.width, height: shot.height, alt: shot.alt };
-  const screens = Array.from({ length: study.screens }, (_, i) => `/images/work/${study.slug}-screen-${i + 1}.webp`);
+  const screens = study.screens.map((alt, i) => ({ src: `/images/work/${study.slug}-screen-${i + 1}.webp`, alt }));
 
   return (
     <article className="from-top">
@@ -74,7 +74,12 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
           <span>
             {!study.featured && <span className="mr-3 max-sm:hidden">Earlier work</span>}
             <span className="cs-count">
-              {String(place + 1).padStart(2, '0')} / {String(set.length).padStart(2, '0')}
+              <span className="sr-only">
+                Project {place + 1} of {set.length}
+              </span>
+              <span aria-hidden="true">
+                {String(place + 1).padStart(2, '0')} / {String(set.length).padStart(2, '0')}
+              </span>
             </span>
             {/* A featured title is below the plate on desktop, so the row names the project. */}
             {study.featured && <span className="ml-3 max-lg:hidden">{study.client}</span>}

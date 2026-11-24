@@ -43,7 +43,8 @@ export function Screens({
   lead,
 }: {
   title: string;
-  screens: string[];
+  /** Each capture's file and the alt text that says what it shows. */
+  screens: { src: string; alt: string }[];
   phone?: boolean | undefined;
   /** The case study's lead picture, opened by a tap on it (see `OPEN_LEAD`). */
   lead?: { src: string; alt: string } | undefined;
@@ -53,7 +54,7 @@ export function Screens({
   const track = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState<number | null>(null);
   const [zoom, setZoom] = useState<Zoom | null>(null);
-  const pictures = [...(lead ? [{ src: lead.src, alt: lead.alt }] : []), ...screens.map((s, i) => ({ src: s, alt: `${title} screen ${i + 1}` }))];
+  const pictures = [...(lead ? [{ src: lead.src, alt: lead.alt }] : []), ...screens];
   const first = lead ? 1 : 0;
   const many = pictures.length > 1;
 
@@ -116,16 +117,16 @@ export function Screens({
     <>
       <ul className="sc-grid" data-phone={phone || undefined} data-pair={screens.length === 2 || undefined}>
         {screens.map((s, i) => (
-          <li key={s} className="rise">
+          <li key={s.src} className="rise">
             <a
-              href={s}
+              href={s.src}
               target="_blank"
               rel="noopener"
               onClick={(e) => open(e, i)}
-              aria-label={`${title} screen ${i + 1}, view full size`}
+              aria-label={`${s.alt}, view full size`}
               className="frame sc-frame"
             >
-              <Image src={s} alt="" fill loading="lazy" sizes="(min-width: 1024px) 66vw, 100vw" className="object-cover object-top" />
+              <Image src={s.src} alt="" fill loading="lazy" sizes="(min-width: 1024px) 66vw, 100vw" className="object-cover object-top" />
             </a>
           </li>
         ))}
@@ -149,7 +150,12 @@ export function Screens({
           <>
             <div className="lb-bar">
               <span className="lb-count" aria-live="polite">
-                {pad(shown + 1)} / {pad(pictures.length)}
+                <span className="sr-only">
+                  Screen {shown + 1} of {pictures.length}
+                </span>
+                <span aria-hidden="true">
+                  {pad(shown + 1)} / {pad(pictures.length)}
+                </span>
               </span>
               {many && (
                 <button type="button" className="lb-btn" aria-label="Previous screen" onClick={() => step(-1)}>

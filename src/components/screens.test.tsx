@@ -2,7 +2,11 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { OPEN_LEAD, Screens, slideAt, zoomFactor, zoomScroll } from './screens';
 
-const screens = ['/a.webp', '/b.webp', '/c.webp'];
+const screens = [
+  { src: '/a.webp', alt: 'Demo list' },
+  { src: '/b.webp', alt: 'Demo form' },
+  { src: '/c.webp', alt: 'Demo chart' },
+];
 
 beforeAll(() => {
   // jsdom has the element but not its methods.
@@ -19,21 +23,21 @@ beforeAll(() => {
 describe('Screens', () => {
   it('opens a capture in the lightbox, steps with the arrow keys and wraps', () => {
     render(<Screens title="Demo" screens={screens} />);
-    const link = screen.getByRole('link', { name: 'Demo screen 2, view full size' });
+    const link = screen.getByRole('link', { name: 'Demo form, view full size' });
     expect(link).toHaveAttribute('href', '/b.webp');
     expect(fireEvent.click(link)).toBe(false); // navigation prevented
-    expect(screen.getByRole('img', { name: 'Demo screen 2' })).toHaveAttribute('src', '/b.webp');
+    expect(screen.getByRole('img', { name: 'Demo form' })).toHaveAttribute('src', '/b.webp');
     expect(screen.getByRole('button', { name: 'Close' })).toHaveFocus();
 
     const dialog = screen.getByRole('dialog', { name: 'Demo screens' });
     fireEvent.keyDown(dialog, { key: 'ArrowRight' });
     fireEvent.keyDown(dialog, { key: 'ArrowRight' });
-    expect(screen.getByRole('img', { name: 'Demo screen 1' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Demo list' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Previous screen' }));
-    expect(screen.getByRole('img', { name: 'Demo screen 3' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Demo chart' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-    expect(screen.queryByRole('img', { name: /Demo screen/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: /^Demo (list|form|chart)$/ })).not.toBeInTheDocument();
   });
 
   it('glides to the next picture, but cuts straight across on a wrap', () => {
@@ -42,7 +46,7 @@ describe('Screens', () => {
       calls.push((o as ScrollToOptions | undefined)?.behavior);
     });
     render(<Screens title="Demo" screens={screens} />);
-    fireEvent.click(screen.getByRole('link', { name: 'Demo screen 2, view full size' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Demo form, view full size' }));
     fireEvent.click(screen.getByRole('button', { name: 'Next screen' }));
     fireEvent.click(screen.getByRole('button', { name: 'Next screen' }));
     spy.mockRestore();
@@ -51,8 +55,8 @@ describe('Screens', () => {
 
   it('leaves a modified click to the browser, so the capture opens in a new tab', () => {
     render(<Screens title="Demo" screens={screens} />);
-    expect(fireEvent.click(screen.getByRole('link', { name: 'Demo screen 1, view full size' }), { metaKey: true })).toBe(true);
-    expect(screen.queryByRole('img', { name: /Demo screen/ })).not.toBeInTheDocument();
+    expect(fireEvent.click(screen.getByRole('link', { name: 'Demo list, view full size' }), { metaKey: true })).toBe(true);
+    expect(screen.queryByRole('img', { name: /^Demo (list|form|chart)$/ })).not.toBeInTheDocument();
   });
 });
 
@@ -67,12 +71,13 @@ describe('Screens with the lead picture', () => {
     });
     expect(ask.defaultPrevented).toBe(true); // taken, so the lead's link does not navigate
     expect(screen.getByText('01 / 04')).toBeInTheDocument();
+    expect(screen.getByText('Screen 1 of 4')).toBeInTheDocument(); // what a screen reader hears for the digits
     expect(screen.getByRole('img', { name: 'Lead' })).toHaveAttribute('src', '/lead.webp');
   });
 
   it('opens a grid capture after the lead, and follows the track as it is swiped', () => {
     render(<Screens title="Demo" screens={screens} lead={lead} />);
-    fireEvent.click(screen.getByRole('link', { name: 'Demo screen 2, view full size' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Demo form, view full size' }));
     expect(screen.getByText('03 / 04')).toBeInTheDocument();
     const track = document.querySelector('.lb-track') as HTMLElement;
     Object.defineProperty(track, 'clientWidth', { value: 390 });
@@ -83,8 +88,8 @@ describe('Screens with the lead picture', () => {
 
   it('a tap on a picture zooms it, another tap fits it again', () => {
     render(<Screens title="Demo" screens={screens} />);
-    fireEvent.click(screen.getByRole('link', { name: 'Demo screen 1, view full size' }));
-    const img = screen.getByRole('img', { name: 'Demo screen 1' });
+    fireEvent.click(screen.getByRole('link', { name: 'Demo list, view full size' }));
+    const img = screen.getByRole('img', { name: 'Demo list' });
     fireEvent.click(img);
     expect(img.parentElement).toHaveAttribute('data-zoom', 'true');
     fireEvent.click(img);

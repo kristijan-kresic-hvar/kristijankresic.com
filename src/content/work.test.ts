@@ -23,9 +23,16 @@ describe('work content', () => {
       const card = hero.replace('.webp', '-card.webp');
       expect(existsSync(hero), `${w.slug} hero`).toBe(true);
       expect(existsSync(card), `${w.slug} card`).toBe(true);
-      for (let i = 1; i <= w.screens; i++) {
+      for (let i = 1; i <= w.screens.length; i++) {
         expect(existsSync(path.join(process.cwd(), 'public/images/work', `${w.slug}-screen-${i}.webp`)), `${w.slug} screen ${i}`).toBe(true);
       }
+    }
+  });
+
+  it('describes every extra screen: no empty alt text, and no two screens of a study share one', () => {
+    for (const w of WORK) {
+      for (const alt of w.screens) expect(alt.trim(), w.slug).not.toBe('');
+      expect(new Set(w.screens).size, w.slug).toBe(w.screens.length);
     }
   });
 

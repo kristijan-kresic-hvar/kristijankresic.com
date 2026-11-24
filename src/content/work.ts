@@ -18,8 +18,11 @@ export type CaseStudy = {
   image?: { src: string; alt: string; width: number; height: number };
   /** Hotspots on the hero image, in percent of width/height, with the decision or feature they point at. */
   annotations: Annotation[];
-  /** Extra screens for the case-study page: /images/work/<slug>-screen-N.webp. None of them repeats the opening picture. */
-  screens: number;
+  /**
+   * Extra screens for the case-study page, as the alt text of each: `screens[N - 1]` says what
+   * /images/work/<slug>-screen-N.webp shows. None of them repeats the opening picture.
+   */
+  screens: string[];
   /** The screens are whole phone captures: shown uncropped, in portrait. */
   phone?: boolean;
   /** A 16:10 plate exists at /images/work/<slug>-plate.webp beside the image. Every featured study has one. */
@@ -56,7 +59,11 @@ export const WORK: CaseStudy[] = [
       { x: 5.6, y: 37.1, title: 'Faceted filters as URL state', text: 'Filter combinations are serialised into the address bar and restored on load; no global store, no stale results after navigation.' },
       { x: 35.75, y: 76, title: 'The component system others built on', text: 'Typed cards, forms (React Hook Form + Zod) and tables that two other developers extended; I reviewed their pull requests.' },
     ],
-    screens: 3,
+    screens: [
+      'BioCirV performance overview with key figures, a bar chart and line charts',
+      'BioCirV almond hulls profile with a photo, key figures and analysis charts',
+      'BioCirV discovery results as a sortable table with three filters applied',
+    ],
     featured: true,
   },
   {
@@ -80,11 +87,14 @@ export const WORK: CaseStudy[] = [
     ],
     image: { src: '/images/work/oncallable.webp', alt: 'OnCallable marketing site home page', width: 1600, height: 1000 },
     annotations: [
-      { x: 31, y: 26, title: 'Every word is a Sanity document', text: 'Headlines, sections and CTAs are editable content with a page-builder schema; editors publish without a developer deploy.' },
+      { x: 31, y: 26, title: 'Every word is a Sanity document', text: 'Headlines, sections and calls to action are editable content with a page-builder schema; editors publish without a developer deploy.' },
       { x: 61, y: 10.4, title: 'Sections you can reorder and A/B test', text: 'Each block is a schema type with variants, so marketing runs experiments, popups and redirects from the CMS.' },
       { x: 34, y: 71.5, title: 'Forms defined in the CMS', text: 'Lead capture reads its fields and destination from Sanity; adding a form is content, not code.' },
     ],
-    screens: 2,
+    screens: [
+      'OnCallable page for professionals with four benefits and a map of jobs',
+      'OnCallable customer page with a map of professionals and three profile cards',
+    ],
     featured: true,
   },
   {
@@ -108,11 +118,15 @@ export const WORK: CaseStudy[] = [
     ],
     image: { src: '/images/work/suello.webp', alt: 'Three Suello app screens: adding a plant, the home screen with a connected planter, and a plant’s sensor readings', width: 1600, height: 1000 },
     annotations: [
-      { x: 37.5, y: 27, title: 'Reminders from device state', text: 'Soil-moisture readings arrive over Bluetooth Low Energy. Watering prompts are computed on the phone, so they work offline.' },
-      { x: 49.6, y: 41.3, title: 'Live planter status', text: 'The "Doing well" badge is driven by sensor characteristics subscribed through the BLE layer I built from scratch.' },
+      { x: 37.5, y: 27, title: 'Reminders from device state', text: 'Soil-moisture readings arrive over Bluetooth Low Energy (BLE). Watering prompts are computed on the phone, so they work offline.' },
+      { x: 49.6, y: 41.3, title: 'Live planter status', text: 'The “Doing well” badge is driven by sensor characteristics subscribed through the BLE layer I built from scratch.' },
       { x: 56, y: 66.7, title: 'A connection that survives real life', text: 'Reconnect and retry logic handles drops and app backgrounding so pairing and onboarding feel instant.' },
     ],
-    screens: 3,
+    screens: [
+      'Suello profile screen with settings and help menus',
+      'Suello add-plant screen with search and a list of common plants',
+      'Suello plant screen with a “Needs more light” badge and sensor readings',
+    ],
     phone: true,
     featured: true,
   },
@@ -141,7 +155,10 @@ export const WORK: CaseStudy[] = [
       { x: 29.3, y: 33.3, title: 'Profile data from Laravel', text: 'The vet profile fields are backed by controllers and migrations I wrote, with PostgreSQL underneath.' },
       { x: 65, y: 55, title: '100k+ users, zero-downtime changes', text: 'Every change went through code review and staged releases on a 24/7 video-consultation platform.' },
     ],
-    screens: 2,
+    screens: [
+      '“Ask Vetster anything” chat with species, availability and health-issue options',
+      'Vetster dog-vet page: how online care works and lists of vets',
+    ],
     featured: true,
   },
   {
@@ -169,7 +186,10 @@ export const WORK: CaseStudy[] = [
       { x: 29.5, y: 40.6, title: 'Multi-party e-signature', text: 'Consent documents move through signer roles with pending/complete states, all on HIPAA-compliant infrastructure.' },
       { x: 82.5, y: 54, title: 'Scheduling and magic-link authentication', text: 'Sessions sync to calendars; users sign in with JSON Web Token (JWT) magic links instead of passwords.' },
     ],
-    screens: 2,
+    screens: [
+      'Naitur forms list: questionnaires and rating scales, each with a Send action',
+      'Naitur response view: a questionnaire answered on a five-point agreement scale',
+    ],
     featured: true,
   },
   {
@@ -196,7 +216,11 @@ export const WORK: CaseStudy[] = [
       { x: 33.8, y: 14.5, title: 'Activity feed and tables', text: 'Data tables with sorting and CSV export so agents can work their book outside the app.' },
       { x: 20.6, y: 95.5, title: 'PayPal subscriptions gate the tools', text: 'Subscription checkout integrated end to end; the tier on the account unlocks sales tools.' },
     ],
-    screens: 3,
+    screens: [
+      'Benefit Buddy tax-savings table with yearly premiums, cost of care and self-funding',
+      'Benefit Buddy premium view comparing two plans side by side, with charts',
+      'Benefit Buddy plans page with a table of plans and case-study templates',
+    ],
     featured: true,
   },
   {
@@ -222,7 +246,10 @@ export const WORK: CaseStudy[] = [
       { x: 42.5, y: 45.8, title: 'Bidding on a running auction', text: 'The current highest bid, a field for a new bid, a bidding agent and an instant purchase price, with the time left beside the title.' },
       { x: 9.8, y: 77.8, title: 'Vehicle data from the CMS', text: 'Consignor, distance, pickup and transport cost in one row, then the full vehicle-data table, all rendered from CMS content.' },
     ],
-    screens: 2,
+    screens: [
+      'car-catcher.de create-auction step 2: the vehicle-data form with paint-thickness fields',
+      'car-catcher.de create-auction step 4: damage markers on a car diagram',
+    ],
     featured: false,
   },
   {
@@ -239,7 +266,7 @@ export const WORK: CaseStudy[] = [
       'buildmycareer.de is a careers portal with a large job-pipeline dashboard behind it, where admins managed jobs and the applications coming in for them. I built the React frontend, with the portal content managed in a CMS.',
     highlights: ['Job-pipeline dashboard where admins managed jobs and applications.', 'Careers portal frontend with CMS-managed content.'],
     annotations: [],
-    screens: 0,
+    screens: [],
     featured: false,
   },
   {
@@ -257,7 +284,11 @@ export const WORK: CaseStudy[] = [
     highlights: ['Custom WordPress theme, multilingual content, performance pass.'],
     image: { src: '/images/work/agrivi.webp', alt: 'Agrivi marketing site home page, Croatian version', width: 1600, height: 1000 },
     annotations: [],
-    screens: 3,
+    screens: [
+      'Agrivi product page with app screenshots and four key figures, in Croatian',
+      'Agrivi case-studies page with a grid of customer stories, in Croatian',
+      'Agrivi about page over an aerial photo of a farm, in Croatian',
+    ],
     featured: false,
   },
   {
@@ -275,7 +306,11 @@ export const WORK: CaseStudy[] = [
     highlights: ['The owner reported enquiries up by about 200% after launch.'],
     image: { src: '/images/work/robinson.webp', alt: 'Robinson Restaurant home page over a photo of a pebble cove seen through pine trees', width: 1600, height: 1000 },
     annotations: [],
-    screens: 3,
+    screens: [
+      'Robinson Restaurant gallery page with a grid of photos and category filters',
+      'Robinson Restaurant menu page: main courses and a wine list with prices',
+      'Robinson Restaurant “Our restaurant” section beside a photo of its painted sign',
+    ],
     featured: false,
   },
 ];
