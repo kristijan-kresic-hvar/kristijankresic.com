@@ -28,6 +28,16 @@ Out of scope: the two CV PDFs, the share image, README and docs, code comments, 
 - K6. `npm run check` stays green. Tests that quote a changed string are updated to the new string, never loosened.
 - K7. The contact form never sends in tests.
 
+## Owner corrections (these override K1 for the lines they touch)
+
+Suello, from the owner on 2026-11-24: "We never actually tested the app working on real planter hardware since project was cancelled before we got the prototype. So I in reality got auth and blutooth working the other stuff is pure UI and UI/UX flow." Asked for detail, the owner confirmed three things:
+
+- Bluetooth pairing and communication were built and tested against a test device, not a real planter.
+- The reconnect and retry logic (dropped connections, app backgrounding) was built and tested, against that test device.
+- The page says once, plainly, that the project ended before a hardware prototype was ready, so the app never ran against a real planter.
+
+So on the Suello page and wherever else Suello is mentioned: authentication and the Bluetooth layer are stated as built and working; the screens that show planter data (watering reminders, the status badge, sensor readings, connection and battery status) are interface built for data no planter ever sent, and no line may say or imply that anything ran on, or was proven with, a real planter or in real use.
+
 ## Acceptance criteria
 
 A failure names the criterion and quotes the line. A preference with no defect behind it is a note, not a failure.
