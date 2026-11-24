@@ -142,6 +142,8 @@ describe('HeroStage', () => {
     const rail = screen.getByRole('list');
     const count = document.querySelector('.stage-count');
     expect(count).toHaveTextContent('01 / 06');
+    // the list already says the position, so the rows' own digits are not read out
+    expect(document.querySelectorAll('.stage-item .stage-n[aria-hidden="true"]')).toHaveLength(FEATURED.length);
     // six plates 301px wide and 12px apart in a 390px window, the third at the left edge
     Array.from(rail.children).forEach((li, i) => {
       Object.defineProperty(li, 'offsetLeft', { value: 20 + i * 313 });

@@ -180,7 +180,7 @@ export function HeroStage({ studies }: { studies: CaseStudy[] }) {
               onClick={(e) => open(i, e)}
               onFocus={(e) => focus(i, e.currentTarget)}
             >
-              <span className="stage-n">{two(i + 1)}</span>
+              <span className="stage-n" aria-hidden="true">{two(i + 1)}</span>
               <span className="stage-name">{study.client}</span>
               <span className="stage-short">{study.short}</span>
               {/* Shown on touch for the selected row only: the link already names where it goes. */}

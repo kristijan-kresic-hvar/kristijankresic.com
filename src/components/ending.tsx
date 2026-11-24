@@ -20,8 +20,8 @@ export function Ending() {
           <section id="contact" aria-labelledby="contact-title" className="lg:col-span-6">
             <h2 id="contact-title" className="end-say">
               <span className="end-lead">
-                <span className="text-text-primary">Hiring a frontend engineer?</span> Email is the fastest way to reach me, and I reply
-                the same day.
+                <span className="text-text-primary">Hiring a frontend engineer?</span> Email is the fastest way to reach me, and I usually
+                reply the same day.
               </span>
               <a href={`mailto:${PROFILE.email}`} className="end-mail">
                 {PROFILE.email}

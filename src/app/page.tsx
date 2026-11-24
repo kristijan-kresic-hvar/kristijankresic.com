@@ -42,7 +42,7 @@ export default function Home() {
               </span>{' '}
               <span>
                 <strong>I leave a foundation other people build on.</strong> On BioCirV two other developers built on my component
-                system while I reviewed their PRs.
+                system while I reviewed their pull requests.
               </span>{' '}
               <span>
                 <strong>AI does the mechanical work;</strong> every architecture call and merged line is mine.

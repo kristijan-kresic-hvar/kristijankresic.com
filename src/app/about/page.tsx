@@ -47,7 +47,7 @@ export default function About() {
           </p>
           <p>
             The pattern repeats: join a team, own the frontend end to end, leave behind a foundation other people can build on. On
-            BioCirV that meant the component system, data layer and PR reviews for two other developers; on OnCallable it meant
+            BioCirV that meant the component system, data layer and pull request reviews for two other developers; on OnCallable it meant
             editors shipping pages without a deploy; on Suello it meant a Bluetooth device layer that survives dropped connections.
           </p>
           <p>
@@ -55,7 +55,7 @@ export default function About() {
             are mine.
           </p>
           <p>
-            Based on Hvar, Croatia (CET). EU citizen. Open to remote roles across Europe or with US-East overlap, and hybrid in Split
+            Based on Hvar, Croatia (CET). EU citizen. Open to remote roles across the EU or with US-East overlap, and hybrid in Split
             or Zagreb. Available now.
           </p>
         </div>
