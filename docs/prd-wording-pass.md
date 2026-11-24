@@ -57,7 +57,7 @@ A failure names the criterion and quotes the line. A preference with no defect b
 - C1. CVs are built from source. `python3 cv/build.py cv && cv/render.sh` reproduces both PDFs in `public/cv/`, each exactly one page, with selectable text and working links.
 - C2. The CVs agree with the site. Every fact that appears in both (dates, roles, client descriptions, numbers, availability and working arrangement, contact details, links) is the same, the site being the reference. Nothing in a CV claims more than the site does: that includes the Suello correction above and the words "shipped" and "production" for work that did not ship. The site shows no phone number (the owner had it removed), so the CVs show none.
 - C3. The CVs follow O1 to O4: British spelling, one term per thing as on the site ("authentication", "pull requests", "enquiries"), no em dashes, no stock phrases. A CV may be terser than the site and keeps its own layout.
-- O7. Metadata. Every page has its own title and description. Descriptions are complete sentences of 50 to 160 characters that agree with the page.
+- O7. Metadata. Every page has its own title and description, 50 to 160 characters, agreeing with the page. On the landing, About, /thanks/, /not-sent/ and the 404 page the description is one or more complete sentences. A case study's description is its tagline, which may be a phrase (owner's decision, 2026-11-24: "Keep the taglines").
 
 ## How to check
 
