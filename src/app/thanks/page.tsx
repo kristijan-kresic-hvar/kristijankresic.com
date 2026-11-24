@@ -5,6 +5,7 @@ import { ArrowLeft } from '@/components/icons';
 
 export const metadata: Metadata = {
   title: 'Message sent',
+  description: 'Your message is with me. I will reply to the address you gave, usually the same day.',
   robots: { index: false },
 };
 

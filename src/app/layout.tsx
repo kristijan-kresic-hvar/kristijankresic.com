@@ -28,12 +28,12 @@ export const metadata: Metadata = {
     template: `%s · ${PROFILE.name}`,
   },
   description:
-    'Frontend engineer with 4+ years shipping production React, Next.js, TypeScript and React Native products for North American clients. Based in Croatia, available now.',
+    'I’m a frontend engineer in Croatia, available now, with 4+ years shipping React, Next.js and TypeScript for North American clients. I also build in React Native.',
   openGraph: {
     type: 'website',
     siteName: PROFILE.name,
     title: `${PROFILE.name} · Frontend engineer`,
-    description: '4+ years shipping production web and mobile products. React · Next.js · TypeScript. Available now.',
+    description: 'I have spent 4+ years shipping production web apps with React, Next.js and TypeScript, and building in React Native. I am available now.',
     images: [{ url: '/images/og.png', width: 1200, height: 630, alt: `${PROFILE.name}, frontend engineer` }],
   },
   twitter: { card: 'summary_large_image' },

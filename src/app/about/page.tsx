@@ -6,7 +6,7 @@ import { PROFILE } from '@/content/profile';
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'Frontend engineer based on Hvar, Croatia. 4+ years professional, building for the web since 2016.',
+  description: 'I am a frontend engineer based on Hvar, Croatia, with 4+ years of professional work, building for the web since 2016.',
   alternates: { canonical: '/about/' },
 };
 

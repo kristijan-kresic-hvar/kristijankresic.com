@@ -9,7 +9,7 @@ const ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_URL ?? '/api/contact';
 const FIELD_ERRORS: Record<string, string> = {
   name: 'Add your name.',
   intent: 'Pick one of the two.',
-  email: 'That email address does not look right.',
+  email: 'Add a full email address, such as name@example.com.',
   message: 'Write a few words about what you need.',
 };
 

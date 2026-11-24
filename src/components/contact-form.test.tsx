@@ -100,10 +100,10 @@ describe('ContactForm', () => {
     const email = screen.getByRole('textbox', { name: 'Reach me at your email' });
     await waitFor(() => expect(email).toHaveFocus());
     expect(email).toHaveAttribute('aria-invalid', 'true');
-    expect(email).toHaveAccessibleDescription(/email address does not look right/);
+    expect(email).toHaveAccessibleDescription(/full email address, such as name@example.com/);
     expect(screen.getByLabelText('What do you need?')).toHaveAccessibleDescription(/what you need/);
     expect(screen.getByRole('textbox', { name: 'I’m your name' })).not.toHaveAttribute('aria-invalid');
-    expect(screen.getAllByRole('alert').map((a) => a.textContent).join(' ')).toMatch(/does not look right.*what you need/);
+    expect(screen.getAllByRole('alert').map((a) => a.textContent).join(' ')).toMatch(/full email address.*what you need/);
   });
 
   it('checks the blanks before sending anything', () => {
