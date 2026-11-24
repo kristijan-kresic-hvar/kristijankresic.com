@@ -29,7 +29,7 @@ export function zoomScroll(o: { fx: number; fy: number; width: number; height: n
 type Zoom = { i: number; width: number; left: number; top: number };
 
 /**
- * The extra captures of a case study: one large with the rest beside it (two sit side by side), or, for phone captures,
+ * The extra captures of a case study: one large with the rest beside it (two or four sit in rows of two), or, for phone captures,
  * each one whole and side by side. Every capture is a plain link to its file; with JavaScript a
  * click opens it in a lightbox instead. The lightbox is a native dialog, so Escape closes it, focus
  * stays inside it and goes back to the capture that opened it. Its pictures sit on one horizontal
@@ -43,8 +43,8 @@ export function Screens({
   lead,
 }: {
   title: string;
-  /** Each capture's file and the alt text that says what it shows. */
-  screens: { src: string; alt: string }[];
+  /** Each capture's file and the alt text that says what it shows. A label names one that is not of the product itself. */
+  screens: { src: string; alt: string; label?: string | undefined }[];
   phone?: boolean | undefined;
   /** The case study's lead picture, opened by a tap on it (see `OPEN_LEAD`). */
   lead?: { src: string; alt: string } | undefined;
@@ -115,7 +115,7 @@ export function Screens({
 
   return (
     <>
-      <ul className="sc-grid" data-phone={phone || undefined} data-pair={screens.length === 2 || undefined}>
+      <ul className="sc-grid" data-phone={phone || undefined} data-pair={screens.length === 2 || screens.length === 4 || undefined}>
         {screens.map((s, i) => (
           <li key={s.src} className="rise">
             <a
@@ -127,6 +127,7 @@ export function Screens({
               className="frame sc-frame"
             >
               <Image src={s.src} alt="" fill loading="lazy" sizes="(min-width: 1024px) 66vw, 100vw" className="object-cover object-top" />
+              {s.label && <span className="sc-label">{s.label}</span>}
             </a>
           </li>
         ))}

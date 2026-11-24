@@ -60,6 +60,14 @@ describe('Screens', () => {
   });
 });
 
+describe('Screens in rows of two', () => {
+  it('lays four captures out as pairs and shows a capture\'s label', () => {
+    const { container } = render(<Screens title="Demo" screens={[{ src: '/old.webp', alt: 'Demo before', label: 'Before: the old way' }, ...screens]} />);
+    expect(container.querySelector('.sc-grid')).toHaveAttribute('data-pair');
+    expect(screen.getByRole('link', { name: 'Demo before, view full size' })).toHaveTextContent('Before: the old way');
+  });
+});
+
 describe('Screens with the lead picture', () => {
   const lead = { src: '/lead.webp', alt: 'Lead' };
 

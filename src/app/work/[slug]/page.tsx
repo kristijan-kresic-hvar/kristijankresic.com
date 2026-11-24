@@ -62,7 +62,10 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
     : hasPlate(study)
       ? { src: `/images/work/${study.slug}-plate.webp`, small: `/images/work/${study.slug}-plate-sm.webp`, width: 1920, height: 1200, alt: shot.alt }
       : { src: shot.src, small: undefined, width: shot.width, height: shot.height, alt: shot.alt };
-  const screens = study.screens.map((alt, i) => ({ src: `/images/work/${study.slug}-screen-${i + 1}.webp`, alt }));
+  const screens = [
+    ...(study.before ? [{ src: `/images/work/${study.slug}-before.webp`, ...study.before }] : []),
+    ...study.screens.map((alt, i) => ({ src: `/images/work/${study.slug}-screen-${i + 1}.webp`, alt })),
+  ];
 
   return (
     <article className="from-top">

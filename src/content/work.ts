@@ -23,6 +23,8 @@ export type CaseStudy = {
    * /images/work/<slug>-screen-N.webp shows. None of them repeats the opening picture.
    */
   screens: string[];
+  /** A picture of what the product replaced, at /images/work/<slug>-before.webp: shown first among the screens, under its label. */
+  before?: { alt: string; label: string };
   /** The screens are whole phone captures: shown uncropped, in portrait. */
   phone?: boolean;
   /** A 16:10 plate exists at /images/work/<slug>-plate.webp beside the image. Every featured study has one. */
@@ -217,10 +219,11 @@ export const WORK: CaseStudy[] = [
       { x: 20.6, y: 95.5, title: 'PayPal subscriptions gate the tools', text: 'Subscription checkout integrated end to end; the tier on the account unlocks sales tools.' },
     ],
     screens: [
-      'Benefit Buddy tax-savings table with yearly premiums, cost of care and self-funding',
       'Benefit Buddy premium view comparing two plans side by side, with charts',
+      'Benefit Buddy tax-savings table with yearly premiums, cost of care and self-funding',
       'Benefit Buddy plans page with a table of plans and case-study templates',
     ],
+    before: { alt: 'The Excel model BuddyIns used before the web app: plan inputs in cells and two pie charts comparing plans', label: 'Before: the Excel model' },
     featured: true,
   },
   {

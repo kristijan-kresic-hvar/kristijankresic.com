@@ -26,6 +26,7 @@ describe('work content', () => {
       for (let i = 1; i <= w.screens.length; i++) {
         expect(existsSync(path.join(process.cwd(), 'public/images/work', `${w.slug}-screen-${i}.webp`)), `${w.slug} screen ${i}`).toBe(true);
       }
+      if (w.before) expect(existsSync(path.join(process.cwd(), 'public/images/work', `${w.slug}-before.webp`)), `${w.slug} before`).toBe(true);
     }
   });
 
