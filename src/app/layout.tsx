@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: `%s · ${PROFILE.name}`,
   },
   description:
-    'I’m a frontend engineer in Croatia, available now, with 4+ years shipping React, Next.js and TypeScript for North American clients. I also build in React Native.',
+    'I’m a frontend engineer in Croatia, available now, with 4+ years shipping React, Next.js and TypeScript for North American clients. I build in React Native too.',
   openGraph: {
     type: 'website',
     siteName: PROFILE.name,
