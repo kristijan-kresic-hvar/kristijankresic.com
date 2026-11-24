@@ -75,7 +75,7 @@ export const WORK: CaseStudy[] = [
       'The marketing site was hard-coded, so every copy change needed a developer deploy. I moved it onto Sanity with a page-builder schema: editors now ship pages, sections, popups, redirects and A/B tests themselves.',
     highlights: [
       'Replatformed the whole site in about two weeks without a content freeze.',
-      'Built in SEO and answer-engine optimisation: structured FAQ data (JSON-LD), per-page metadata and clean URLs.',
+      'Set up SEO and answer-engine optimisation: structured FAQ data (JSON-LD), per-page metadata and clean URLs.',
       'Zero developer deploys for content since launch.',
     ],
     image: { src: '/images/work/oncallable.webp', alt: 'OnCallable marketing site home page', width: 1600, height: 1000 },
@@ -106,7 +106,7 @@ export const WORK: CaseStudy[] = [
       'Authentication and account flows wired to the backend.',
       'Onboarding with custom animations that explain pairing without a manual.',
     ],
-    image: { src: '/images/work/suello.webp', alt: 'Suello app home screen showing a connected planter', width: 1600, height: 1000 },
+    image: { src: '/images/work/suello.webp', alt: 'Three Suello app screens: adding a plant, the home screen with a connected planter, and a plant’s sensor readings', width: 1600, height: 1000 },
     annotations: [
       { x: 37.5, y: 27, title: 'Reminders from device state', text: 'Soil-moisture readings arrive over Bluetooth Low Energy. Watering prompts are computed on the phone, so they work offline.' },
       { x: 49.6, y: 41.3, title: 'Live planter status', text: 'The "Doing well" badge is driven by sensor characteristics subscribed through the BLE layer I built from scratch.' },
@@ -135,7 +135,7 @@ export const WORK: CaseStudy[] = [
       'Laravel controllers and migrations for user and vet profile data: profile fields, onboarding state, account settings.',
       'Worked inside an established codebase with code review and staged releases.',
     ],
-    image: { src: '/images/work/vetster.webp', alt: 'Vetster home page with a vet on a video call', width: 1600, height: 1000 },
+    image: { src: '/images/work/vetster.webp', alt: 'Vetster find-a-vet page with a vet search and species picker', width: 1600, height: 1000 },
     annotations: [
       { x: 40.5, y: 7.8, title: 'Vet-side flows in Vue.js', text: 'Onboarding, profile and account-settings screens shipped inside an established Vue.js codebase with staged releases.' },
       { x: 29.3, y: 33.3, title: 'Profile data from Laravel', text: 'The vet profile fields are backed by controllers and migrations I wrote, with PostgreSQL underneath.' },
@@ -160,14 +160,14 @@ export const WORK: CaseStudy[] = [
       'Clinics and facilitators run screening, sessions and follow-ups on Naitur. I shipped the responsive frontend: JWT magic-link authentication, multi-party e-signature flows, data tables, export and analytics on HIPAA-compliant infrastructure.',
     highlights: [
       '100+ facilitators and 15+ clinics onboarded in the platform’s first week.',
-      'JWT magic-link auth and multi-party e-signature flows for consent documents.',
+      'JWT magic-link authentication and multi-party e-signature flows for consent documents.',
       'Clinical forms (standard scales), response views, data tables and CSV export.',
     ],
     image: { src: '/images/work/naitur.webp', alt: 'Naitur journey dashboard with phased activities', width: 1600, height: 1000 },
     annotations: [
       { x: 48.8, y: 35.2, title: 'Phased journey pipeline', text: 'Screening → Facilitation → Integration as typed data tables with status chips; clinics track every client step.' },
       { x: 29.5, y: 40.6, title: 'Multi-party e-signature', text: 'Consent documents move through signer roles with pending/complete states, all on HIPAA-compliant infrastructure.' },
-      { x: 82.5, y: 54, title: 'Scheduling and magic-link auth', text: 'Sessions sync to calendars; users sign in with JWT magic links instead of passwords.' },
+      { x: 82.5, y: 54, title: 'Scheduling and magic-link authentication', text: 'Sessions sync to calendars; users sign in with JSON Web Token (JWT) magic links instead of passwords.' },
     ],
     screens: 2,
     featured: true,
@@ -188,11 +188,11 @@ export const WORK: CaseStudy[] = [
       'Insurance agents manage clients and plans on BuddyIns. I built the Next.js frontend over the Django REST API: authentication flows, PayPal subscription checkout, CRUD screens, data tables and CSV export.',
     highlights: [
       'PayPal subscription checkout integrated end to end with the Django backend.',
-      'Auth flows, CRUD screens and data tables with export for agents.',
+      'Authentication flows, CRUD screens and data tables with export for agents.',
     ],
     image: { src: '/images/work/buddyins.webp', alt: 'BuddyIns agent dashboard with activity feed', width: 1600, height: 1000 },
     annotations: [
-      { x: 15.5, y: 19, title: 'Benefit Buddy plan builder', text: 'CRUD screens over the Django REST API for building and sharing long-term-care plans.' },
+      { x: 15.5, y: 19, title: 'Benefit Buddy plan builder', text: 'Create, read, update and delete (CRUD) screens over the Django REST API for building and sharing long-term-care plans.' },
       { x: 33.8, y: 14.5, title: 'Activity feed and tables', text: 'Data tables with sorting and CSV export so agents can work their book outside the app.' },
       { x: 20.6, y: 95.5, title: 'PayPal subscriptions gate the tools', text: 'Subscription checkout integrated end to end; the tier on the account unlocks sales tools.' },
     ],
@@ -267,7 +267,7 @@ export const WORK: CaseStudy[] = [
     tagline: 'A custom WordPress theme for a beach restaurant; the owner reported enquiries up by about 200%.',
     period: '2019 – 2021',
     role: 'Freelance web developer',
-    context: 'Beach restaurant',
+    context: 'Island beach restaurant',
     location: 'Hvar, Croatia',
     url: 'https://robinson-hvar.com',
     stack: ['WordPress', 'PHP', 'JavaScript'],
