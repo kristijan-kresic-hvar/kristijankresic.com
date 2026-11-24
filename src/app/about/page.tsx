@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 };
 
 const TIMELINE = [
-  { when: 'Jan 2023 – Aug 2026', what: 'Frontend Developer, Agilno (remote)', note: 'Embedded in six North American client teams: BioCirV, OnCallable, Suello, Vetster, Naitur, BuddyIns.' },
-  { when: 'Apr 2022 – Nov 2022', what: 'Frontend Web Developer, amondi GmbH (Zagreb, hybrid)', note: 'Car Catcher and BuildMyCareer, two CMS-driven React apps.' },
-  { when: 'Jul 2020 – Mar 2021', what: 'Web Developer, Reroot (contract)', note: 'Agrivi marketing site redesign.' },
+  { when: 'Jan 2023 – Aug 2026', what: 'Frontend developer, Agilno (remote)', note: 'Embedded in six North American client teams: BioCirV, OnCallable, Suello, Vetster, Naitur, BuddyIns.' },
+  { when: 'Apr 2022 – Nov 2022', what: 'Frontend web developer, amondi GmbH (Zagreb, hybrid)', note: 'Car Catcher and BuildMyCareer, two CMS-driven React apps.' },
+  { when: 'Jul 2020 – Mar 2021', what: 'Web developer, Reroot (contract)', note: 'Agrivi marketing site redesign.' },
   { when: '2019 – 2021', what: 'Freelance web developer, Hvar', note: 'Robinson Restaurant and local businesses.' },
   { when: '2016 – 2018', what: 'Algebra Bernays University, Zagreb', note: 'Certificate programmes: Frontend Development & Graphic Design; PHP & MySQL Backend Development.' },
 ];
@@ -41,7 +41,7 @@ export default function About() {
         </figure>
         <div className="about-bio max-w-reading space-y-5 text-text-body lg:col-span-6 lg:col-start-3">
           <p className="text-lead text-text-secondary">
-            I&apos;ve been building for the web since {PROFILE.since} and shipping professionally for {PROFILE.yearsProfessional}{' '}
+            I&rsquo;ve been building for the web since {PROFILE.since} and shipping professionally for {PROFILE.yearsProfessional}{' '}
             years. For the last three and a half of those I was at Agilno, a product agency, embedded in six North American client
             teams across insurance, HIPAA healthcare, telehealth and IoT.
           </p>
