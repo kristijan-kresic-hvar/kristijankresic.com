@@ -16,7 +16,9 @@ Every string a visitor can read or hear, on `/`, `/about/`, all ten case studies
 - Page and component text: headings, paragraphs, labels, buttons, helper lines, form errors and confirmations, link text, `aria-label`s, screen-reader-only text.
 - Metadata: page titles, descriptions, Open Graph text.
 
-Out of scope: the two CV PDFs, the share image, README and docs, code comments, layout and CSS, any new section or new claim, and adding technical depth to a case study (the owner has to supply that).
+Out of scope: the share image, README and docs, code comments, layout and CSS, any new section or new claim, and adding technical depth to a case study (the owner has to supply that).
+
+The two CVs are in scope (owner, 2026-11-24: "We need to align everything correctly", "align it to our current site"). Their source is `cv/` (brought over from the portfolio-v2 repository): `cv/build.py` holds one content model and writes `cv/frontend.html` and `cv/fullstack.html`, and `cv/render.sh` prints them to `public/cv/*.pdf` with headless Chrome.
 
 ## Fixed constraints
 
@@ -52,6 +54,9 @@ A failure names the criterion and quotes the line. A preference with no defect b
   - Numbers, ranges and dates follow one format ("100k+", "4+", "Jan 2023 – Aug 2026").
 - O5. Interface text. Every label, button, link, error, status and confirmation says in plain words what it is or what to do next. Errors name the problem and the fix. Link text makes sense read on its own. Icon-only controls have a label. Alt text describes what the picture shows. Screen-reader-only text reads as naturally as the visible text.
 - O6. Plain English first. On every case study a non-technical reader can tell from the title and tagline what the product is and what was done. An abbreviation that is not common knowledge is spelled out at its first visible use on a page (for example BLE). The reader for this test is a recruiter who hires for software roles: abbreviations found in ordinary job adverts count as common knowledge (API, CMS, SEO, SaaS, IoT, QA, CSV, PDF, A/B test, and HIPAA where "US-regulated" sits beside it), and abbreviations from one sub-field do not (BLE, JWT, CRUD, CTA).
+- C1. CVs are built from source. `python3 cv/build.py cv && cv/render.sh` reproduces both PDFs in `public/cv/`, each exactly one page, with selectable text and working links.
+- C2. The CVs agree with the site. Every fact that appears in both (dates, roles, client descriptions, numbers, availability and working arrangement, contact details, links) is the same, the site being the reference. Nothing in a CV claims more than the site does: that includes the Suello correction above and the words "shipped" and "production" for work that did not ship. The site shows no phone number (the owner had it removed), so the CVs show none.
+- C3. The CVs follow O1 to O4: British spelling, one term per thing as on the site ("authentication", "pull requests", "enquiries"), no em dashes, no stock phrases. A CV may be terser than the site and keeps its own layout.
 - O7. Metadata. Every page has its own title and description. Descriptions are complete sentences of 50 to 160 characters that agree with the page.
 
 ## How to check
