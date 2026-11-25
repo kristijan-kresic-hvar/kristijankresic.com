@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 import { Container } from './container';
 import { PROFILE } from '@/content/profile';
 
@@ -11,8 +12,26 @@ const LINKS = [
   { href: PROFILE.cv.frontend, label: 'CV', always: false },
 ];
 
+/**
+ * Click listener (capture, on the document) that lets the scroll an in-page link starts glide:
+ * `html[data-glide]` turns smooth scrolling on in globals.css. It is removed in the next task;
+ * the glide already under way keeps going, and a scroll restore on reload or Back stays instant.
+ */
+export function glide(e: MouseEvent) {
+  if (!(e.target instanceof Element) || !e.target.closest('a[href^="#"]')) return;
+  const html = document.documentElement;
+  html.dataset.glide = '';
+  setTimeout(() => {
+    delete html.dataset.glide;
+  });
+}
+
 export function Nav() {
   const path = usePathname();
+  useEffect(() => {
+    document.addEventListener('click', glide, true);
+    return () => document.removeEventListener('click', glide, true);
+  }, []);
   const tone = 'text-text-body transition-colors duration-(--duration-instant) hover:text-text-primary';
   return (
     <header className="site-nav sticky top-0 z-40 bg-bg-base/85 backdrop-blur-md">

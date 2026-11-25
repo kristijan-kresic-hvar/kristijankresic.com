@@ -191,10 +191,10 @@ html {
     --container-reading: max(31rem, 42.5rem - 120 * (1vw - 1px * 16));
   }
 }
-/* In-page links glide (Work, Email me). Route changes still jump: the router turns this off for
-   its own scroll, told to by data-scroll-behavior on <html>. */
+/* In-page links glide (Work, Email me): nav.tsx sets data-glide for the click that starts the
+   scroll. Only then, or the browser's own scroll restore on a reload or Back glides too, from the top. */
 @media (prefers-reduced-motion: no-preference) {
-  html {
+  html[data-glide] {
     scroll-behavior: smooth;
   }
 }
