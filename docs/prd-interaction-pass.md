@@ -68,14 +68,14 @@ Owner (2026-11-25), looking at `/work/buddyins/` in a 768 by 572 window: "isnt i
 
 Under 1024px wide the picture and its notes take one of three layouts, chosen by the window alone, with the same conditions in the CSS and in the script:
 
-- Upright: under 1024px wide, at least 500px tall, and less than 6:5 wide to tall. The picture is stacked above its notes and pins (Part 1).
-- Side by side: 768 to 1023px wide and at least 6:5 wide to tall, at any height. The picture sits beside its notes.
+- Upright: under 1024px wide, at least 500px tall, and not wider than tall. The picture is stacked above its notes and pins (Part 1).
+- Side by side: 768 to 1023px wide and wider than tall, at any height. The picture sits beside its notes.
 - Free: everything else under 1024px. The picture is stacked above its notes and does not pin.
 
 - T1. The whole picture can be seen at once. At every size its height is at most the window height minus the nav minus 16px.
-- T2. Upright: the picture is as wide as its column, made narrower only as far as needed to leave 200px for notes under it while it is pinned. It is at least 85% of its column at 768 by 1024, 744 by 1133, 820 by 1180, 785 by 834 and 900 by 800.
-- T3. Side by side: the picture is at least 55% of the content width and its notes column is at least 250px wide. The picture stays in view under the nav while its notes scroll, and lets go at the end of the notes without covering anything. Pairs light as P6 says (a tap on touch, hover or focus with a mouse); nothing tracks the scroll. Leader lines are not required. Checked at 768 by 572, 844 by 390, 932 by 430, 900 by 600, 960 by 600, 1000 by 700 and 1023 by 768.
-- T4. Free: the picture is as wide as its column unless T1 makes it narrower. Checked at 568 by 320, 667 by 375 and 700 by 520.
+- T2. Upright: the picture is as wide as its column, made narrower only as far as needed to leave 200px for notes under it while it is pinned. It is the full width of its column at 768 by 1024, 744 by 1133, 820 by 1180, 785 by 834 and 900 by 1000: at 768px and wider an upright window always has the room, so the picture is never a little narrower than the text beside which it sits.
+- T3. Side by side: the picture is at least 55% of the content width and its notes column is at least 250px wide. The picture stays in view under the nav while its notes scroll, and lets go at the end of the notes without covering anything. Pairs light as P6 says (a tap on touch, hover or focus with a mouse); nothing tracks the scroll. Leader lines are not required. Checked at 768 by 572, 844 by 390, 932 by 430, 900 by 600, 960 by 600, 900 by 800, 1000 by 700 and 1023 by 768.
+- T4. Free: the picture is as wide as its column unless T1 makes it narrower. Checked at 568 by 320, 667 by 375, 600 by 520 and 700 by 520.
 - T5. In a stacked layout a picture narrower than its column is centred in it.
 - T6. In all three layouts the markers keep their 44px touch targets, a tap on a marker or a note behaves as Part 1 says for that layout, and P1 to P5 hold wherever the picture pins.
 - T7. The step from 1023px to 1024px wide is not a jolt: at 1023 by 768 and 1024 by 768 the picture is beside its notes in both, and its width differs by no more than 15%.
