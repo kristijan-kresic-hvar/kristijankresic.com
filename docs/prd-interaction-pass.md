@@ -82,6 +82,28 @@ Under 1024px wide the picture and its notes take one of three layouts, chosen by
 
 Page heights under 1024px change with this part by design; `.gauntlet/scroll/heights.json` and `heights.webkit.json` are re-recorded by the orchestrator once, after T1 to T7 hold.
 
+## Part 4: every page and section at every window shape
+
+Owner (2026-11-25): "can we make sure layout makes sense on all screens for all pages and sections so we dont have similar problems again." The picture-size fault got through because earlier passes were tested at a handful of device sizes (320 by 568, 390 by 844, 820 by 1180, 1280 by 800 and up). Windows between those, and windows that are wide and short, were never looked at.
+
+The sweep. A script kept in the repository under `scripts/layout/`, run with `npm run check:layout` (needs the dev server and playwright-cli, no new dependency), loads every page at every sweep size in Chromium and in WebKit, judges V1 to V5 by measurement, prints one line per finding and `LAYOUT SWEEP OK` when there is none, and writes a contact sheet of screenshots per page for V6. It takes a base address, so it can be pointed at the deployed site. Run against the code before Part 3 (the deployed preview while it still has it, or commit f3f1fc5), it must report the two known faults: the lead picture at about 50% of its column at 768 by 572, and the lead picture taller than the window at 844 by 390. A sweep that cannot see those is not accepted.
+
+Pages: `/`, `/about/`, all ten case studies, `/thanks/`, `/not-sent/` and the 404 page.
+
+Sweep sizes. Widths 320, 360, 390, 430, 480, 540, 600, 640, 700, 768, 820, 900, 960, 1023, 1024, 1100, 1180, 1280, 1366, 1440, 1600, 1920, 2560. Each width at a short, a middle and a tall window, chosen so that both upright and sideways shapes are covered, plus phones on their side (568 by 320, 667 by 375, 844 by 390, 932 by 430). Touch under 1024px wide and at 1180 by 820 and 1366 by 1024; a mouse from 900px wide.
+
+For every page, every section and every sweep size, in both engines:
+
+- V1. Nothing is wider than the window and the page does not scroll sideways. A rail that is meant to scroll sideways is the only exception.
+- V2. Nothing is cut off or sits on top of something else: no text box overlaps another, no text is clipped by its container, no control is under the nav or a pinned block when the page is at rest.
+- V3. No picture, plate, chart or card row is left small beside empty space: each is at least 60% of its section's content width unless something sits beside it. A paragraph held to a reading measure is not a fault.
+- V4. Everything meant to be seen whole can be: no picture is taller than the window minus the nav, and no pinned block is taller than the room it pins in or leaves less than 200px for what scrolls past it.
+- V5. Text stays readable: body lines run between 28 and 85 characters, and no text is under 12px.
+- V6. By eye, on the contact sheets: no section looks unfinished at any size. That means no lopsided empty space, no element orphaned on a row of its own, no heading parted from what it heads, no columns of badly uneven height, and no abrupt change of composition between two sizes one step apart unless the PRD names it.
+- V7. Each fault found is fixed where the layout is defined (the rule that produced it), not patched at the one size that showed it.
+
+The signed-off desktop look still holds (K1): the guard must pass. At 1024px and wider with a mouse, a V1, V2 or V4 fault is fixed provided the guard stays pixel-identical at its sizes; a V3 or V6 finding at those sizes is not changed: it is listed for the owner with a screenshot.
+
 ## How to check
 
-`npm run check` for types, lint, tests and build. `.gauntlet/guard/run.sh` for K1. `.gauntlet/scroll/run.sh` for P1 to P5 and the page heights (about twelve minutes; `quick` about three). All three need the dev server on http://localhost:3000. P6 to P8 and Part 2 are checked by driving the real pages at the test sizes.
+`npm run check` for types, lint, tests and build. `.gauntlet/guard/run.sh` for K1. `.gauntlet/scroll/run.sh` for P1 to P5 and the page heights (about twelve minutes; `quick` about three). `npm run check:layout` for V1 to V5 and the contact sheets (Part 4). All of these need the dev server on http://localhost:3000. P6 to P8 and Part 2 are checked by driving the real pages at the test sizes.
