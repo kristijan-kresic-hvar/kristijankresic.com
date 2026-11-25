@@ -13,7 +13,7 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
 const MARKER = 14; // marker radius in px; lines start and end at the marker's edge
 const noop = () => () => {};
 
-/** Where the picture pins above its decisions: phones and tablet portrait, never under 500px tall. Mirrors `.shot-pin` in globals.css. */
+/** Where the picture pins above its notes: phones and tablet portrait, never under 500px tall. Mirrors `.shot-pin` in globals.css. */
 export const PINNED = '(max-width: 63.99rem) and (min-height: 31.25rem)';
 /** Room between whatever covers the top of the window (nav, pinned picture) and the top of a note jumped to. */
 export const GAP = 8;
@@ -80,7 +80,7 @@ export function hitArea(centres: { x: number; y: number }[], i: number, half: nu
 }
 
 /**
- * Where to scroll so a decision sits just below what covers the window, or null when it is already in full view
+ * Where to scroll so a note sits just below what covers the window, or null when it is already in full view
  * and nothing is pinned. Pinned, it always moves to the same place, so `currentAt` then picks that one.
  */
 export function jumpTo(row: { top: number; bottom: number }, o: { scrollY: number; cover: number; viewH: number; pinned: boolean }): number | null {
@@ -90,12 +90,12 @@ export function jumpTo(row: { top: number; bottom: number }, o: { scrollY: numbe
 }
 
 /**
- * Hero screenshot marked up like a proof: numbered markers on the image, the decision behind each
- * one listed beside it, and a leader line from the image's edge, at the marker's height, to its decision.
+ * Hero screenshot marked up like a proof: numbered markers on the image, the note on each one
+ * listed beside it, and a leader line from the image's edge, at the marker's height, to its note.
  * From 1024px: image left, list right, SVG lines measured from the DOM.
  * Below that: markers on the image, numbered list underneath, no lines.
  * Markers and list rows are buttons: hover or focus either one to light the pair.
- * Touch (and anything under 1024px): a marker jumps to its decision and makes it current, a decision makes itself
+ * Touch (and anything under 1024px): a marker jumps to its note and makes it current, a note makes itself
  * current, and while the picture is pinned the top-most note whose head is whole under it is current, and a tap
  * on a note brings it there.
  */

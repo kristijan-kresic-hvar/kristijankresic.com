@@ -1027,14 +1027,14 @@ li + li > .callout {
     display: inline;
   }
 }
-/* The decision current after a tap or at the reading line: its number fills (data-active) and its text comes up. */
+/* The note current after a tap or under the pinned picture: its number fills (data-active) and its text comes up. */
 .callout-text {
   transition: color var(--duration-fast) var(--ease-standard);
 }
 .callout[aria-current='true'] .callout-text {
   color: var(--color-text-secondary);
 }
-/* Phones and tablet portrait: the picture holds under the nav while its decisions scroll up beneath
+/* Phones and tablet portrait: the picture holds under the nav while its notes scroll up beneath
    it, so a number and its note are on screen together. At most 45% of the window tall; off on a
    phone on its side, where it would leave no room to read. */
 @media (max-width: 63.99rem) and (min-height: 31.25rem) {
@@ -1072,7 +1072,7 @@ li + li > .callout {
 /* ---------------------------------------------------------------------------------------------
    Motion outside the hero, all CSS, all behind prefers-reduced-motion:
    1. once the screenshot has loaded its markers arrive, then leader lines draw from the image's
-      edge to each decision, which is what explains the pairing;
+      edge to each note, which is what explains the pairing;
    2. the rule under the contact address draws as the address arrives.
    Everything else is feedback at --duration-instant. Nothing here hides content: without these
    rules the page is the same page, already in its final state.
@@ -1085,7 +1085,7 @@ li + li > .callout {
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* The numbers arrive one by one, then each line draws out to its decision. */
+  /* The numbers arrive one by one, then each line draws out to its note. */
   .shot[data-ready] .marker:not(.marker-static) {
     animation: marker-in 400ms var(--ease-out) calc(var(--i, 0) * 110ms + 250ms) backwards;
   }
@@ -1412,7 +1412,7 @@ li + li > .callout {
   .cs-credits dd {
     margin-top: 0;
   }
-  /* Values, the stack line, the decision notes and their helper line are read as sentences: body size. */
+  /* Values, the stack line, the notes and their helper line are read as sentences: body size. */
   .cs-credits dd,
   .cs-side dd,
   .callout-text,

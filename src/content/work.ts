@@ -16,7 +16,7 @@ export type CaseStudy = {
   outcome?: string;
   /** The screenshot. Absent while a study has none: its page and the links to it then show no picture. */
   image?: { src: string; alt: string; width: number; height: number };
-  /** Hotspots on the hero image, in percent of width/height, with the decision or feature they point at. */
+  /** Hotspots on the hero image, in percent of width/height, with the note on what they point at. */
   annotations: Annotation[];
   /**
    * Extra screens for the case-study page, as the alt text of each: `screens[N - 1]` says what

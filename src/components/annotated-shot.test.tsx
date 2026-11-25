@@ -10,7 +10,7 @@ const annotations = [
 ];
 
 describe('AnnotatedShot', () => {
-  it('renders a numbered hotspot and a callout for every annotation, linked for assistive tech', () => {
+  it('renders a numbered marker and a note for every annotation, linked for assistive tech', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
     const hotspot = screen.getByRole('button', { name: '1. Search' });
     expect(hotspot).toHaveAttribute('aria-describedby', 'callout-0');
@@ -18,15 +18,15 @@ describe('AnnotatedShot', () => {
     expect(screen.getByRole('button', { name: '2. Filters' })).toBeInTheDocument();
   });
 
-  it('highlights the pair when a callout is focused', () => {
+  it('highlights the pair when a note is focused', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
-    const callout = document.getElementById('callout-1') as HTMLElement;
-    fireEvent.focus(callout);
-    expect(callout).toHaveAttribute('data-active', 'true');
+    const note = document.getElementById('callout-1') as HTMLElement;
+    fireEvent.focus(note);
+    expect(note).toHaveAttribute('data-active', 'true');
     expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'true');
     expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'false');
-    fireEvent.blur(callout);
-    expect(callout).toHaveAttribute('data-active', 'false');
+    fireEvent.blur(note);
+    expect(note).toHaveAttribute('data-active', 'false');
   });
 
   it('sets where the picture lets go while the server HTML is parsed, and renders no script on the client', () => {
@@ -82,27 +82,27 @@ describe('currentAt (the top-most whole head)', () => {
 
 describe('jumpTo', () => {
   const o = { scrollY: 1000, cover: 57, viewH: 844, pinned: false };
-  it('leaves a decision alone when it is already in full view and nothing is pinned', () => {
+  it('leaves a note alone when it is already in full view and nothing is pinned', () => {
     expect(jumpTo({ top: 200, bottom: 320 }, o)).toBeNull();
   });
-  it('brings a decision below the nav when it is under it or below the window', () => {
+  it('brings a note below the nav when it is under it or below the window', () => {
     expect(jumpTo({ top: 20, bottom: 140 }, o)).toBe(1000 + 20 - 57 - GAP);
     expect(jumpTo({ top: 800, bottom: 920 }, o)).toBe(1000 + 800 - 57 - GAP);
   });
-  it('with the picture pinned, always lands the decision just under the picture', () => {
+  it('with the picture pinned, always lands the note just under the picture', () => {
     const pinned = { ...o, cover: 57 + 243, pinned: true };
     expect(jumpTo({ top: 400, bottom: 520 }, pinned)).toBe(1000 + 400 - 300 - GAP);
   });
 });
 
 describe('AnnotatedShot on touch and narrow screens', () => {
-  it('tapping a marker makes its decision current, lights the pair and moves focus there', () => {
+  it('tapping a marker makes its note current, lights the pair and moves focus there', () => {
     const scroll = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
     fireEvent.click(screen.getByRole('button', { name: '2. Filters' }));
-    const callout = document.getElementById('callout-1') as HTMLElement;
-    expect(callout).toHaveAttribute('aria-current', 'true');
-    expect(callout).toHaveFocus();
+    const note = document.getElementById('callout-1') as HTMLElement;
+    expect(note).toHaveAttribute('aria-current', 'true');
+    expect(note).toHaveFocus();
     expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'true');
     expect(document.getElementById('callout-0')).not.toHaveAttribute('aria-current');
     expect(scroll).toHaveBeenCalledOnce();
