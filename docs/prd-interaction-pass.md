@@ -29,7 +29,7 @@ The cause is the rule in `currentAt` (`src/components/annotated-shot.tsx`): a no
 
 ## Test sizes
 
-Touch: 320 by 568, 390 by 844, 820 by 1180, 1180 by 820. Mouse: 900 by 800, 1280 by 800, 1440 by 900, 2560 by 1440. The seven case studies with a numbered picture: biocirv, oncallable, suello, vetster, naitur, buddyins, carcatcher.
+Touch: 320 by 568, 390 by 844, 820 by 1180, 1180 by 820, and for Part 3 the sizes its criteria name, each with touch and with a mouse. Mouse: 900 by 800, 1280 by 800, 1440 by 900, 2560 by 1440. The seven case studies with a numbered picture: biocirv, oncallable, suello, vetster, naitur, buddyins, carcatcher.
 
 ## Part 1: the numbered picture and its notes
 
@@ -61,6 +61,26 @@ The same four faults are looked for everywhere: a state that flashes, a state th
 - S6. Jumps. "Email me" in the nav, the skip link and every in-page link land with their target's heading whole below the nav at every test size, on the landing and on a case study.
 - S7. After a touch scroll or a tap, nothing is left in its hover or pressed look.
 - S8. Back from a case study to the landing: the page shows the place the visitor left, with no visible jump after it appears.
+
+## Part 3: the size of the lead picture between phone and desktop
+
+Owner (2026-11-25), looking at `/work/buddyins/` in a 768 by 572 window: "isnt it too small for tablet users ?" It is. The pinned picture is capped at 44% of the window's height, so in a window that is wide and short it shrinks and sits at the left with nothing beside it. Measured today: 50% of its column at 768 by 572, 42% at 960 by 600, 52% at 1023 by 768, 62% at 900 by 800, 74% at 785 by 834. On a phone on its side the opposite happens: at 844 by 390 the picture is 497px tall in a window with 325px under the nav, so it can never be seen whole. Tablets held upright are fine (94 to 100%).
+
+Under 1024px wide the picture and its notes take one of three layouts, chosen by the window alone, with the same conditions in the CSS and in the script:
+
+- Upright: under 1024px wide, at least 500px tall, and less than 6:5 wide to tall. The picture is stacked above its notes and pins (Part 1).
+- Side by side: 768 to 1023px wide and at least 6:5 wide to tall, at any height. The picture sits beside its notes.
+- Free: everything else under 1024px. The picture is stacked above its notes and does not pin.
+
+- T1. The whole picture can be seen at once. At every size its height is at most the window height minus the nav minus 16px.
+- T2. Upright: the picture is as wide as its column, made narrower only as far as needed to leave 200px for notes under it while it is pinned. It is at least 85% of its column at 768 by 1024, 744 by 1133, 820 by 1180, 785 by 834 and 900 by 800.
+- T3. Side by side: the picture is at least 55% of the content width and its notes column is at least 250px wide. The picture stays in view under the nav while its notes scroll, and lets go at the end of the notes without covering anything. Pairs light as P6 says (a tap on touch, hover or focus with a mouse); nothing tracks the scroll. Leader lines are not required. Checked at 768 by 572, 844 by 390, 932 by 430, 900 by 600, 960 by 600, 1000 by 700 and 1023 by 768.
+- T4. Free: the picture is as wide as its column unless T1 makes it narrower. Checked at 568 by 320, 667 by 375 and 700 by 520.
+- T5. In a stacked layout a picture narrower than its column is centred in it.
+- T6. In all three layouts the markers keep their 44px touch targets, a tap on a marker or a note behaves as Part 1 says for that layout, and P1 to P5 hold wherever the picture pins.
+- T7. The step from 1023px to 1024px wide is not a jolt: at 1023 by 768 and 1024 by 768 the picture is beside its notes in both, and its width differs by no more than 15%.
+
+Page heights under 1024px change with this part by design; `.gauntlet/scroll/heights.json` and `heights.webkit.json` are re-recorded by the orchestrator once, after T1 to T7 hold.
 
 ## How to check
 
