@@ -25,6 +25,7 @@ The cause is the rule in `currentAt` (`src/components/annotated-shot.tsx`): a no
 - K6. `npm run check` stays green. Changed logic has unit tests. A test for a rule this PRD replaces is rewritten for the new rule, never deleted without a replacement and never loosened.
 - K7. The contact form never sends in tests.
 - K8. Nothing shifts as the page settles: no element moves after first paint because a script measured something.
+- K9. Safari is required beside Chromium (owner, 2026-11-25: "safari is a must besides chromium"). P1 to P8 and S1 to S8 hold in Safari on macOS and in Safari on an iPhone and an iPad. No milestone passes on Chromium evidence alone. Nothing may depend on a feature Safari lacks without a fallback that meets the same criterion.
 
 ## Test sizes
 
@@ -39,9 +40,9 @@ A note's head is its number chip and its title. A head is whole when all of it i
 - P1. One rule. At every scroll position where any of the picture is on screen, the current note is the top-most note whose head is whole. When no note has a whole head, none is current. The current note carries `aria-current="true"` and its marker on the picture is lit; no other marker or note is lit. Never two.
 - P2. The lit pair depends on where the page is, not on how it got there. The same position gives the same pair after scrolling down, scrolling up, a flick, paging with the keyboard, dragging the scrollbar, a reload that restores the scroll position, back and forward navigation, and a resize or rotation. It is right on load, before any scroll.
 - P3. No flash. Stepping the scroll through the picture and its notes in either direction, every lit state lasts at least 48px of scroll, and no pair goes A, B, A.
-- P4. The last note is never under the picture. The picture lets go when the last note's head reaches its lower edge; from there the picture and the last note leave together, the last note still lit. What follows the notes stays where it is today: page heights do not change, and nothing after the notes slides under the picture.
+- P4. The last note is never under the picture. The picture lets go when the last note reaches the place a tap would leave it (its head whole, within 48px of the picture's lower edge); from there the picture and the last note leave together, the last note still lit. What follows the notes stays where it is today: page heights do not change, and nothing after the notes slides under the picture.
 - P5. Taps. Tapping a marker, or a note, brings that note to rest with its head whole just under the picture (within 48px of the edge), lights the pair and moves focus to the note. No other pair lights on the way. A second tap during the glide ends on the second note. Under reduced motion the move is instant. A few pixels of scroll after a tap do not change the pair.
-- P6. Where the picture does not pin, nothing tracks the scroll. Under 500px tall, and on touch at 1024px and wider, a tap on a marker or a note lights that pair, as today.
+- P6. Where the picture does not pin, nothing tracks the scroll, and a pair lit by scrolling does not stay lit when a rotation or resize takes the page out of the pinned layout. Under 500px tall, and on touch at 1024px and wider, a tap on a marker or a note lights that pair, as today.
 - P7. A change of pair is one colour change at the existing durations, instant under reduced motion.
 - P8. The helper line, the 44px touch targets, the lightbox on tapping the picture, and the fade under the pinned picture all work as before.
 - P9. Names. Code comments, test names and identifiers in `src/components/annotated-shot.tsx`, its test and the matching rules in `src/app/globals.css` call these "notes", as the page now does.
