@@ -1046,7 +1046,7 @@ li + li > .callout {
 }
 /* Upright: the picture holds under the nav while its notes scroll up beneath it, so a number and
    its note are on screen together. As wide as its column, narrower only to leave 200px for notes. */
-@media (max-width: 63.99rem) and (min-height: 31.25rem) and (aspect-ratio < 6/5) {
+@media (max-width: 63.99rem) and (min-height: 31.25rem) and (orientation: portrait) {
   .shot-pin {
     position: sticky;
     top: var(--nav-h);
@@ -1077,10 +1077,10 @@ li + li > .callout {
     pointer-events: none;
   }
 }
-/* Side by side: a window wider than 6:5 from 768px has the room beside the picture, so the notes
+/* Side by side: a window wider than tall from 768px has the room beside the picture, so the notes
    go there, as on desktop, and the picture stays in view while they scroll. Nothing tracks the scroll.
    SIDE in annotated-shot.tsx. */
-@media (min-width: 48rem) and (max-width: 63.99rem) and (aspect-ratio >= 6/5) {
+@media (min-width: 48rem) and (max-width: 63.99rem) and (orientation: landscape) {
   .shot {
     grid-template-columns: minmax(0, 2fr) minmax(15.625rem, 1fr);
   }

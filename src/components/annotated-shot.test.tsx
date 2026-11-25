@@ -50,14 +50,14 @@ describe('PINNED (the upright layout)', () => {
     expect(css).toContain(`@media ${PINNED} {\n  .shot-pin {\n    position: sticky;`);
   });
 
-  it('has the side-by-side layout as its own stylesheet rule, from 768px and at least 6:5', () => {
+  it('has the side-by-side layout as its own stylesheet rule, from 768px and wider than tall', () => {
     const css = readFileSync('src/app/globals.css', 'utf8');
-    expect(SIDE).toBe('(min-width: 48rem) and (max-width: 63.99rem) and (aspect-ratio >= 6/5)');
+    expect(SIDE).toBe('(min-width: 48rem) and (max-width: 63.99rem) and (orientation: landscape)');
     expect(css).toContain(`@media ${SIDE} {\n  .shot {`);
   });
 
-  it('pins only under 1024px wide, from 500px tall and narrower than 6:5', () => {
-    expect(PINNED).toBe('(max-width: 63.99rem) and (min-height: 31.25rem) and (aspect-ratio < 6/5)');
+  it('pins only under 1024px wide, from 500px tall and not wider than tall', () => {
+    expect(PINNED).toBe('(max-width: 63.99rem) and (min-height: 31.25rem) and (orientation: portrait)');
   });
 });
 

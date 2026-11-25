@@ -15,11 +15,11 @@ const noop = () => () => {};
 
 /**
  * Where the picture pins above its notes (the upright layout): under 1024px wide, at least 500px tall and
- * narrower than 6:5. Wider windows from 768px put the notes beside it; the rest stack it unpinned. Mirrors `.shot-pin` in globals.css.
+ * not wider than tall. Wider windows from 768px put the notes beside it; the rest stack it unpinned. Mirrors `.shot-pin` in globals.css.
  */
-export const PINNED = '(max-width: 63.99rem) and (min-height: 31.25rem) and (aspect-ratio < 6/5)';
-/** Where the notes sit beside the picture under 1024px: 768px wide and up, at least 6:5 wide to tall. Mirrors `.shot` in globals.css. */
-export const SIDE = '(min-width: 48rem) and (max-width: 63.99rem) and (aspect-ratio >= 6/5)';
+export const PINNED = '(max-width: 63.99rem) and (min-height: 31.25rem) and (orientation: portrait)';
+/** Where the notes sit beside the picture under 1024px: 768px wide and up, wider than tall. Mirrors `.shot` in globals.css. */
+export const SIDE = '(min-width: 48rem) and (max-width: 63.99rem) and (orientation: landscape)';
 /** Room between whatever covers the top of the window (nav, pinned picture) and the top of a note jumped to. */
 export const GAP = 8;
 
