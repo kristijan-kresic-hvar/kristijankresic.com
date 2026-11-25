@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { AnnotatedShot, currentAt, GAP, hitArea, jumpTo, PINNED } from './annotated-shot';
+import { AnnotatedShot, currentAt, GAP, hitArea, jumpTo, PINNED, SIDE } from './annotated-shot';
+import { readFileSync } from 'node:fs';
 import { renderToString } from 'react-dom/server';
 import { OPEN_LEAD } from './screens';
 
@@ -40,6 +41,23 @@ describe('AnnotatedShot', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={[]} />);
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.getByRole('img', { name: 'shot' })).toBeInTheDocument();
+  });
+});
+
+describe('PINNED (the upright layout)', () => {
+  it('is the same condition as the stylesheet rule that pins the picture', () => {
+    const css = readFileSync('src/app/globals.css', 'utf8');
+    expect(css).toContain(`@media ${PINNED} {\n  .shot-pin {\n    position: sticky;`);
+  });
+
+  it('has the side-by-side layout as its own stylesheet rule, from 768px and at least 6:5', () => {
+    const css = readFileSync('src/app/globals.css', 'utf8');
+    expect(SIDE).toBe('(min-width: 48rem) and (max-width: 63.99rem) and (aspect-ratio >= 6/5)');
+    expect(css).toContain(`@media ${SIDE} {\n  .shot {`);
+  });
+
+  it('pins only under 1024px wide, from 500px tall and narrower than 6:5', () => {
+    expect(PINNED).toBe('(max-width: 63.99rem) and (min-height: 31.25rem) and (aspect-ratio < 6/5)');
   });
 });
 
@@ -92,6 +110,13 @@ describe('jumpTo', () => {
   it('with the picture pinned, always lands the note just under the picture', () => {
     const pinned = { ...o, cover: 57 + 243, pinned: true };
     expect(jumpTo({ top: 400, bottom: 520 }, pinned)).toBe(1000 + 400 - 300 - GAP);
+  });
+  it('beside the picture, lifts a note below the window only until it is whole, and one under the nav to below it', () => {
+    const beside = { ...o, viewH: 572, beside: true };
+    expect(jumpTo({ top: 500, bottom: 640 }, beside)).toBe(1000 + 640 - 572 + GAP);
+    expect(jumpTo({ top: 700, bottom: 1400 }, beside)).toBe(1000 + 700 - 57 - GAP);
+    expect(jumpTo({ top: 20, bottom: 140 }, beside)).toBe(1000 + 20 - 57 - GAP);
+    expect(jumpTo({ top: 200, bottom: 320 }, beside)).toBeNull();
   });
 });
 

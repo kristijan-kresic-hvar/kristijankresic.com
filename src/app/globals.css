@@ -1034,10 +1034,19 @@ li + li > .callout {
 .callout[aria-current='true'] .callout-text {
   color: var(--color-text-secondary);
 }
-/* Phones and tablet portrait: the picture holds under the nav while its notes scroll up beneath
-   it, so a number and its note are on screen together. At most 45% of the window tall; off on a
-   phone on its side, where it would leave no room to read. */
-@media (max-width: 63.99rem) and (min-height: 31.25rem) {
+/* Under 1024px the picture and its notes take one of three layouts, chosen by the window: upright
+   (pinned above the notes, PINNED in annotated-shot.tsx), side by side (landscape from 768px) and
+   free (stacked, not pinned). In each the whole picture fits under the nav, and a stacked picture
+   narrower than its column sits in its middle. */
+@media (max-width: 63.99rem) {
+  .shot-pin > div {
+    max-width: calc((100svh - var(--nav-h) - 1rem) * var(--ratio));
+    margin-inline: auto;
+  }
+}
+/* Upright: the picture holds under the nav while its notes scroll up beneath it, so a number and
+   its note are on screen together. As wide as its column, narrower only to leave 200px for notes. */
+@media (max-width: 63.99rem) and (min-height: 31.25rem) and (aspect-ratio < 6/5) {
   .shot-pin {
     position: sticky;
     top: var(--nav-h);
@@ -1047,7 +1056,7 @@ li + li > .callout {
     background: var(--color-bg-base);
   }
   .shot-pin > div {
-    max-width: calc((44svh - 1.5rem) * var(--ratio));
+    max-width: calc((100svh - var(--nav-h) - 1.5rem - 12.5rem - 2px) * var(--ratio));
   }
   /* The picture lets go once the last note reaches it: the grid's content box ends there (--tail is set by
      annotated-shot.tsx), and the same height comes back as padding, so nothing after the notes moves. */
@@ -1066,6 +1075,18 @@ li + li > .callout {
     height: 1.25rem;
     background: linear-gradient(var(--color-bg-base), transparent);
     pointer-events: none;
+  }
+}
+/* Side by side: a window wider than 6:5 from 768px has the room beside the picture, so the notes
+   go there, as on desktop, and the picture stays in view while they scroll. Nothing tracks the scroll.
+   SIDE in annotated-shot.tsx. */
+@media (min-width: 48rem) and (max-width: 63.99rem) and (aspect-ratio >= 6/5) {
+  .shot {
+    grid-template-columns: minmax(0, 2fr) minmax(15.625rem, 1fr);
+  }
+  .shot-pin {
+    position: sticky;
+    top: calc(var(--nav-h) + 0.5rem);
   }
 }
 

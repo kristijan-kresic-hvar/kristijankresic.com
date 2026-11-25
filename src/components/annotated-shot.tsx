@@ -13,8 +13,13 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
 const MARKER = 14; // marker radius in px; lines start and end at the marker's edge
 const noop = () => () => {};
 
-/** Where the picture pins above its notes: phones and tablet portrait, never under 500px tall. Mirrors `.shot-pin` in globals.css. */
-export const PINNED = '(max-width: 63.99rem) and (min-height: 31.25rem)';
+/**
+ * Where the picture pins above its notes (the upright layout): under 1024px wide, at least 500px tall and
+ * narrower than 6:5. Wider windows from 768px put the notes beside it; the rest stack it unpinned. Mirrors `.shot-pin` in globals.css.
+ */
+export const PINNED = '(max-width: 63.99rem) and (min-height: 31.25rem) and (aspect-ratio < 6/5)';
+/** Where the notes sit beside the picture under 1024px: 768px wide and up, at least 6:5 wide to tall. Mirrors `.shot` in globals.css. */
+export const SIDE = '(min-width: 48rem) and (max-width: 63.99rem) and (aspect-ratio >= 6/5)';
 /** Room between whatever covers the top of the window (nav, pinned picture) and the top of a note jumped to. */
 export const GAP = 8;
 
@@ -82,10 +87,15 @@ export function hitArea(centres: { x: number; y: number }[], i: number, half: nu
 /**
  * Where to scroll so a note sits just below what covers the window, or null when it is already in full view
  * and nothing is pinned. Pinned, it always moves to the same place, so `currentAt` then picks that one.
+ * Beside the picture, a note below the window comes up only until it is whole, so the picture stays in view.
  */
-export function jumpTo(row: { top: number; bottom: number }, o: { scrollY: number; cover: number; viewH: number; pinned: boolean }): number | null {
+export function jumpTo(
+  row: { top: number; bottom: number },
+  o: { scrollY: number; cover: number; viewH: number; pinned: boolean; beside?: boolean },
+): number | null {
   const want = o.cover + GAP;
   if (!o.pinned && row.top >= want && row.bottom <= o.viewH) return null;
+  if (o.beside && row.top >= want) return o.scrollY + Math.min(row.top - want, row.bottom - o.viewH + GAP);
   return o.scrollY + row.top - want;
 }
 
@@ -267,6 +277,7 @@ export function AnnotatedShot({
       cover: nav + (pinned && pin.current ? pin.current.offsetHeight : 0),
       viewH: window.innerHeight,
       pinned,
+      beside: window.matchMedia(SIDE).matches,
     });
     unhold.current();
     if (top === null || Math.abs(top - window.scrollY) < 1) {
