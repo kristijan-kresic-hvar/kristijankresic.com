@@ -120,11 +120,27 @@ describe('jumpTo', () => {
   });
 });
 
+// jsdom has no PointerEvent, and the pairs tell a finger from a mouse by its pointerType.
+class FakePointerEvent extends MouseEvent {
+  pointerType: string;
+  constructor(type: string, init: PointerEventInit = {}) {
+    super(type, init);
+    this.pointerType = init.pointerType ?? '';
+  }
+}
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the DOM typings say it always exists; jsdom disagrees
+window.PointerEvent ??= FakePointerEvent as typeof PointerEvent;
+
+const tap = (el: HTMLElement) => {
+  fireEvent.pointerDown(el, { pointerType: 'touch' });
+  fireEvent.click(el);
+};
+
 describe('AnnotatedShot on touch and narrow screens', () => {
   it('tapping a marker makes its note current, lights the pair and moves focus there', () => {
     const scroll = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
-    fireEvent.click(screen.getByRole('button', { name: '2. Filters' }));
+    tap(screen.getByRole('button', { name: '2. Filters' }));
     const note = document.getElementById('callout-1') as HTMLElement;
     expect(note).toHaveAttribute('aria-current', 'true');
     expect(note).toHaveFocus();
@@ -137,8 +153,8 @@ describe('AnnotatedShot on touch and narrow screens', () => {
   it('where the picture does not pin, tapping a note makes it and its marker current, one at a time', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
     const [first, second] = [document.getElementById('callout-0'), document.getElementById('callout-1')] as HTMLElement[];
-    fireEvent.click(first as HTMLElement);
-    fireEvent.click(second as HTMLElement);
+    tap(first as HTMLElement);
+    tap(second as HTMLElement);
     expect(second).toHaveAttribute('aria-current', 'true');
     expect(first).not.toHaveAttribute('aria-current');
     expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'true');
@@ -163,6 +179,33 @@ describe('AnnotatedShot on touch and narrow screens', () => {
     fireEvent(window, new Event('resize'));
     await waitFor(() => expect(document.getElementById('callout-0')).not.toHaveAttribute('aria-current'));
     expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'false');
+    mm.mockRestore();
+  });
+
+  it('where the picture does not pin, a mouse click leaves nothing current, so hover and focus still light a pair', () => {
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    const [first, second] = [document.getElementById('callout-0'), document.getElementById('callout-1')] as HTMLElement[];
+    fireEvent.pointerDown(second as HTMLElement, { pointerType: 'mouse' });
+    fireEvent.click(second as HTMLElement);
+    fireEvent.click(screen.getByRole('button', { name: '2. Filters' })); // a key on the marker: no pointer at all
+    expect(second).not.toHaveAttribute('aria-current');
+    fireEvent.pointerEnter(first as HTMLElement, { pointerType: 'mouse' });
+    expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'true');
+    expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'false');
+    fireEvent.pointerLeave(first as HTMLElement, { pointerType: 'mouse' });
+    fireEvent.focus(screen.getByRole('button', { name: '2. Filters' }));
+    expect(second).toHaveAttribute('data-active', 'true');
+    expect(first).toHaveAttribute('data-active', 'false');
+  });
+
+  it('where the picture pins, a mouse click or a key on a marker still jumps to its note', () => {
+    const mm = vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({ matches: query === PINNED, media: query }) as MediaQueryList);
+    const scroll = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    fireEvent.click(screen.getByRole('button', { name: '2. Filters' }));
+    expect(document.getElementById('callout-1')).toHaveAttribute('aria-current', 'true');
+    expect(scroll).toHaveBeenCalledOnce();
+    scroll.mockRestore();
     mm.mockRestore();
   });
 

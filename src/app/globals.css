@@ -1040,7 +1040,8 @@ li + li > .callout {
    narrower than its column sits in its middle. */
 @media (max-width: 63.99rem) {
   .shot-pin > div {
-    max-width: calc((100svh - var(--nav-h) - 1rem) * var(--ratio));
+    /* The 1px border on each side is not part of the picture's ratio. */
+    max-width: calc((100svh - var(--nav-h) - 1rem - 2px) * var(--ratio) + 2px);
     margin-inline: auto;
   }
 }

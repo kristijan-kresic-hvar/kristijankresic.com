@@ -105,9 +105,9 @@ export function jumpTo(
  * From 1024px: image left, list right, SVG lines measured from the DOM.
  * Below that: markers on the image, numbered list underneath, no lines.
  * Markers and list rows are buttons: hover or focus either one to light the pair.
- * Touch (and anything under 1024px): a marker jumps to its note and makes it current, a note makes itself
- * current, and while the picture is pinned the top-most note whose head is whole under it is current, and a tap
- * on a note brings it there.
+ * Touch (and a mouse or a key where the picture pins): a marker jumps to its note and makes it current, a note
+ * makes itself current, and while the picture is pinned the top-most note whose head is whole under it is
+ * current, and a tap on a note brings it there.
  */
 export function AnnotatedShot({
   src,
@@ -258,11 +258,12 @@ export function AnnotatedShot({
     };
   }, [annotations]);
 
-  // A tap, a pen or anything under 1024px; a mouse or a key on the desktop layout keeps the desktop's behaviour.
+  // A tap or a pen, or anything where the picture pins (hover and focus light nothing there). Elsewhere a mouse
+  // or a key keeps the desktop's behaviour: hover and focus light the pair, a click leaves nothing current.
   function tapped() {
     const by = input.current;
     input.current = '';
-    return by === 'touch' || by === 'pen' || !window.matchMedia('(min-width: 64rem)').matches;
+    return by === 'touch' || by === 'pen' || window.matchMedia(PINNED).matches;
   }
 
   function jump(i: number) {
