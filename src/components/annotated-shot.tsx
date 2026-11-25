@@ -1,7 +1,7 @@
 'use client';
 
 import { getImageProps } from 'next/image';
-import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState, ViewTransition } from 'react';
+import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, ViewTransition } from 'react';
 import { lookedAt, plateMorph } from '@/components/plate';
 import { OPEN_LEAD } from '@/components/screens';
 import type { Annotation } from '@/content/work';
@@ -11,6 +11,7 @@ type Line = { x1: number; y1: number; x2: number; y2: number; ex: number; mx: nu
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 const MARKER = 14; // marker radius in px; lines start and end at the marker's edge
+const noop = () => () => {};
 
 /** Where the picture pins above its decisions: phones and tablet portrait, never under 500px tall. Mirrors `.shot-pin` in globals.css. */
 export const PINNED = '(max-width: 63.99rem) and (min-height: 31.25rem)';
@@ -25,6 +26,19 @@ export const GAP = 8;
 export function currentAt(heads: { top: number; bottom: number }[], cover: number, viewH: number): number | null {
   const i = heads.findIndex((h) => h.top >= cover - 0.5 && h.bottom <= viewH + 0.5);
   return i === -1 ? null : i;
+}
+
+/**
+ * Sets `--tail` on `.shot`, so the pinned picture lets go when the last note reaches its resting place under it:
+ * the grid's content box, which holds the sticky picture, ends there, and the same height comes back as padding.
+ * Self-contained: it also runs inline while the page is parsed, so the picture is in its place at first paint.
+ */
+function setTail(shot: Element | null | undefined, gap: number) {
+  const pin = shot?.querySelector('.shot-pin');
+  const last = shot?.querySelector('li:last-child > .callout');
+  if (!(shot instanceof HTMLElement) || !pin || !last) return;
+  const tail = shot.getBoundingClientRect().bottom - last.getBoundingClientRect().top + gap - parseFloat(getComputedStyle(pin).marginBottom);
+  shot.style.setProperty('--tail', `${String(tail)}px`);
 }
 
 /**
@@ -126,6 +140,12 @@ export function AnnotatedShot({
   const track = useRef(() => {});
   const pic = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
+  /** True only while hydrating server HTML: the inline script must not be rendered on the client. */
+  const fromServer = useSyncExternalStore(
+    noop,
+    () => false,
+    () => true,
+  );
 
   // Tell the hero which project to open on when the visitor goes back.
   useEffect(() => {
@@ -165,13 +185,7 @@ export function AnnotatedShot({
           return p ? `polygon(${p.map(([x, y]) => `${String(x)}px ${String(y)}px`).join(', ')})` : undefined;
         }),
       );
-      // The pinned picture lets go when the last note reaches its resting place under it: the grid's content box,
-      // which holds the sticky picture, ends there, and the same height comes back as padding below it.
-      const last = rows.current[annotations.length - 1];
-      if (last && pin.current) {
-        const tail = el.getBoundingClientRect().bottom - last.getBoundingClientRect().top + GAP - parseFloat(getComputedStyle(pin.current).marginBottom);
-        el.style.setProperty('--tail', `${String(tail)}px`);
-      }
+      setTail(el, GAP);
       if (!window.matchMedia('(min-width: 1024px)').matches) {
         setLines([]);
         return;
@@ -206,6 +220,7 @@ export function AnnotatedShot({
     if (annotations.length === 0) return;
     const mq = window.matchMedia(PINNED);
     let frame = 0;
+    let was = mq.matches;
     const head = (i: number) => {
       const a = labels.current[i]?.getBoundingClientRect();
       const b = titles.current[i]?.getBoundingClientRect();
@@ -214,6 +229,9 @@ export function AnnotatedShot({
     track.current = () => {
       frame = 0;
       setTracking(mq.matches);
+      // Leaving the pinned layout (a rotation or resize) drops the pair the scroll lit.
+      if (was && !mq.matches) setCurrent(null);
+      was = mq.matches;
       if (!mq.matches || held.current !== null || !pin.current) return;
       setCurrent(currentAt(annotations.map((_, i) => head(i)), pin.current.getBoundingClientRect().bottom, window.innerHeight));
     };
@@ -333,6 +351,7 @@ export function AnnotatedShot({
     <div
       ref={wrap}
       data-ready={ready || undefined}
+      suppressHydrationWarning
       style={{ '--ratio': width / height } as CSSProperties}
       className="shot relative grid gap-x-12 gap-y-8 lg:grid-cols-12"
     >
@@ -428,6 +447,9 @@ export function AnnotatedShot({
             );
           })}
         </svg>
+      )}
+      {fromServer && (
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: `(${setTail.toString()})(document.currentScript.parentElement,${String(GAP)})` }} />
       )}
     </div>
   );

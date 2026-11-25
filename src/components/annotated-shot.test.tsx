@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { AnnotatedShot, currentAt, GAP, hitArea, jumpTo } from './annotated-shot';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { AnnotatedShot, currentAt, GAP, hitArea, jumpTo, PINNED } from './annotated-shot';
+import { renderToString } from 'react-dom/server';
 import { OPEN_LEAD } from './screens';
 
 const annotations = [
@@ -26,6 +27,13 @@ describe('AnnotatedShot', () => {
     expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'false');
     fireEvent.blur(callout);
     expect(callout).toHaveAttribute('data-active', 'false');
+  });
+
+  it('sets where the picture lets go while the server HTML is parsed, and renders no script on the client', () => {
+    const html = renderToString(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    expect(html).toMatch(/<script>.*--tail.*document\.currentScript\.parentElement,8\)<\/script><\/div>$/s);
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    expect(document.querySelector('.shot script')).toBeNull();
   });
 
   it('falls back to a plain image with no annotations', () => {
@@ -110,6 +118,27 @@ describe('AnnotatedShot on touch and narrow screens', () => {
     expect(first).not.toHaveAttribute('aria-current');
     expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'true');
     expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'false');
+  });
+
+  it('drops the pair the scroll lit when a rotation takes the page out of the pinned layout', async () => {
+    let pinned = true;
+    const mm = vi.spyOn(window, 'matchMedia').mockImplementation(
+      (query) =>
+        ({
+          get matches() {
+            return query === PINNED && pinned;
+          },
+          media: query,
+        }) as MediaQueryList,
+    );
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    // jsdom lays nothing out: every head sits at 0, under a picture whose edge is at 0, so the first is whole.
+    expect(document.getElementById('callout-0')).toHaveAttribute('aria-current', 'true');
+    pinned = false;
+    fireEvent(window, new Event('resize'));
+    await waitFor(() => expect(document.getElementById('callout-0')).not.toHaveAttribute('aria-current'));
+    expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'false');
+    mm.mockRestore();
   });
 
   it('has a helper line for touch that does not mention hover', () => {
