@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { AnnotatedShot, currentAt, GAP, hitArea, jumpTo, READ } from './annotated-shot';
+import { AnnotatedShot, currentAt, GAP, hitArea, jumpTo } from './annotated-shot';
 import { OPEN_LEAD } from './screens';
 
 const annotations = [
@@ -35,42 +35,40 @@ describe('AnnotatedShot', () => {
   });
 });
 
-describe('currentAt (the reading line)', () => {
-  const line = 300;
-  it('lights nothing before the first decision reaches the line', () => {
-    expect(currentAt([400, 520, 640], line)).toBeNull();
+describe('currentAt (the top-most whole head)', () => {
+  const cover = 300;
+  const viewH = 844;
+  // Heads 28px tall at these tops.
+  const at = (...tops: number[]) => tops.map((top) => ({ top, bottom: top + 28 }));
+  it('lights nothing while no head is whole: all under the picture, or the first still below the window', () => {
+    expect(currentAt(at(-200, 100, 250), cover, viewH)).toBeNull();
+    expect(currentAt(at(830, 950), cover, viewH)).toBeNull();
   });
-  it('lights the first decision once its top passes the line, and the one after as it follows', () => {
-    expect(currentAt([300, 420, 540], line)).toBe(0);
-    expect(currentAt([150, 270, 390], line)).toBe(1);
+  it('lights the first note once its head is whole inside the window', () => {
+    expect(currentAt(at(viewH - 28, 950), cover, viewH)).toBe(0);
+    expect(currentAt(at(400, 520), cover, viewH)).toBe(0);
   });
-  it('lights the last decision once its top passes the line, and keeps it as the list leaves', () => {
-    expect(currentAt([-200, -80, 40], line)).toBe(2);
-    expect(currentAt([-900, -780, -660], line)).toBe(2);
+  it('keeps a note lit while its head is whole, even with its text under the picture', () => {
+    expect(currentAt(at(cover, cover + 170), cover, viewH)).toBe(0);
   });
-  it('a decision jumped to (top at GAP under the cover) is the one at the line, not the next', () => {
-    const cover = 260;
-    expect(currentAt([cover + GAP, cover + GAP + 60], cover + READ)).toBe(0);
-    expect(currentAt([cover + GAP, cover + GAP + 60], cover + READ, cover)).toBe(0);
+  it('hands over to the next note as soon as the head slides under the picture, never back', () => {
+    expect(currentAt(at(cover - 1, cover + 169), cover, viewH)).toBe(1);
+    expect(currentAt(at(cover - 120, cover + 50), cover, viewH)).toBe(1);
   });
-  it('with the cover given, the next decision takes over once the current heading slides under it', () => {
-    const cover = 300;
-    // A 170px tall decision: the old rule kept 0 current with its heading 100px under the cover.
-    expect(currentAt([200, 370, 540], cover + READ, cover)).toBe(1);
-    expect(currentAt([200, 370, 540], cover + READ)).toBe(0);
-    // Still the first before it passes the line, and nothing before that.
-    expect(currentAt([320, 490], cover + READ, cover)).toBe(0);
-    expect(currentAt([400, 570], cover + READ, cover)).toBeNull();
+  it('judges the whole head, so a title wrapping onto a second line must be in the window too', () => {
+    expect(currentAt([{ top: 800, bottom: 860 }], cover, viewH)).toBeNull();
+    expect(currentAt([{ top: 780, bottom: 840 }], cover, viewH)).toBe(0);
   });
-  it('with the cover given, the last stays current while its heading shows and lets go once it slides under', () => {
-    const cover = 300;
-    expect(currentAt([-200, 100, cover], cover + READ, cover)).toBe(2);
-    expect(currentAt([-200, 100, cover - 1], cover + READ, cover)).toBeNull();
-    expect(currentAt([-400, -230, -60], cover + READ, cover)).toBeNull();
-    // A last decision shorter than the gap to the line still gets its turn between the one before and none.
-    expect(currentAt([100, cover + READ + 10], cover + READ, cover)).toBe(1);
-    // Scrolling back up, it is current again as soon as its heading is back out.
-    expect(currentAt([-30, cover + 5], cover + READ, cover)).toBe(1);
+  it('lights a note jumped to (its row top at GAP under the picture, its head 17px lower), not the one before', () => {
+    const head = cover + GAP + 17;
+    expect(currentAt(at(head - 120, head, head + 120), cover, viewH)).toBe(1);
+    // A few pixels of scroll after the jump keep it.
+    expect(currentAt(at(head - 124, head - 4, head + 116), cover, viewH)).toBe(1);
+  });
+  it('gives the same answer for the same heads, whichever way the page scrolled to get there', () => {
+    const heads = at(cover - 40, cover + 60, cover + 180);
+    expect(currentAt(heads, cover, viewH)).toBe(currentAt([...heads], cover, viewH));
+    expect(currentAt(heads, cover, viewH)).toBe(1);
   });
 });
 
@@ -103,7 +101,7 @@ describe('AnnotatedShot on touch and narrow screens', () => {
     scroll.mockRestore();
   });
 
-  it('tapping a decision makes it and its marker current, one at a time', () => {
+  it('where the picture does not pin, tapping a note makes it and its marker current, one at a time', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
     const [first, second] = [document.getElementById('callout-0'), document.getElementById('callout-1')] as HTMLElement[];
     fireEvent.click(first as HTMLElement);

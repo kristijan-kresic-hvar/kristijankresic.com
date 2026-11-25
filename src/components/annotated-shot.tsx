@@ -14,24 +14,17 @@ const MARKER = 14; // marker radius in px; lines start and end at the marker's e
 
 /** Where the picture pins above its decisions: phones and tablet portrait, never under 500px tall. Mirrors `.shot-pin` in globals.css. */
 export const PINNED = '(max-width: 63.99rem) and (min-height: 31.25rem)';
-/** The reading line sits this far below the pinned picture; a decision jumped to lands above it, at `GAP`. */
-export const READ = 32;
-/** Room between whatever covers the top of the window (nav, pinned picture) and a decision jumped to. */
+/** Room between whatever covers the top of the window (nav, pinned picture) and the top of a note jumped to. */
 export const GAP = 8;
 
 /**
- * The decision being read: the last one whose top has passed the reading line, or none before the first.
- * Given the bottom of what covers the window, the next one takes over as soon as the current one's heading
- * slides under it, so a tall decision on a small phone is not read with its heading hidden, and once the last
- * one's heading is under it nothing is current.
- * Both boundaries only move one way as the page scrolls, so scrolling never lights two and never flickers.
+ * The current note: the top-most one whose head (number chip and title) is whole, at or below `cover` (the
+ * bottom of the pinned picture) and inside the window, or none when no head is whole. It depends only on where
+ * the heads are, so the same scroll position always gives the same note, however the page got there.
  */
-export function currentAt(tops: number[], line: number, cover?: number): number | null {
-  const last = tops.findLastIndex((t) => t <= line);
-  const at = last === -1 ? null : last;
-  if (at === null || cover === undefined || (tops[at] ?? 0) >= cover) return at;
-  const shown = tops.findIndex((t) => t >= cover);
-  return shown === -1 ? null : shown;
+export function currentAt(heads: { top: number; bottom: number }[], cover: number, viewH: number): number | null {
+  const i = heads.findIndex((h) => h.top >= cover - 0.5 && h.bottom <= viewH + 0.5);
+  return i === -1 ? null : i;
 }
 
 /**
@@ -89,7 +82,8 @@ export function jumpTo(row: { top: number; bottom: number }, o: { scrollY: numbe
  * Below that: markers on the image, numbered list underneath, no lines.
  * Markers and list rows are buttons: hover or focus either one to light the pair.
  * Touch (and anything under 1024px): a marker jumps to its decision and makes it current, a decision makes itself
- * current, and while the picture is pinned the decision at the reading line is current.
+ * current, and while the picture is pinned the top-most note whose head is whole under it is current, and a tap
+ * on a note brings it there.
  */
 export function AnnotatedShot({
   src,
@@ -115,15 +109,21 @@ export function AnnotatedShot({
   const wrap = useRef<HTMLDivElement>(null);
   const img = useRef<HTMLDivElement>(null);
   const labels = useRef<(HTMLSpanElement | null)[]>([]);
+  const titles = useRef<(HTMLSpanElement | null)[]>([]);
   const [lines, setLines] = useState<Line[]>([]);
   const [hits, setHits] = useState<(string | undefined)[]>([]);
   const [active, setActive] = useState<number | null>(null);
   const [current, setCurrent] = useState<number | null>(null);
+  // Where the picture pins, the scroll alone picks the lit pair: hover and focus no longer light one.
+  const [tracking, setTracking] = useState(false);
   const pin = useRef<HTMLDivElement>(null);
   const rows = useRef<(HTMLButtonElement | null)[]>([]);
   const input = useRef('');
-  // A jump holds its decision current until the scroll it started ends, so the rows it glides past never light.
+  // A jump holds its note current until the scroll it started ends, so the rows it glides past never light.
   const held = useRef<number | null>(null);
+  // Drops the last jump's hold without releasing it, so a second tap during the glide takes over.
+  const unhold = useRef(() => {});
+  const track = useRef(() => {});
   const pic = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
 
@@ -165,6 +165,13 @@ export function AnnotatedShot({
           return p ? `polygon(${p.map(([x, y]) => `${String(x)}px ${String(y)}px`).join(', ')})` : undefined;
         }),
       );
+      // The pinned picture lets go when the last note reaches its resting place under it: the grid's content box,
+      // which holds the sticky picture, ends there, and the same height comes back as padding below it.
+      const last = rows.current[annotations.length - 1];
+      if (last && pin.current) {
+        const tail = el.getBoundingClientRect().bottom - last.getBoundingClientRect().top + GAP - parseFloat(getComputedStyle(pin.current).marginBottom);
+        el.style.setProperty('--tail', `${String(tail)}px`);
+      }
       if (!window.matchMedia('(min-width: 1024px)').matches) {
         setLines([]);
         return;
@@ -194,23 +201,31 @@ export function AnnotatedShot({
     return () => ro.disconnect();
   }, [annotations]);
 
-  // While pinned, the decision at the reading line is current.
+  // While pinned, the top-most note whose head is whole is current: on load, on every scroll and on a resize.
   useEffect(() => {
     if (annotations.length === 0) return;
     const mq = window.matchMedia(PINNED);
     let frame = 0;
-    function track() {
+    const head = (i: number) => {
+      const a = labels.current[i]?.getBoundingClientRect();
+      const b = titles.current[i]?.getBoundingClientRect();
+      return a && b ? { top: Math.min(a.top, b.top), bottom: Math.max(a.bottom, b.bottom) } : { top: Infinity, bottom: Infinity };
+    };
+    track.current = () => {
       frame = 0;
+      setTracking(mq.matches);
       if (!mq.matches || held.current !== null || !pin.current) return;
-      const cover = pin.current.getBoundingClientRect().bottom;
-      setCurrent(currentAt(rows.current.map((r) => r?.getBoundingClientRect().top ?? Infinity), cover + READ, cover));
+      setCurrent(currentAt(annotations.map((_, i) => head(i)), pin.current.getBoundingClientRect().bottom, window.innerHeight));
+    };
+    function later() {
+      if (!frame) frame = requestAnimationFrame(track.current);
     }
-    function onScroll() {
-      if (!frame) frame = requestAnimationFrame(track);
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
+    track.current();
+    window.addEventListener('scroll', later, { passive: true });
+    window.addEventListener('resize', later);
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', later);
+      window.removeEventListener('resize', later);
       cancelAnimationFrame(frame);
     };
   }, [annotations]);
@@ -235,14 +250,23 @@ export function AnnotatedShot({
       viewH: window.innerHeight,
       pinned,
     });
-    if (top === null) return;
+    unhold.current();
+    if (top === null || Math.abs(top - window.scrollY) < 1) {
+      held.current = null;
+      return;
+    }
     held.current = i;
     const release = () => {
+      unhold.current();
       held.current = null;
+      track.current();
+    };
+    const timer = setTimeout(release, 1200); // scrollend never fires in older Safari, nor when the page cannot move
+    unhold.current = () => {
+      clearTimeout(timer);
       window.removeEventListener('scrollend', release);
     };
     window.addEventListener('scrollend', release);
-    setTimeout(release, 1200); // scrollend never fires when the page is already there, or in older Safari
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top, behavior: still ? 'instant' : 'smooth' });
   }
@@ -287,8 +311,8 @@ export function AnnotatedShot({
 
   if (annotations.length === 0) return frame;
 
-  // Once something is current (a tap, or the reading line) it is the lit pair; hover and focus light it otherwise.
-  const lit = current ?? active;
+  // Once something is current (a tap, or the scroll while pinned) it is the lit pair; hover and focus light it otherwise.
+  const lit = tracking ? current : (current ?? active);
   const pair = (i: number) => ({
     // Pointer events, so the mouse events a tap fakes never leave a pair lit.
     onPointerEnter: (e: { pointerType: string }) => {
@@ -351,7 +375,11 @@ export function AnnotatedShot({
                 }}
                 {...pair(i)}
                 onClick={() => {
-                  if (tapped()) setCurrent(i);
+                  // Where the picture pins, a note tapped comes to rest under it, as a tap on its marker does.
+                  if (tapped()) {
+                    if (window.matchMedia(PINNED).matches) jump(i);
+                    else setCurrent(i);
+                  }
                 }}
                 aria-current={current === i || undefined}
                 className="callout grid w-full grid-cols-[2.5rem_1fr] py-4 text-left"
@@ -366,7 +394,14 @@ export function AnnotatedShot({
                   {i + 1}
                 </span>
                 <span>
-                  <span className="block font-semibold text-text-primary">{a.title}</span>
+                  <span
+                    ref={(n) => {
+                      titles.current[i] = n;
+                    }}
+                    className="block font-semibold text-text-primary"
+                  >
+                    {a.title}
+                  </span>
                   <span className="callout-text mt-1 block text-sm text-text-body">{a.text}</span>
                 </span>
               </button>

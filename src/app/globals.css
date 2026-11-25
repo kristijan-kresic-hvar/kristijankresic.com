@@ -1049,6 +1049,14 @@ li + li > .callout {
   .shot-pin > div {
     max-width: calc((44svh - 1.5rem) * var(--ratio));
   }
+  /* The picture lets go once the last note reaches it: the grid's content box ends there (--tail is set by
+     annotated-shot.tsx), and the same height comes back as padding, so nothing after the notes moves. */
+  .shot {
+    padding-bottom: var(--tail, 0px);
+  }
+  .shot-pin + div {
+    margin-bottom: calc(-1 * var(--tail, 0px));
+  }
   /* Text sliding under the picture fades out instead of meeting a hard edge. */
   .shot-pin::after {
     content: '';
