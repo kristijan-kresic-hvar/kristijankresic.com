@@ -22,7 +22,7 @@ const config = defineConfig([
   },
   ...createSlopConfig({ cwd: import.meta.dirname }),
   {
-    ignores: ['.next/**', 'out/**', 'node_modules/**', '.gauntlet/**', '.impeccable/**', '.playwright-cli/**'],
+    ignores: ['.next/**', 'out/**', 'node_modules/**', '.gauntlet/**', '.impeccable/**', '.playwright-cli/**', 'scripts/layout/out/**'],
   },
 ]);
 
