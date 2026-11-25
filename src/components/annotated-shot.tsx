@@ -335,10 +335,10 @@ export function AnnotatedShot({
       </div>
 
       <div className="lg:col-span-4 lg:self-center">
-        <h2 className="text-lg font-semibold tracking-normal">The decisions behind this screen</h2>
+        <h2 className="text-lg font-semibold tracking-normal">What I built here</h2>
         <p className="mt-1 text-sm text-text-muted">
           <span className="hint-mouse">Hover, tap or tab through the numbers.</span>
-          <span className="hint-touch">Tap a number to go to its decision.</span>
+          <span className="hint-touch">Tap a number to go to its note.</span>
         </p>
         <ol className="mt-5">
           {annotations.map((a, i) => (
