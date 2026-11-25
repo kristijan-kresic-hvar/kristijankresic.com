@@ -86,7 +86,7 @@ Page heights under 1024px change with this part by design; `.gauntlet/scroll/hei
 
 Owner (2026-11-25): "can we make sure layout makes sense on all screens for all pages and sections so we dont have similar problems again." The picture-size fault got through because earlier passes were tested at a handful of device sizes (320 by 568, 390 by 844, 820 by 1180, 1280 by 800 and up). Windows between those, and windows that are wide and short, were never looked at.
 
-The sweep. A script kept in the repository under `scripts/layout/`, run with `npm run check:layout` (needs the dev server and playwright-cli, no new dependency), loads every page at every sweep size in Chromium and in WebKit, judges V1 to V5 by measurement, prints one line per finding and `LAYOUT SWEEP OK` when there is none, and writes a contact sheet of screenshots per page for V6. It takes a base address, so it can be pointed at the deployed site. Run against the code before Part 3 (the deployed preview while it still has it, or commit f3f1fc5), it must report the two known faults: the lead picture at about 50% of its column at 768 by 572, and the lead picture taller than the window at 844 by 390. A sweep that cannot see those is not accepted.
+The sweep. A script kept in the repository under `scripts/layout/`, run with `npm run check:layout` (needs the dev server and playwright-cli, no new dependency), loads every page at every sweep size in Chromium and in WebKit, judges V1 to V5 by measurement and V8 by its stress run, prints one line per finding and `LAYOUT SWEEP OK` when there is none, and writes a contact sheet of screenshots per page for V6. It takes a base address, so it can be pointed at the deployed site. Run against the code before Part 3 (the deployed preview while it still has it, or commit f3f1fc5), it must report the two known faults: the lead picture at about 50% of its column at 768 by 572, and the lead picture taller than the window at 844 by 390. A sweep that cannot see those is not accepted.
 
 Pages: `/`, `/about/`, all ten case studies, `/thanks/`, `/not-sent/` and the 404 page.
 
@@ -101,6 +101,12 @@ For every page, every section and every sweep size, in both engines:
 - V5. Text stays readable: body lines run between 28 and 85 characters, and no text is under 12px.
 - V6. By eye, on the contact sheets: no section looks unfinished at any size. That means no lopsided empty space, no element orphaned on a row of its own, no heading parted from what it heads, no columns of badly uneven height, and no abrupt change of composition between two sizes one step apart unless the PRD names it.
 - V7. Each fault found is fixed where the layout is defined (the rule that produced it), not patched at the one size that showed it.
+- V8. Text cannot break a layout. Owner (2026-11-25), on the work index at 768 by 572, where "Open case study" sits on the same row as the project name: "we need to make sure that text never has chance to break layout on any section on any screen". Measured today: with the current names the tightest row has 24px between name and label at 640px wide ("OnCallable") and 87px at 768px, so it holds only because the names happen to be short. The sweep therefore has a stress run, at every page and at least one short, one middle and one tall window per width band (phone, phone on its side, tablet upright, tablet on its side, desktop, wide):
+  - every visible text made half as long again;
+  - one unbreakable 24-character word added to every heading, name, label, button and link text;
+  - the browser's default text size raised from 16px to 20px and to 24px;
+  - the three combined.
+  Under each, V1, V2 and V4 still hold: text wraps onto more lines or is shortened with an ellipsis where a single line is the design (the full text still reachable), and nothing is pushed out of the window, on top of other text, under the nav, or out of reach. No layout may depend on a string being as short as it is today: a row that holds two texts side by side must say what happens when they do not fit (wrap below, or shorten one).
 
 The signed-off desktop look still holds (K1): the guard must pass. At 1024px and wider with a mouse, a V1, V2 or V4 fault is fixed provided the guard stays pixel-identical at its sizes; a V3 or V6 finding at those sizes is not changed: it is listed for the owner with a screenshot.
 
