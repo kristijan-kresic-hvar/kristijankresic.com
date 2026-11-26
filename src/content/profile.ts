@@ -3,8 +3,6 @@ export const PROFILE = {
   headline: 'Frontend engineer',
   stackLine: 'React · Next.js · TypeScript',
   email: 'kristijan.kresic.dev@gmail.com',
-  phone: '+385 91 9027 183',
-  phoneHref: 'tel:+385919027183',
   github: 'https://github.com/kristijan-kresic-hvar',
   linkedin: 'https://www.linkedin.com/in/kkwebdev/',
   location: 'Hvar, Croatia (CET)',

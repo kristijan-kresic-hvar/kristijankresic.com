@@ -1,0 +1,8 @@
+pre-commit:
+  commands:
+    secrets:
+      run: gitleaks git --pre-commit --staged --redact --no-banner
+pre-push:
+  commands:
+    check:
+      run: npm run check

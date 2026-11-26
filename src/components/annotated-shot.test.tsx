@@ -1,6 +1,9 @@
-import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { AnnotatedShot } from './annotated-shot';
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { AnnotatedShot, currentAt, GAP, hitArea, jumpTo, PINNED, SIDE } from './annotated-shot';
+import { readFileSync } from 'node:fs';
+import { renderToString } from 'react-dom/server';
+import { OPEN_LEAD } from './screens';
 
 const annotations = [
   { x: 10, y: 20, title: 'Search', text: 'Debounced autocomplete.' },
@@ -8,7 +11,7 @@ const annotations = [
 ];
 
 describe('AnnotatedShot', () => {
-  it('renders a numbered hotspot and a callout for every annotation, linked for assistive tech', () => {
+  it('renders a numbered marker and a note for every annotation, linked for assistive tech', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
     const hotspot = screen.getByRole('button', { name: '1. Search' });
     expect(hotspot).toHaveAttribute('aria-describedby', 'callout-0');
@@ -16,17 +19,246 @@ describe('AnnotatedShot', () => {
     expect(screen.getByRole('button', { name: '2. Filters' })).toBeInTheDocument();
   });
 
-  it('highlights the pair when a callout is focused', () => {
+  it('highlights the pair when a note is focused', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
-    const callout = document.getElementById('callout-1')!;
-    fireEvent.focus(callout);
-    expect(callout.className).toContain('border-accent');
-    expect(screen.getByRole('button', { name: '2. Filters' }).className).toContain('bg-accent');
+    const note = document.getElementById('callout-1') as HTMLElement;
+    fireEvent.focus(note);
+    expect(note).toHaveAttribute('data-active', 'true');
+    expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'true');
+    expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'false');
+    fireEvent.blur(note);
+    expect(note).toHaveAttribute('data-active', 'false');
+  });
+
+  it('sets where the picture lets go while the server HTML is parsed, and renders no script on the client', () => {
+    const html = renderToString(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    expect(html).toMatch(/<script>.*--tail.*document\.currentScript\.parentElement,8\)<\/script><\/div>$/s);
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    expect(document.querySelector('.shot script')).toBeNull();
   });
 
   it('falls back to a plain image with no annotations', () => {
     render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={[]} />);
     expect(screen.queryByRole('button')).toBeNull();
     expect(screen.getByRole('img', { name: 'shot' })).toBeInTheDocument();
+  });
+});
+
+describe('PINNED (the upright layout)', () => {
+  it('is the same condition as the stylesheet rule that pins the picture', () => {
+    const css = readFileSync('src/app/globals.css', 'utf8');
+    expect(css).toContain(`@media ${PINNED} {\n  .shot-pin {\n    position: sticky;`);
+  });
+
+  it('has the side-by-side layout as its own stylesheet rule, from 768px and wider than tall', () => {
+    const css = readFileSync('src/app/globals.css', 'utf8');
+    expect(SIDE).toBe('(min-width: 48rem) and (max-width: 63.99rem) and (orientation: landscape)');
+    expect(css).toContain(`@media ${SIDE} {\n  .shot {`);
+  });
+
+  it('pins only under 1024px wide, from 500px tall and not wider than tall', () => {
+    expect(PINNED).toBe('(max-width: 63.99rem) and (min-height: 31.25rem) and (orientation: portrait)');
+  });
+});
+
+describe('currentAt (the top-most whole head)', () => {
+  const cover = 300;
+  const viewH = 844;
+  // Heads 28px tall at these tops.
+  const at = (...tops: number[]) => tops.map((top) => ({ top, bottom: top + 28 }));
+  it('lights nothing while no head is whole: all under the picture, or the first still below the window', () => {
+    expect(currentAt(at(-200, 100, 250), cover, viewH)).toBeNull();
+    expect(currentAt(at(830, 950), cover, viewH)).toBeNull();
+  });
+  it('lights the first note once its head is whole inside the window', () => {
+    expect(currentAt(at(viewH - 28, 950), cover, viewH)).toBe(0);
+    expect(currentAt(at(400, 520), cover, viewH)).toBe(0);
+  });
+  it('keeps a note lit while its head is whole, even with its text under the picture', () => {
+    expect(currentAt(at(cover, cover + 170), cover, viewH)).toBe(0);
+  });
+  it('hands over to the next note as soon as the head slides under the picture, never back', () => {
+    expect(currentAt(at(cover - 1, cover + 169), cover, viewH)).toBe(1);
+    expect(currentAt(at(cover - 120, cover + 50), cover, viewH)).toBe(1);
+  });
+  it('judges the whole head, so a title wrapping onto a second line must be in the window too', () => {
+    expect(currentAt([{ top: 800, bottom: 860 }], cover, viewH)).toBeNull();
+    expect(currentAt([{ top: 780, bottom: 840 }], cover, viewH)).toBe(0);
+  });
+  it('lights a note jumped to (its row top at GAP under the picture, its head 17px lower), not the one before', () => {
+    const head = cover + GAP + 17;
+    expect(currentAt(at(head - 120, head, head + 120), cover, viewH)).toBe(1);
+    // A few pixels of scroll after the jump keep it.
+    expect(currentAt(at(head - 124, head - 4, head + 116), cover, viewH)).toBe(1);
+  });
+  it('gives the same answer for the same heads, whichever way the page scrolled to get there', () => {
+    const heads = at(cover - 40, cover + 60, cover + 180);
+    expect(currentAt(heads, cover, viewH)).toBe(currentAt([...heads], cover, viewH));
+    expect(currentAt(heads, cover, viewH)).toBe(1);
+  });
+});
+
+describe('jumpTo', () => {
+  const o = { scrollY: 1000, cover: 57, viewH: 844, pinned: false };
+  it('leaves a note alone when it is already in full view and nothing is pinned', () => {
+    expect(jumpTo({ top: 200, bottom: 320 }, o)).toBeNull();
+  });
+  it('brings a note below the nav when it is under it or below the window', () => {
+    expect(jumpTo({ top: 20, bottom: 140 }, o)).toBe(1000 + 20 - 57 - GAP);
+    expect(jumpTo({ top: 800, bottom: 920 }, o)).toBe(1000 + 800 - 57 - GAP);
+  });
+  it('with the picture pinned, always lands the note just under the picture', () => {
+    const pinned = { ...o, cover: 57 + 243, pinned: true };
+    expect(jumpTo({ top: 400, bottom: 520 }, pinned)).toBe(1000 + 400 - 300 - GAP);
+  });
+  it('beside the picture, lifts a note below the window only until it is whole, and one under the nav to below it', () => {
+    const beside = { ...o, viewH: 572, beside: true };
+    expect(jumpTo({ top: 500, bottom: 640 }, beside)).toBe(1000 + 640 - 572 + GAP);
+    expect(jumpTo({ top: 700, bottom: 1400 }, beside)).toBe(1000 + 700 - 57 - GAP);
+    expect(jumpTo({ top: 20, bottom: 140 }, beside)).toBe(1000 + 20 - 57 - GAP);
+    expect(jumpTo({ top: 200, bottom: 320 }, beside)).toBeNull();
+  });
+});
+
+// jsdom has no PointerEvent, and the pairs tell a finger from a mouse by its pointerType.
+class FakePointerEvent extends MouseEvent {
+  pointerType: string;
+  constructor(type: string, init: PointerEventInit = {}) {
+    super(type, init);
+    this.pointerType = init.pointerType ?? '';
+  }
+}
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the DOM typings say it always exists; jsdom disagrees
+window.PointerEvent ??= FakePointerEvent as typeof PointerEvent;
+
+const tap = (el: HTMLElement) => {
+  fireEvent.pointerDown(el, { pointerType: 'touch' });
+  fireEvent.click(el);
+};
+
+describe('AnnotatedShot on touch and narrow screens', () => {
+  it('tapping a marker makes its note current, lights the pair and moves focus there', () => {
+    const scroll = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    tap(screen.getByRole('button', { name: '2. Filters' }));
+    const note = document.getElementById('callout-1') as HTMLElement;
+    expect(note).toHaveAttribute('aria-current', 'true');
+    expect(note).toHaveFocus();
+    expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'true');
+    expect(document.getElementById('callout-0')).not.toHaveAttribute('aria-current');
+    expect(scroll).toHaveBeenCalledOnce();
+    scroll.mockRestore();
+  });
+
+  it('where the picture does not pin, tapping a note makes it and its marker current, one at a time', () => {
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    const [first, second] = [document.getElementById('callout-0'), document.getElementById('callout-1')] as HTMLElement[];
+    tap(first as HTMLElement);
+    tap(second as HTMLElement);
+    expect(second).toHaveAttribute('aria-current', 'true');
+    expect(first).not.toHaveAttribute('aria-current');
+    expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'true');
+    expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'false');
+  });
+
+  it('drops the pair the scroll lit when a rotation takes the page out of the pinned layout', async () => {
+    let pinned = true;
+    const mm = vi.spyOn(window, 'matchMedia').mockImplementation(
+      (query) =>
+        ({
+          get matches() {
+            return query === PINNED && pinned;
+          },
+          media: query,
+        }) as MediaQueryList,
+    );
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    // jsdom lays nothing out: every head sits at 0, under a picture whose edge is at 0, so the first is whole.
+    expect(document.getElementById('callout-0')).toHaveAttribute('aria-current', 'true');
+    pinned = false;
+    fireEvent(window, new Event('resize'));
+    await waitFor(() => expect(document.getElementById('callout-0')).not.toHaveAttribute('aria-current'));
+    expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'false');
+    mm.mockRestore();
+  });
+
+  it('where the picture does not pin, a mouse click leaves nothing current, so hover and focus still light a pair', () => {
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    const [first, second] = [document.getElementById('callout-0'), document.getElementById('callout-1')] as HTMLElement[];
+    fireEvent.pointerDown(second as HTMLElement, { pointerType: 'mouse' });
+    fireEvent.click(second as HTMLElement);
+    fireEvent.click(screen.getByRole('button', { name: '2. Filters' })); // a key on the marker: no pointer at all
+    expect(second).not.toHaveAttribute('aria-current');
+    fireEvent.pointerEnter(first as HTMLElement, { pointerType: 'mouse' });
+    expect(screen.getByRole('button', { name: '1. Search' })).toHaveAttribute('data-active', 'true');
+    expect(screen.getByRole('button', { name: '2. Filters' })).toHaveAttribute('data-active', 'false');
+    fireEvent.pointerLeave(first as HTMLElement, { pointerType: 'mouse' });
+    fireEvent.focus(screen.getByRole('button', { name: '2. Filters' }));
+    expect(second).toHaveAttribute('data-active', 'true');
+    expect(first).toHaveAttribute('data-active', 'false');
+  });
+
+  it('where the picture pins, a mouse click or a key on a marker still jumps to its note', () => {
+    const mm = vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({ matches: query === PINNED, media: query }) as MediaQueryList);
+    const scroll = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    fireEvent.click(screen.getByRole('button', { name: '2. Filters' }));
+    expect(document.getElementById('callout-1')).toHaveAttribute('aria-current', 'true');
+    expect(scroll).toHaveBeenCalledOnce();
+    scroll.mockRestore();
+    mm.mockRestore();
+  });
+
+  it('has a helper line for touch that does not mention hover', () => {
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    expect(document.querySelector('.hint-touch')?.textContent).not.toMatch(/hover/i);
+    expect(document.querySelector('.hint-mouse')).toHaveTextContent('Hover, tap or tab through the numbers.');
+  });
+});
+
+describe('tapping the lead picture', () => {
+  it('asks the lightbox to open on a tap on the picture, and never on a tap on a marker', () => {
+    const asked = vi.fn((e: Event) => {
+      e.preventDefault();
+    });
+    window.addEventListener(OPEN_LEAD, asked);
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={annotations} />);
+    fireEvent.click(screen.getByRole('button', { name: '1. Search' }));
+    expect(asked).not.toHaveBeenCalled();
+    const link = screen.getByRole('link', { name: 'shot, view full size' });
+    expect(link).toHaveAttribute('href', '/x.webp');
+    expect(fireEvent.click(screen.getByRole('img', { name: 'shot' }))).toBe(false); // the lightbox took it
+    expect(asked).toHaveBeenCalledTimes(1);
+    window.removeEventListener(OPEN_LEAD, asked);
+  });
+
+  it('stays a plain link to the file with no lightbox, or when the visitor asks for a new tab', () => {
+    render(<AnnotatedShot src="/x.webp" alt="shot" width={1600} height={1000} annotations={[]} />);
+    const link = screen.getByRole('link', { name: 'shot, view full size' });
+    expect(fireEvent.click(link)).toBe(true);
+    const asked = vi.fn((e: Event) => {
+      e.preventDefault();
+    });
+    window.addEventListener(OPEN_LEAD, asked);
+    expect(fireEvent.click(link, { metaKey: true })).toBe(true);
+    expect(asked).not.toHaveBeenCalled();
+    window.removeEventListener(OPEN_LEAD, asked);
+  });
+});
+
+describe('hitArea (markers close together)', () => {
+  it('leaves a marker with no neighbour in reach its whole square', () => {
+    expect(hitArea([{ x: 0, y: 0 }, { x: 100, y: 0 }], 0, 24)).toBeNull();
+  });
+
+  it('splits two neighbours along the line halfway between them', () => {
+    const centres = [{ x: 0, y: 0 }, { x: 30, y: 0 }];
+    expect(hitArea(centres, 0, 24)).toEqual([[0, 0], [39, 0], [39, 48], [0, 48]]);
+    expect(hitArea(centres, 1, 24)).toEqual([[9, 0], [48, 0], [48, 48], [9, 48]]);
+  });
+
+  it('cuts only the corner facing a diagonal neighbour', () => {
+    // Suello's markers 2 and 3 on a 280px picture: the bottom edge keeps 24 to 29.25px, so 21.5px straight down stays marker 2's.
+    expect(hitArea([{ x: 0, y: 0 }, { x: 18, y: 45 }], 0, 24)).toEqual([[0, 0], [48, 0], [48, 40.5], [29.25, 48], [0, 48]]);
   });
 });

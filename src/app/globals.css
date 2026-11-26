@@ -1,5 +1,21 @@
 @import 'tailwindcss';
 
+/* Responsive conventions (docs/prd-responsive-pass.md). Every stylesheet in the project writes its
+   queries in these exact words, so one search finds every rule for a class of device.
+   Desktop, 1024 to 1600px with a mouse, is signed off and frozen: a width rule may only change
+   things below 1024px or above 1600px, and a touch rule from 1024px up is keyed on input, not width.
+     phone             (max-width: 39.99rem)                              under 640px
+     phone on its side (max-width: 63.99rem) and (max-height: 31.24rem)   under 500px tall
+     tablet portrait   (min-width: 40rem) and (max-width: 63.99rem)       640 to 1023px; add
+                       `and (min-height: 31.25rem)` where the phone-on-its-side layout takes over
+     desktop layout    (min-width: 64rem)
+     wide              (min-width: 100.01rem)                             above 1600px
+     touch             (hover: none) and (pointer: coarse)                at any width
+     small phone       (max-width: 23.43rem)                              under 375px, the nav only
+   Tailwind's `sm:` is the 640px line and `lg:` the 1024px line.
+   Hover looks sit inside `(hover: hover)`, so a tap never leaves one stuck; a pressed look is `:active`.
+   Sizes for small screens and fingers are the --tap and --text-phone tokens in :root below. */
+
 /* Design tokens — dark-only, single amber accent. Mirrors the locked v2 design system. */
 @theme {
   --font-sans: var(--font-geist), system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -27,20 +43,174 @@
   --color-accent-glow: rgba(245, 158, 11, 0.2);
   --color-accent-text: #fcd34d;
 
-  --text-display: clamp(44px, 7vw, 88px);
+  /* Sized by wrap math, not taste: the hero statement holds two lines from 768 to 1920 because the
+     page gutter scales on the same vw curve. Re-measure if the copy or the gutter changes. */
+  --text-display: clamp(2.25rem, 4.72vw, 5.75rem);
+  --text-title: clamp(1.75rem, 2.9vw, 3.5rem);
+  --text-lead: clamp(1.125rem, 1.4vw, 1.375rem);
   --tracking-tighter: -0.04em;
   --tracking-tight: -0.02em;
-  --tracking-wide: 0.08em;
+  --tracking-wide: 0.05em;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --container-reading: 680px;
+  --container-page: 1920px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :root {
-  color-scheme: dark;
+  --gutter: clamp(1.25rem, 2.78vw, 3.5rem);
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  /* The dimmest text tone in use (#818181): 5:1 on the base, and still above 4.5:1 where a dimmed
+     contour line of the field passes behind it. */
+  --tone-dim: color-mix(in srgb, var(--color-text-muted) 90%, var(--color-bg-base));
+  /* The smallest box a finger is asked to hit, and the taller one for a form's main button on a phone. */
+  --tap: 2.75rem;
+  --tap-lg: 3rem;
+  /* Type floors on phones: reading copy and anything typed into (iOS zooms the page for less), then labels, captions and counters. */
+  --text-phone-body: 1rem;
+  --text-phone-meta: 0.8125rem;
+}
+
+:root {
+  /* `only`: the browser may not apply a light scheme or its own automatic recolouring. */
+  color-scheme: only dark;
+}
+
+/* Reduced motion, the net under everything else. Each effect already has its own guard; this
+   catches whatever is added later without one. Nothing animates, nothing transitions, nothing
+   glides. Colours and layout are untouched, so the page is the same page in its final state. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scripts off: the page is complete as served. The one control that does nothing without a script goes. */
+@media (scripting: none) {
+  .end-details button {
+    display: none;
+  }
+}
+
+/* Forced colours (Windows high contrast): the system repaints text, backgrounds and borders, and
+   drops shadows. What the site drew with those gets a system-coloured equivalent. */
+@media (forced-colors: active) {
+  .btn-primary {
+    border: 1px solid ButtonText;
+  }
+  /* Focus on the form's blanks is a shadow and a border colour, both lost here. */
+  :is(.cf-blank, .cf-note):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+  /* The numbered markers keep their own amber, or the lit one cannot be told from the rest. */
+  .marker {
+    forced-color-adjust: none;
+  }
+}
+
+/* Print and "Save as PDF". Browsers drop backgrounds on paper, which would leave light text on
+   white, so the palette turns to ink on paper and the parts that only work on a screen go. */
+@media print {
+  :root {
+    --color-bg-base: #fff;
+    --color-bg-elev-1: #fff;
+    --color-bg-elev-2: #f4f4f5;
+    --color-bg-elev-3: #e4e4e7;
+    --color-text-primary: #000;
+    --color-text-secondary: #18181b;
+    --color-text-body: #27272a;
+    --color-text-muted: #52525b;
+    --color-border-subtle: #d4d4d8;
+    --color-border-default: #a1a1aa;
+    --color-border-strong: #71717a;
+    --color-accent: #92400e;
+    --color-accent-text: #92400e;
+    color-scheme: only light;
+  }
+  canvas,
+  .site-nav,
+  .cf,
+  .lightbox,
+  .stage-deck {
+    display: none !important;
+  }
+  /* Whatever was waiting to be revealed, or mid-opening, prints in its final state. */
+  .rise[data-wait],
+  .hero * {
+    opacity: 1 !important;
+    translate: none !important;
+    animation: none !important;
+  }
+  a {
+    text-decoration: underline;
+  }
 }
 
 html {
+  /* The sticky nav's height with its rule. Anything scrolled to (a new page, #work, #contact) lands below it, not under it. */
+  --nav-h: calc(3.5rem + 1px);
+  scroll-padding-top: var(--nav-h);
   background: var(--color-bg-base);
   color: var(--color-text-body);
-  scroll-behavior: smooth;
+  scrollbar-color: var(--color-border-strong) var(--color-bg-base);
+  caret-color: var(--color-accent);
+}
+
+@media (min-width: 40rem) {
+  html {
+    --nav-h: calc(4rem + 1px);
+  }
+}
+/* Wide: above 1600px the root size grows with the screen (16px at 1600, 22px at 2560 and up), so the
+   rem-built layout and type grow together and each wide width shows the signed-off layout of a
+   1600 to 1860px screen, scaled. The px-sized tokens move to rem here so they grow too. */
+@media (min-width: 100.01rem) {
+  html {
+    font-size: min(0.375rem + 0.625vw, 1.375rem);
+    /* The nav's 4rem in em too: WebKit resolves rem in the root's own properties against 16px, not this grown size. */
+    scroll-padding-top: max(var(--nav-h), calc(4em + 1px));
+  }
+  :root {
+    --container-page: 120rem;
+    /* Narrows from the frozen 1600px width to about 72 characters by 1760px, without a jump at 1601. */
+    --container-reading: max(31rem, 42.5rem - 120 * (1vw - 1px * 16));
+  }
+}
+/* In-page links glide (Work, Email me): nav.tsx sets data-glide for the click that starts the
+   scroll. Only then, or the browser's own scroll restore on a reload or Back glides too, from the top. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-glide] {
+    scroll-behavior: smooth;
+  }
+}
+/* A little air under the nav when the contact block or the form is scrolled to. */
+#contact,
+#message {
+  scroll-margin-top: 2rem;
+}
+/* A page whose box starts at the very top of the document, behind the nav. The router scrolls a new
+   page into place only when its first element starts above the window, so without this a page
+   opened from one scrolled a few pixels keeps those pixels and the nav covers its first row. */
+.from-top {
+  margin-top: calc(var(--nav-h) * -1);
+  padding-top: var(--nav-h);
 }
 
 body {
@@ -60,103 +230,1750 @@ body {
   border-radius: 2px;
 }
 
-h1,
-h2,
-h3 {
+/* Element defaults sit in the base layer so utilities on the element can override them. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    color: var(--color-text-primary);
+    text-wrap: balance;
+    letter-spacing: var(--tracking-tight);
+    /* A word longer than the line breaks instead of running out of the window. */
+    overflow-wrap: break-word;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* Inline text links: a hairline that turns amber, never a colour block. */
+.link {
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color var(--duration-instant) var(--ease-standard), color var(--duration-instant) var(--ease-standard);
+}
+@media (hover: hover) {
+  .link:hover {
+    color: var(--color-text-primary);
+    text-decoration-color: var(--color-accent);
+  }
+}
+.link:active {
+  text-decoration-color: var(--color-accent);
+}
+
+/* Earlier work: three columns side by side, dates leading, each under a hairline that starts with
+   a short amber tick. The tick runs the full width while its project is hovered or focused. */
+.ew-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem 3rem;
+}
+.ew-strip li {
+  flex: 1;
+}
+.ew-cell {
+  position: relative;
+  display: grid;
+  align-content: start;
+  height: 100%; /* equal focus rings across the row */
+  gap: 0.375rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-default);
+}
+.ew-cell::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 2.5rem;
+  height: 1px;
+  background: var(--color-accent);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+.ew-cell:focus-visible::before,
+.ew-cell:active::before {
+  width: 100%;
+}
+@media (hover: hover) {
+  .ew-cell:hover::before {
+    width: 100%;
+  }
+}
+.ew-go {
+  display: none;
+}
+.ew-years {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+.ew-title {
+  margin-top: 0.5rem;
+  font-size: var(--text-lead);
+  font-weight: 500;
+  line-height: 1.25;
   color: var(--color-text-primary);
-  text-wrap: balance;
-  letter-spacing: var(--tracking-tight);
 }
-
-.grid-lines {
-  background-image: repeating-linear-gradient(to right, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 120px);
+.ew-tag {
+  max-width: 38ch;
+  color: var(--color-text-body);
 }
-
-.glow {
-  background: radial-gradient(circle at 20% 80%, var(--color-accent-glow) 0%, rgba(245, 158, 11, 0.05) 40%, transparent 70%);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .reveal {
-    animation: reveal 0.4s ease-out both;
-  }
-  .reveal-delay-1 {
-    animation-delay: 80ms;
-  }
-  .reveal-delay-2 {
-    animation-delay: 160ms;
-  }
-  .reveal-delay-3 {
-    animation-delay: 240ms;
-  }
-  @keyframes reveal {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
+@media (min-width: 64rem) {
+  .ew-strip {
+    flex-direction: row;
   }
 }
-
-/* Work card: the tall capture scrolls inside a 16:10 frame on hover. Container-query units make the
-   travel distance exact without JS: frame height = 62.5cqw. */
-.shot {
-  container-type: inline-size;
-}
-.shot-scroll {
-  height: auto;
-  transform: translateY(0);
-}
-@media (prefers-reduced-motion: no-preference) and (hover: hover) {
-  .shot-scroll {
-    transition: transform 6s linear;
-  }
-  .group:hover .shot-scroll {
-    transform: translateY(calc(-100% + 62.5cqw));
+/* Tablet portrait: the four in two columns of two. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .ew-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem var(--gutter);
   }
 }
-
-/* Ticker */
-.ticker {
-  overflow: hidden;
-  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-}
-.ticker-track {
-  width: max-content;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .ticker-track {
-    animation: ticker 60s linear infinite;
+/* Phones: each project is one row to tap. Below the desktop an arrow beside each title says where it goes. */
+@media (max-width: 39.99rem) {
+  .ew-strip {
+    gap: 0;
   }
-  .ticker:hover .ticker-track {
-    animation-play-state: paused;
+  .ew-cell {
+    padding-block: 1rem 1.5rem;
   }
-  @keyframes ticker {
-    to {
-      transform: translateX(-50%);
-    }
+}
+@media (max-width: 63.99rem) {
+  .ew-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .ew-go {
+    display: block;
+    flex: none;
+    color: var(--color-text-muted);
+  }
+  .ew-cell:active .ew-go {
+    color: var(--color-accent);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ticker-track {
-    flex-wrap: wrap;
-    width: auto;
-  }
-  .ticker-track > ul[aria-hidden='true'] {
-    display: none;
-  }
-  .ticker-track > ul {
-    flex-wrap: wrap;
-    row-gap: 8px;
+  .ew-cell::before {
+    transition: none;
   }
 }
 
-/* Browser frame around the hero screenshot */
+/* How I work: one paragraph, each claim bright and its evidence grey. The size runs on one line
+   from 20px at 375 to 32.4px at 1440 (the size the owner approved); 36ch sets lines of 47 to 55 characters. */
+.practice {
+  --practice-size: clamp(1.25rem, 0.977rem + 1.164vw, 2.625rem);
+}
+.practice-grid {
+  column-gap: clamp(1.5rem, 2.5vw, 3rem); /* the hero's --hero-gap, so column 4 is the hero's column 4 */
+}
+.practice-para {
+  max-width: 36ch;
+  font-size: var(--practice-size);
+  font-weight: 500;
+  line-height: 1.24;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-muted);
+  text-wrap: pretty;
+}
+.practice-para strong {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+/* Phones: the portrait is a byline, small with the caption beside it, so it leaves no empty
+   column next to it; the hero's contact chip already carries the face at first sight. */
+@media (max-width: 39.99rem) {
+  .practice-figure {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: none;
+  }
+  .practice-figure .portrait {
+    flex: none;
+    width: 4rem;
+  }
+  .practice-figure figcaption {
+    margin-top: 0;
+    font-size: var(--text-phone-body);
+    color: var(--color-text-secondary);
+  }
+  .practice-more > a {
+    min-height: var(--tap);
+  }
+  .practice-more > span {
+    font-size: var(--text-phone-body);
+  }
+}
+/* Tablet portrait: the portrait is a narrow first column and the paragraph takes the rest, so
+   neither leaves an empty half beside it. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .practice-grid {
+    grid-template-columns: clamp(7rem, 16vw, 10rem) minmax(0, 1fr);
+  }
+  .practice-figure {
+    max-width: none;
+    margin-top: calc(var(--practice-size) * 0.265);
+  }
+  .practice-para {
+    max-width: 34ch;
+  }
+  .practice-more > a {
+    min-height: var(--tap);
+  }
+}
+@media (min-width: 64rem) {
+  /* Geist at line-height 1.24: the cap top of the first line sits 0.265em below the line box. */
+  .practice-figure {
+    margin-top: calc(var(--practice-size) * 0.265);
+  }
+}
+/* As the paragraph scrolls in, each sentence comes up from a dimmer tone to its final two, one
+   after another. Colour only, so nothing moves; the dimmest point is #7a7a7a on the page (4.6:1). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .practice-para {
+      view-timeline: --practice block;
+    }
+    .practice-para > span,
+    .practice-para strong {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --practice;
+      animation-range: entry calc(var(--i) * 20%) entry calc(var(--i) * 20% + 60%);
+    }
+    .practice-para > span {
+      animation-name: practice-evidence;
+    }
+    .practice-para strong {
+      animation-name: practice-claim;
+    }
+    .practice-para > span:nth-child(2) {
+      --i: 1;
+    }
+    .practice-para > span:nth-child(3) {
+      --i: 2;
+    }
+    .practice-para > span:nth-child(4) {
+      --i: 3;
+    }
+  }
+}
+.practice-para > span {
+  --i: 0;
+}
+@keyframes practice-evidence {
+  from {
+    color: var(--tone-dim);
+  }
+}
+@keyframes practice-claim {
+  from {
+    color: var(--color-text-muted);
+  }
+}
+.portrait {
+  filter: grayscale(1) contrast(1.06);
+}
+
+/* Buttons. Hover and press answer within --duration-instant. */
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-instant) var(--ease-standard),
+    border-color var(--duration-instant) var(--ease-standard),
+    color var(--duration-instant) var(--ease-standard);
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-bg-base);
+}
+@media (hover: hover) {
+  .btn-primary:hover {
+    background: var(--color-accent-hover);
+  }
+}
+.btn-primary:active {
+  background: var(--color-accent-active);
+}
+.btn-secondary {
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+}
+@media (hover: hover) {
+  .btn-secondary:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-bg-elev-1);
+  }
+}
+.btn-secondary:active {
+  background: var(--color-bg-elev-2);
+}
+.btn-secondary[data-state='copied'] {
+  border-color: var(--color-accent);
+}
+
+/* Confirmation ticks: the one in the copy button and the ringed one on a sent message. Each line
+   has a path length of 1 and draws itself once; under reduced motion it is simply there. */
+.check {
+  color: var(--color-accent);
+}
+.cf-check {
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 1.25rem;
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cf-check circle {
+  /* from twelve o'clock */
+  rotate: -90deg;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .check path,
+  .cf-check :is(circle, path) {
+    stroke-dasharray: 1;
+    animation: tick-draw 320ms var(--ease-out) both;
+  }
+  .cf-check circle {
+    animation-duration: 600ms;
+  }
+  .cf-check path {
+    animation-duration: 380ms;
+    animation-delay: 380ms;
+  }
+}
+@keyframes tick-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* Scroll reveals (.rise). A block below the window waits transparent and a little low, and comes
+   up once when it has scrolled in. The script in reveals.tsx marks the ones that wait
+   ([data-wait]); a block it never marked is simply there, so nothing depends on it running.
+   One motion per section: this is for sections that have none of their own. */
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    transition:
+      opacity 800ms var(--ease-out),
+      translate 800ms var(--ease-out);
+  }
+  .rise[data-wait] {
+    opacity: 0;
+    translate: 0 1.25rem;
+    transition: none; /* hiding is instant and out of sight; only the arrival is seen */
+  }
+}
+
+/* Nav hairline appears once the page has scrolled (progressive: without scroll timelines it is always on). */
+.site-nav {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+@supports (animation-timeline: scroll()) {
+  .site-nav {
+    animation: nav-rule linear both;
+    animation-timeline: scroll();
+    animation-range: 0 4rem;
+  }
+  @keyframes nav-rule {
+    from {
+      border-bottom-color: transparent;
+    }
+  }
+}
+
+/* Nav on touch: each link gets a finger-high hit box as an invisible ::after, so the bar keeps its
+   height and spacing; text links reach half the gap to each side (--reach). */
+.nav-short {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  .site-nav a {
+    position: relative;
+  }
+  .site-nav a::after {
+    content: '';
+    position: absolute;
+    inset-inline: var(--reach, 0);
+    top: 50%;
+    height: var(--tap);
+    transform: translateY(-50%);
+  }
+  .site-nav nav > a:not(.btn-primary) {
+    --reach: -0.5rem;
+  }
+}
+@media (hover: none) and (pointer: coarse) and (min-width: 40rem) {
+  .site-nav nav > a:not(.btn-primary) {
+    --reach: -0.8125rem;
+  }
+}
+/* When the row does not fit (a larger default text size, longer words): the name gives way first and
+   ends in an ellipsis, keeping at least 3rem, then the links wrap, right-aligned, and the bar grows
+   (nav.tsx keeps --nav-h at its real height). The name clips in a span, so the link's touch box does not. */
+.site-nav > div > a {
+  min-width: 0;
+}
+.nav-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.site-nav nav {
+  flex-shrink: 0;
+  max-width: calc(100% - 4rem);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 0.25rem;
+}
+.site-nav nav > a {
+  overflow-wrap: anywhere;
+}
+.site-nav .btn-primary {
+  white-space: normal;
+}
+/* Small phones: name, Work, About and the button on one line in 280px. The CV stays on the
+   landing's first screen and in the ending. */
+@media (max-width: 23.43rem) {
+  .site-nav > div,
+  .site-nav nav {
+    column-gap: 0.75rem;
+  }
+  .site-nav nav > a:not(.btn-primary) {
+    --reach: -0.375rem;
+  }
+  .site-nav .btn-primary {
+    padding-inline: 0.625rem;
+  }
+  .nav-long {
+    display: none;
+  }
+  .nav-short {
+    display: inline;
+  }
+}
+
+/* The ending (contact and footer in one). The contour chart from the hero returns behind it,
+   surfacing from the top edge; the closing sentence is set like the hero statement and its last
+   line is the address. */
+.ending {
+  position: relative;
+  isolation: isolate; /* the chart sits at z-index -1 without leaving the footer */
+}
+.ending-field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mask-image: linear-gradient(transparent, #000 45%);
+}
+.end-say {
+  container-type: inline-size; /* the address sizes itself to this width */
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-muted);
+}
+.end-lead {
+  display: block;
+  max-width: 24ch;
+}
+/* One line at every width: the address is 14.3em wide in Geist 600, so its size is capped at
+   1/14.3 of the sentence block (7cqi), less a few percent for hinting. Longer text wraps. */
+.end-mail {
+  display: block;
+  width: fit-content;
+  margin-top: 0.12em;
+  font-size: min(1em, 6.8cqi);
+  overflow-wrap: break-word;
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+  text-decoration-color: var(--color-accent);
+}
+
+/* Contact form, written as a sentence with blanks: name, what it is about, email. Each blank is a
+   hairline that becomes a 2px amber rule while it has focus; the message is a ruled area under
+   the sentence, under its own question. */
+.cf-say {
+  font-size: clamp(1.25rem, 1.6vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-body);
+}
+.cf-thanks {
+  color: var(--color-text-primary);
+}
+/* Safari draws its contacts button inside the blank, over the end of the placeholder. Suggestions still come up while typing. */
+.cf-blank::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+  pointer-events: none;
+}
+.cf-blank {
+  field-sizing: content;
+  min-width: 7ch;
+  max-width: 100%;
+  padding: 0 0.1em;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  outline: none;
+  transition:
+    border-color var(--duration-instant) var(--ease-standard),
+    box-shadow var(--duration-instant) var(--ease-standard);
+}
+.cf-blank::placeholder,
+.cf-note::placeholder {
+  color: var(--tone-dim);
+  opacity: 1;
+}
+/* The intent blank reads as a choice: a drawn caret after it, in the hairline's colour. */
+.cf-pick {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 0.9em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238e8e8e' stroke-width='1.25'/%3E%3C/svg%3E")
+    no-repeat right 0.1em bottom 0.64em / 0.55em auto; /* centred on the text line, also when touch pads the top */
+}
+@media (hover: hover) {
+  .cf-pick:hover {
+    border-bottom-color: var(--color-text-muted);
+  }
+}
+.cf-pick option {
+  background: var(--color-bg-elev-1);
+  color: var(--color-text-primary);
+}
+/* A browser's autofill paints its own background box over a field. Clipping that background to
+   the text keeps the blank a line with words on it, in the site's own text colour. */
+:is(.cf-blank, .cf-note):is(:autofill, :-webkit-autofill) {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: var(--color-text-primary);
+}
+.cf-blank:focus-visible {
+  border-bottom-color: var(--color-accent);
+  /* The second pixel of the rule, inside the box, so the text does not move. */
+  box-shadow: inset 0 -1px 0 var(--color-accent);
+}
+.cf-pick:focus-visible {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23f59e0b' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+.cf-blank[aria-invalid='true'],
+.cf-note[aria-invalid='true'] {
+  border-bottom-color: var(--color-accent-text);
+}
+.cf-errors p,
+.cf-failed p {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-accent-text);
+}
+.cf-failed p {
+  max-width: 48ch;
+  color: var(--color-text-body);
+}
+.cf-trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.cf-ask {
+  display: block;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-body);
+}
+.cf-note {
+  display: block;
+  width: 100%;
+  min-height: 7rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem 0;
+  border: 0;
+  border-top: 1px solid var(--color-border-default);
+  border-bottom: 1px solid var(--color-border-default);
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  outline: none;
+  transition:
+    border-color var(--duration-instant) var(--ease-standard),
+    box-shadow var(--duration-instant) var(--ease-standard);
+}
+/* Focus as on the blanks: the rule under the field turns amber and doubles. The rule above stays
+   grey, and the corners stay square (the global focus style rounds them, which bent the ends). */
+.cf-note:focus-visible {
+  border-bottom-color: var(--color-accent);
+  border-radius: 0;
+  box-shadow: inset 0 -1px 0 var(--color-accent);
+}
+.cf-send {
+  margin-top: 1.25rem;
+  white-space: normal; /* a longer label wraps inside the button */
+}
+.cf-send[aria-disabled='true'] {
+  cursor: progress;
+  background: var(--color-accent-active);
+}
+/* Touch: blanks and button at least 44px tall. The blanks grow upward so the text stays on its
+   hairline, and the sentence opens up to hold them. */
+@media (pointer: coarse) {
+  .cf-say {
+    line-height: 2.2;
+  }
+  .cf-blank {
+    line-height: 1.6;
+    padding-top: calc(2.75rem - 1.6em);
+  }
+  .cf-send {
+    min-height: 2.75rem;
+  }
+}
+
+/* Phones: the ways to reach me make one even block (copy across, the two CVs side by side), and
+   the sentence breaks into its parts, each words-above-field, with filled fields a thumb can hit. */
+@media (max-width: 39.99rem) {
+  /* The bar stacks at every phone width by rule; wrapping alone left it one row from 400px up. */
+  .end-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .end-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 1rem;
+    width: auto;
+  }
+  .end-details > button {
+    grid-column: 1 / -1;
+    justify-content: center;
+    min-height: var(--tap);
+    white-space: normal;
+  }
+  .end-details > a {
+    min-height: var(--tap);
+  }
+  /* A label longer than its half (a larger text size, a longer word) wraps inside it. */
+  .end-details > *,
+  .end-bar a {
+    overflow-wrap: anywhere;
+  }
+  .end-where,
+  .cf-errors p,
+  .cf-failed p {
+    font-size: var(--text-phone-body);
+  }
+  .cf-say {
+    display: grid;
+    gap: 1.25rem;
+    line-height: 1.4;
+  }
+  .cf-part {
+    display: grid;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: normal;
+  }
+  .cf-stop {
+    display: none;
+  }
+  .cf-blank,
+  .cf-note {
+    border-top: 0;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background-color: var(--color-bg-elev-1);
+    font-size: var(--text-phone-body);
+  }
+  .cf-blank {
+    field-sizing: fixed;
+    width: 100%;
+    min-height: var(--tap-lg);
+    padding: 0 0.875rem;
+    line-height: normal;
+  }
+  .cf-pick {
+    padding-right: 2.5rem;
+    background-position: right 0.875rem center;
+  }
+  .cf-ask {
+    margin-top: 1.25rem;
+  }
+  .cf-note {
+    padding: 0.75rem 0.875rem;
+  }
+  .cf-send {
+    width: 100%;
+    justify-content: center;
+    min-height: var(--tap-lg);
+    font-size: var(--text-phone-body);
+  }
+}
+
+/* Touch at any width: every link on the landing that stands on its own is a finger's height. */
+@media (hover: none) and (pointer: coarse) {
+  .end-details > *,
+  .end-bar a,
+  .page-back,
+  .practice-more > a,
+  .facts a {
+    min-height: var(--tap);
+  }
+  /* A link inside a sentence: block padding on an inline box grows the hit area without moving a line. */
+  .link-in-text {
+    padding-block: 0.25rem;
+  }
+  /* The fact sheet's address is inline text, which takes no min-height. No specificity, so the
+     phone layout's own display still wins. */
+  :where(.facts a[href^='mailto']) {
+    display: inline-flex;
+    align-items: center;
+  }
+  /* The big address keeps its size and place: the extra height is an invisible box around it. */
+  .end-mail {
+    position: relative;
+  }
+  .end-mail::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: var(--tap);
+    transform: translateY(-50%);
+  }
+  /* A link inside a sentence: 24px of height without moving the lines. */
+  .cf-failed a {
+    padding-block: 0.25rem;
+  }
+}
+
+/* Annotated screenshot: markers, list rows and leader lines share one active state (amber). */
+.marker {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-bg-base);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background-color var(--duration-instant) var(--ease-standard),
+    color var(--duration-instant) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-out);
+}
+/* 44px touch target around the 28px marker */
+.marker:not(.marker-static)::before {
+  content: '';
+  position: absolute;
+  inset: -0.5rem;
+  clip-path: var(--hit, none);
+}
+.marker[data-active='true'],
+.callout[data-active='true'] .marker {
+  background: var(--color-accent);
+  color: var(--color-bg-base);
+}
+.marker:not(.marker-static)[data-active='true'] {
+  scale: 1.15;
+}
+/* Rules only between rows, and they never light: an amber rule above the lit row read as an
+   underline of the row before it. The filled number and the amber line mark the lit pair. */
+li + li > .callout {
+  border-top: 1px solid var(--color-border-default);
+}
+.leader {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+  transition: stroke var(--duration-instant) var(--ease-standard);
+}
+.leader-across {
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+[data-active='true'] > .leader {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  opacity: 1;
+}
+
+/* The helper line names the input in hand: no hover on a touch screen. */
+.hint-touch {
+  display: none;
+}
+@media (hover: none) and (pointer: coarse) {
+  /* The hit box starts inside the 1.5px ring, so it reaches a full 44px only from 10px out. */
+  .marker:not(.marker-static)::before {
+    inset: -0.625rem;
+  }
+  .hint-mouse {
+    display: none;
+  }
+  .hint-touch {
+    display: inline;
+  }
+}
+/* The note current after a tap or under the pinned picture: its number fills (data-active) and its text comes up. */
+.callout-text {
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.callout[aria-current='true'] .callout-text {
+  color: var(--color-text-secondary);
+}
+/* Under 1024px the picture and its notes take one of three layouts, chosen by the window: upright
+   (pinned above the notes, PINNED in annotated-shot.tsx), side by side (landscape from 768px) and
+   free (stacked, not pinned). In each the whole picture fits under the nav, and a stacked picture
+   narrower than its column sits in its middle. */
+@media (max-width: 63.99rem) {
+  .shot-pin > div {
+    /* The 1px border on each side is not part of the picture's ratio. */
+    max-width: calc((100svh - var(--nav-h) - 1rem - 2px) * var(--ratio) + 2px);
+    margin-inline: auto;
+  }
+}
+/* Upright: the picture holds under the nav while its notes scroll up beneath it, so a number and
+   its note are on screen together. As wide as its column, narrower only to leave 200px for notes. */
+@media (max-width: 63.99rem) and (min-height: 31.25rem) and (orientation: portrait) {
+  .shot-pin {
+    position: sticky;
+    top: var(--nav-h);
+    z-index: 20;
+    padding-block: 0.75rem;
+    margin-block: -0.75rem;
+    background: var(--color-bg-base);
+  }
+  .shot-pin > div {
+    max-width: calc((100svh - var(--nav-h) - 1.5rem - 12.5rem - 2px) * var(--ratio));
+  }
+  /* The picture lets go once the last note reaches it: the grid's content box ends there (--tail is set by
+     annotated-shot.tsx), and the same height comes back as padding, so nothing after the notes moves. */
+  .shot {
+    padding-bottom: var(--tail, 0px);
+  }
+  .shot-pin + div {
+    margin-bottom: calc(-1 * var(--tail, 0px));
+  }
+  /* Text sliding under the picture fades out instead of meeting a hard edge. */
+  .shot-pin::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    height: 1.25rem;
+    background: linear-gradient(var(--color-bg-base), transparent);
+    pointer-events: none;
+  }
+}
+/* Side by side: a window wider than tall from 768px has the room beside the picture, so the notes
+   go there, as on desktop, and the picture stays in view while they scroll. Nothing tracks the scroll.
+   SIDE in annotated-shot.tsx. */
+@media (min-width: 48rem) and (max-width: 63.99rem) and (orientation: landscape) {
+  .shot {
+    grid-template-columns: minmax(0, 2fr) minmax(15.625rem, 1fr);
+  }
+  .shot-pin {
+    position: sticky;
+    top: calc(var(--nav-h) + 0.5rem);
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Motion outside the hero, all CSS, all behind prefers-reduced-motion:
+   1. once the screenshot has loaded its markers arrive, then leader lines draw from the image's
+      edge to each note, which is what explains the pairing;
+   2. the rule under the contact address draws as the address arrives.
+   Everything else is feedback at --duration-instant. Nothing here hides content: without these
+   rules the page is the same page, already in its final state.
+   --------------------------------------------------------------------------------------------- */
+/* Markers and lines wait for the screenshot (.shot gets data-ready once it has decoded). Only
+   where scripts run, because a script is what lifts the wait. */
+@media (scripting: enabled) {
+  .shot:not([data-ready]) :is(.marker:not(.marker-static), .leader) {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* The numbers arrive one by one, then each line draws out to its note. */
+  .shot[data-ready] .marker:not(.marker-static) {
+    animation: marker-in 400ms var(--ease-out) calc(var(--i, 0) * 110ms + 250ms) backwards;
+  }
+  .leader-gutter {
+    stroke-dasharray: var(--len);
+  }
+  .shot[data-ready] .leader-gutter {
+    animation: leader-draw 0.7s var(--ease-out) calc(var(--i, 0) * 110ms + 550ms) backwards;
+  }
+}
+@keyframes marker-in {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+}
+
+/* Page transition: the hero plate travels into the case-study plate (and back). React names the
+   pair only for the navigation; without the API the link is a plain navigation. */
+@media (prefers-reduced-motion: no-preference) {
+  /* The curve the opening uses to carry the tile onto the stage, so both journeys move alike. */
+  ::view-transition-group(.plate-morph) {
+    animation-duration: 700ms;
+    animation-timing-function: cubic-bezier(0.65, 0, 0.1, 1);
+  }
+  ::view-transition-old(.plate-morph),
+  ::view-transition-new(.plate-morph) {
+    height: 100%;
+    object-fit: cover;
+    animation-duration: 320ms;
+  }
+}
+/* About on phones: the portrait runs edge to edge as a set crop and fades into the page under its
+   caption, the bio is set a size up on a measure of about 40 characters, and each period is a mono
+   label above its role, as in the landing's earlier work. */
+@media (max-width: 39.99rem) {
+  .about-figure {
+    max-width: none;
+    margin-inline: calc(-1 * var(--gutter));
+  }
+  .about-figure .portrait {
+    aspect-ratio: 4 / 3;
+    object-position: 50% 30%;
+    border-radius: 0;
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  }
+  .about-figure figcaption {
+    position: relative;
+    margin-top: -2rem;
+    padding-inline: var(--gutter);
+    font-size: var(--text-phone-body);
+    color: var(--color-text-secondary);
+  }
+  .about-bio {
+    max-width: 19.5rem;
+  }
+  .about-bio p:not(:first-child) {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+  .about-when {
+    font-family: var(--font-mono);
+    font-size: var(--text-phone-meta);
+  }
+  .about-page .facts {
+    font-size: var(--text-phone-body);
+  }
+}
+/* About at tablet portrait: the portrait is a narrow first column beside the bio, so the bio keeps
+   a reading measure and nothing leaves an empty half; the facts fill three columns. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .about-intro {
+    grid-template-columns: clamp(9rem, 22vw, 13rem) minmax(0, 1fr);
+  }
+  .about-intro h1 {
+    grid-column: 1 / -1;
+  }
+  .about-figure {
+    max-width: none;
+  }
+  .about-bio {
+    max-width: 31rem;
+  }
+  .about-page .facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+/* The About page (see page-fade.tsx) fades in, rising a few pixels, and fades out when it is left.
+   While it is up the nav is its own layer above it, so the page scrolled under the nav never shows
+   over it as it leaves; the layer does not animate, so the nav simply holds still. */
+:root:has(.about-page) .site-nav {
+  view-transition-name: site-nav;
+}
+::view-transition-group(site-nav),
+::view-transition-old(site-nav),
+::view-transition-new(site-nav) {
+  animation: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(.page-out) {
+    animation: page-out 180ms var(--ease-standard) both;
+  }
+  ::view-transition-new(.page-in) {
+    animation: page-in 520ms var(--ease-out) both;
+  }
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    translate: 0 1rem;
+  }
+}
+/* Reduced motion: the browser may still swap the page through a view transition, but nothing moves. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes leader-draw {
+  from {
+    stroke-dashoffset: var(--len);
+  }
+}
+/* Case-study opening: a slate row (back, place in the set, next), the annotated plate, then the
+   title between hairlines and one strip of credits. Phones and studies without markers lead with
+   the title instead: the image (and on phones its list) would push it a screen down. */
+.cs-open {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.5rem;
+}
+.cs-shot {
+  margin-top: 2rem;
+}
+.cs-slate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+.cs-slate a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color var(--duration-instant) var(--ease-standard);
+}
+@media (hover: hover) {
+  .cs-slate a:hover {
+    color: var(--color-text-primary);
+  }
+}
+.cs-slate a:active {
+  color: var(--color-text-primary);
+}
+.cs-count {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+.cs-head {
+  display: grid;
+  gap: 1rem 3rem;
+  padding-block: 1.5rem 1.75rem;
+  border-block: 1px solid var(--color-border-default);
+}
+.cs-credits {
+  order: 1;
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 3rem;
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--color-border-default);
+  font-size: 0.875rem;
+}
+.cs-credits dt {
+  color: var(--color-text-muted);
+}
+.cs-credits dd {
+  margin-top: 0.125rem;
+  overflow-wrap: anywhere;
+  color: var(--color-text-primary);
+}
+@media (min-width: 64rem) {
+  .cs-head {
+    grid-template-columns: 8fr 4fr;
+    align-items: end;
+  }
+  .cs-credits {
+    order: 0;
+    margin-top: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .cs-shot {
+    margin-top: 3rem;
+  }
+  .cs-open[data-marked] .cs-shot {
+    order: -1;
+    margin-top: 0;
+  }
+  .cs-open[data-marked] .cs-head {
+    margin-top: 3.5rem;
+  }
+}
+
+/* Case-study "What I built": heading, summary and stack hold the left (pinned from 1024px) while
+   the highlights, the evidence, run down the right at lead size. */
+.cs-built {
+  display: grid;
+  gap: 2.5rem 3rem;
+}
+.cs-side p {
+  margin-top: 1.25rem;
+  max-width: 46ch;
+  color: var(--color-text-body);
+}
+.cs-side dl {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-default);
+  font-size: 0.875rem;
+}
+.cs-side dt {
+  color: var(--color-text-muted);
+}
+.cs-side dd {
+  margin-top: 0.25rem;
+  color: var(--color-text-secondary);
+}
+.cs-proof li {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  padding-block: 1.75rem;
+  font-size: var(--text-lead);
+  line-height: 1.45;
+  color: var(--color-text-primary);
+}
+/* Rules only between items: nothing above the first or below the last. */
+.cs-proof li + li {
+  border-top: 1px solid var(--color-border-default);
+}
+.cs-proof li:first-child {
+  padding-top: 0;
+}
+.cs-proof li:last-child {
+  padding-bottom: 0;
+}
+.cs-num {
+  padding-top: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--color-accent);
+}
+@media (min-width: 64rem) {
+  .cs-built {
+    grid-template-columns: 5fr 7fr;
+    align-items: start;
+  }
+  .cs-proof li {
+    padding-block: 2.25rem;
+  }
+}
+/* Pinned only where the window can hold the whole column under the nav. */
+@media (min-width: 64rem) and (min-height: 44rem) {
+  .cs-side {
+    position: sticky;
+    top: 6.5rem;
+  }
+}
+
+/* Case study under 1024px. Slate: each of its three parts is a finger-sized row. */
+@media (hover: none) and (pointer: coarse) {
+  .cs-slate {
+    align-items: center;
+  }
+  .cs-slate > *,
+  .cs-count {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+  }
+  /* The live address gets a finger-tall hit area without moving the credits. */
+  .cs-credits a {
+    position: relative;
+  }
+  .cs-credits a::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: var(--tap);
+    transform: translateY(-50%);
+  }
+}
+@media (max-width: 63.99rem) {
+  /* Break a long address between its parts, not inside a word. */
+  .cs-credits dd {
+    overflow-wrap: break-word;
+  }
+}
+/* Phones: credits read as a list of label and value, one per row. */
+@media (max-width: 39.99rem) {
+  .cs-credits {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+  .cs-credits > div {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .cs-credits dd {
+    margin-top: 0;
+  }
+  /* Values, the stack line, the notes and their helper line are read as sentences: body size. */
+  .cs-credits dd,
+  .cs-side dd,
+  .callout-text,
+  .hint-mouse,
+  .hint-touch {
+    font-size: var(--text-phone-body);
+  }
+}
+/* Tablet portrait: summary and stack beside the highlights, as on desktop, in a narrower split. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .cs-built {
+    grid-template-columns: 5fr 7fr;
+    align-items: start;
+    column-gap: 2.5rem;
+  }
+  .cs-proof li {
+    grid-template-columns: 2.5rem 1fr;
+  }
+}
+@media (min-width: 40rem) and (max-width: 63.99rem) and (min-height: 44rem) {
+  .cs-side {
+    position: sticky;
+    top: 6.5rem;
+  }
+}
+/* Tablet portrait with a single highlight: a half-width statement left a column empty beside the stack, so the two stack. */
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .cs-built-one {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cs-built-one .cs-side {
+    position: static;
+  }
+  /* Stacked, both use the width, the paragraph at no more than about 75 characters a line. */
+  .cs-built-one .cs-side p {
+    max-width: 55ch;
+  }
+}
+
+/* Case-study "More screens": one capture large with the rest stacked beside it. Phone captures
+   stand whole, side by side. */
+.sc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+.sc-grid li:first-child {
+  grid-column: 1 / -1;
+}
+.sc-frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elev-1);
+}
+@media (min-width: 64rem) {
+  .sc-grid {
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .sc-grid li:first-child {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+  .sc-grid li:first-child .sc-frame {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}
+/* Names a capture that is not of the product itself, such as what it replaced. */
+.sc-label {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+/* Two or four captures: rows of two equal halves from 640px, one under the other below. */
+.sc-grid[data-pair] {
+  grid-template-columns: 1fr;
+}
+.sc-grid[data-pair] li:first-child {
+  grid-column: auto;
+  grid-row: auto;
+}
+.sc-grid[data-pair] li .sc-frame {
+  aspect-ratio: 16 / 10;
+  height: auto;
+}
+@media (min-width: 40rem) {
+  .sc-grid[data-pair] {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.sc-grid[data-phone] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 54rem;
+}
+.sc-grid[data-phone] li:first-child {
+  grid-column: auto;
+  grid-row: auto;
+}
+.sc-grid[data-phone] li .sc-frame {
+  aspect-ratio: 3 / 5;
+  height: auto;
+}
+
+/* Wide: the large capture is a 1200px file, so the grid stops where it would be drawn past 1500px. */
+@media (min-width: 100.01rem) {
+  .sc-grid:not([data-phone], [data-pair]) {
+    max-width: 2272px;
+  }
+}
+
+/* Lightbox: a native dialog over the whole window, the capture scrolling inside it. */
+.lightbox {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--color-bg-base) 96%, transparent);
+  color: var(--color-text-secondary);
+}
+.lightbox[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+.lightbox::backdrop {
+  background: none;
+}
+html:has(.lightbox[open]) {
+  overflow: hidden;
+}
+.lb-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem var(--gutter);
+  /* Solid, so the site nav behind never shows through the controls. */
+  background: var(--color-bg-base);
+  font-size: 0.875rem;
+}
+.lb-count {
+  margin-right: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+.lb-btn {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding-inline: 0.75rem;
+  border-radius: var(--radius-md);
+  transition:
+    background-color var(--duration-instant) var(--ease-standard),
+    color var(--duration-instant) var(--ease-standard);
+}
+@media (hover: hover) {
+  .lb-btn:hover {
+    background: var(--color-bg-elev-2);
+    color: var(--color-text-primary);
+  }
+}
+.lb-btn:active {
+  background: var(--color-bg-elev-2);
+  color: var(--color-text-primary);
+}
+/* One slide per picture on a horizontal snap track: a swipe changes picture with the browser's own scroll physics. */
+.lb-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  grid-template-rows: minmax(0, 1fr);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.lb-stage {
+  overflow: auto;
+  /* Sideways a fitted picture hands the swipe on to the track; zoomed, it keeps it (below). */
+  overscroll-behavior-x: auto;
+  overscroll-behavior-y: contain;
+  padding: 0.5rem var(--gutter) 2rem;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.lb-stage img {
+  cursor: zoom-in;
+}
+/* Zoomed by a tap: the picture at 2x or more, panned inside its slide; the slide's edges hold, so a pan never changes picture. */
+.lb-stage[data-zoom] {
+  padding: 0;
+  overscroll-behavior-x: contain;
+}
+.lightbox[open] .lb-stage[data-zoom] img {
+  width: var(--zw);
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border-radius: 0;
+  cursor: zoom-out;
+}
+/* Under 1024px the window is solid, so the page's own words do not read through around a small picture,
+   and a fitted picture sits in the middle; a taller one still starts at its top. */
+@media (max-width: 63.99rem) {
+  .lightbox {
+    background: var(--color-bg-base);
+  }
+  .lb-stage:not([data-zoom]) {
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+  }
+  .lb-stage img {
+    flex-shrink: 0;
+  }
+}
+/* Phones: the controls sit at the bottom, under the thumb. */
+@media (max-width: 39.99rem) {
+  .lightbox[open] {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .lb-bar {
+    order: 1;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  }
+  .sc-grid:not([data-phone]) {
+    grid-template-columns: 1fr;
+  }
+}
+.lb-stage img {
+  display: block;
+  width: auto;
+  max-width: min(100%, 75rem);
+  height: auto;
+  margin-inline: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+.lightbox[data-phone] .lb-stage img {
+  max-height: 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lightbox[open] {
+    animation: lightbox-in var(--duration-fast) var(--ease-out);
+  }
+}
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Where the band of light on the next-project plate is, along its diagonal. Off the left edge at rest. */
+@property --sweep {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: -30%;
+}
+/* Case-study close: the next project's name with its plate, small, beside it. On hover the arrow
+   leaves the name and runs across to the plate, which takes an amber edge as it lands and is
+   then crossed once by a band of light. */
+.cs-next {
+  display: grid;
+  gap: 1.75rem 3rem;
+  align-items: center;
+  padding-block: 3rem 3.5rem;
+  border-top: 1px solid var(--color-border-default);
+}
+.cs-next-label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+.cs-next-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.22em; /* a word space at this tracking */
+  margin-top: 0.5rem;
+  font-size: var(--text-display);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: var(--tracking-tighter);
+  color: var(--color-text-primary);
+}
+.cs-next-tag {
+  display: block;
+  max-width: 44ch;
+  margin-top: 1rem;
+  font-size: var(--text-lead);
+  color: var(--color-text-body);
+}
+/* The track the arrow runs along. Its runner is a line with the arrowhead at its right end. */
+.cs-go {
+  flex: none;
+  width: 0.5em;
+  margin-left: 0.08em;
+  overflow: hidden;
+  color: var(--color-accent);
+}
+.cs-go > span {
+  display: flex;
+  align-items: center;
+}
+.cs-go i {
+  flex: 1;
+  height: 0.047em; /* the icon's stroke at this size */
+  margin-right: -0.09em;
+  background: currentColor;
+}
+.cs-go svg {
+  flex: none;
+  width: 0.5em;
+  height: 0.5em;
+}
+.cs-next-plate {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elev-1);
+}
+/* A study with no screenshot: the plate holds the site's depth chart and the facts there are,
+   so the arrow still has somewhere to land and nothing poses as a screen. */
+.cs-chart {
+  position: relative;
+  aspect-ratio: 16 / 10;
+}
+/* The same plate as the lead of its own page: a band across the page, not a tall empty frame. */
+.cs-chart-lead {
+  overflow: hidden;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elev-1);
+}
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .cs-chart-lead {
+    aspect-ratio: 5 / 2;
+  }
+}
+@media (min-width: 64rem) {
+  .cs-chart-lead {
+    aspect-ratio: 3 / 1;
+  }
+  .cs-chart-lead .cs-chart-note {
+    inset: auto 1.5rem 1.25rem;
+    font-size: 0.8125rem;
+  }
+}
+.cs-chart-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.cs-chart-note {
+  position: absolute;
+  inset: auto 1rem 0.875rem;
+  display: grid;
+  gap: 0.125rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+.cs-chart-note b {
+  margin-top: 0.375rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+@media (max-width: 39.99rem) {
+  .cs-chart-note {
+    font-size: var(--text-phone-meta);
+  }
+}
+@media (min-width: 64rem) {
+  .cs-next {
+    grid-template-columns: 8fr 4fr;
+    padding-block: 3.5rem 5rem;
+  }
+}
+/* Only where the plate sits beside the name and there is a pointer to hover with. */
+@media (min-width: 64rem) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .cs-go {
+    flex: 1;
+    min-width: 0.5em;
+    margin-right: -2.25rem; /* across the column gap, stopping just short of the plate */
+  }
+  .cs-go > span {
+    /* At rest only the arrowhead end shows, beside the name. */
+    translate: calc(-100% + 0.5em) 0;
+    transition: translate 700ms var(--ease-out);
+  }
+  .cs-next:is(:hover, :focus-visible) .cs-go > span {
+    translate: 0 0;
+  }
+  /* The hero's light: the plate sits in a little shade, and once the arrow has landed and the edge
+     has lit, a band of light crosses it once (the shade lifts along the band, with a little gloss). */
+  .cs-next-plate {
+    position: relative;
+    isolation: isolate;
+    transition: border-color var(--duration-normal) var(--ease-standard);
+  }
+  .cs-next-plate::before,
+  .cs-next-plate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .cs-next-plate::before {
+    background: var(--color-bg-base);
+    opacity: 0.16;
+    mask-image: linear-gradient(105deg, #000 calc(var(--sweep) - 26%), transparent var(--sweep), #000 calc(var(--sweep) + 26%));
+  }
+  .cs-next-plate::after {
+    background: linear-gradient(
+      105deg,
+      transparent calc(var(--sweep) - 15%),
+      color-mix(in srgb, var(--color-text-primary) 18%, transparent) var(--sweep),
+      transparent calc(var(--sweep) + 15%)
+    );
+    mix-blend-mode: screen;
+  }
+  .cs-next:is(:hover, :focus-visible) .cs-next-plate {
+    --sweep: 130%;
+    border-color: var(--color-accent);
+    /* Leaving has no transition for the band, so it resets out of sight instead of sweeping back. */
+    transition:
+      border-color var(--duration-normal) var(--ease-standard) 400ms,
+      --sweep 1200ms var(--ease-standard) 600ms;
+  }
+}
+/* Under 1024 the plate sits below the name and a long name would wrap the arrow onto a line of its
+   own, so the arrow stands still at the end of the label row. */
+@media (max-width: 63.99rem) {
+  .cs-next > span:first-child {
+    position: relative;
+  }
+  .cs-go {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    font-size: var(--text-title);
+  }
+}
+/* Touch with the plate beside the name: no hover, so the arrow runs to the plate once, after the
+   block has risen into view. A block the reveal script never held back shows the arrow arrived. */
+@media (min-width: 64rem) and (hover: none) and (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  .cs-go {
+    flex: 1;
+    min-width: 0.5em;
+    margin-right: -2.25rem;
+  }
+  .cs-go > span {
+    transition: translate 900ms var(--ease-out) 500ms;
+  }
+  .cs-next[data-wait] .cs-go > span {
+    translate: calc(-100% + 0.5em) 0;
+    transition: none;
+  }
+}
+
+/* A short amber rule above a statement set at title scale (case-study outcome, practice statement). */
+.ruled::before {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin-bottom: 1.25rem;
+  background: var(--color-accent);
+}
+
+/* Linked screenshots: the border answers the pointer, nothing moves. */
 .frame {
-  box-shadow:
-    0 0 0 1px var(--color-border-default),
-    0 30px 80px -30px rgba(0, 0, 0, 0.8);
+  transition: border-color var(--duration-instant) var(--ease-standard);
+}
+@media (hover: hover) {
+  a.frame:hover,
+  a:hover .frame {
+    border-color: var(--color-border-strong);
+  }
+}
+a.frame:active,
+a:active .frame {
+  border-color: var(--color-border-strong);
 }

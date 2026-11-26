@@ -1,0 +1,11 @@
+<svg viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="48" fill="#0A0A0B"/>
+  <g transform="translate(33 33)">
+    <path fill="#F59E0B" d="M0 0h20v190H0z"/>
+    <path fill="#F5F5F5" d="M45 0h72L45 90z"/>
+    <path fill="#F59E0B" d="M147 0h41v9L105 112 85 87z"/>
+    <path fill="#F5F5F5" d="M188 47l-43 54 43 66z"/>
+    <path fill="#F5F5F5" d="M67 99L45 124v66h78z"/>
+    <path fill="#F59E0B" d="M127 123l-9 11 36 56h18z"/>
+  </g>
+</svg>

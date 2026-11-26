@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kristijan Krešić · Software engineer (React / Next.js / TypeScript / Laravel)</title>
+<style>
+  /* Standalone CV — borrows token VALUES from DESIGN.md (amber scale, Geist, mono-label
+     pattern), inverted to light paper for ATS/print. Does not consume global.css. */
+        
+  :root {
+    --ink: #18181b;          /* headings */
+    --body: #3f3f46;         /* body text */
+    --muted: #71717a;        /* meta, stack tails */
+    --hairline: #e4e4e7;
+    --amber: #f59e0b;        /* thick rules only (DESIGN.md --color-accent) */
+    --amber-text: #b45309;   /* small text on white, AA 5.0:1 (amber-700; #d97706 is only 3.19:1) */
+    --sans: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'Geist Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  @page { size: A4; margin: 8mm 13mm 8mm; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  body {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: var(--body);
+    background: #fff;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  @media screen { body { padding: 48px 24px; } }
+
+  a { color: var(--amber-text); text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--amber-text); outline-offset: 2px; }
+
+  /* ---- header ---- */
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  h1 .dot { color: #d97706; } /* 24px bold = WCAG large text, 3:1 threshold */
+  .headline {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--amber-text);
+    margin-top: 4px;
+  }
+  .contact {
+    margin-top: 6px;
+    font-size: 10.5px;
+    color: var(--muted);
+    font-variant-ligatures: none;
+  }
+  .contact .sep { color: #a1a1aa; padding: 0 2px; }
+
+  /* ---- sections ---- */
+  section { margin-top: 9px; }
+  h2 {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--ink);
+    border-bottom: 2px solid var(--amber);
+    padding-bottom: 3px;
+    margin-bottom: 7px;
+    break-after: avoid;
+  }
+
+  .summary { max-width: 100%; }
+
+  /* ---- experience entries ---- */
+  .role { break-inside: avoid; }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .row .dates {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  h3 { font-size: inherit; font-weight: inherit; }
+  .role-title { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+  .role-desc { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+
+  .project { margin-top: 7px; padding-left: 12px; border-left: 2px solid var(--hairline); break-inside: avoid; }
+  .project-title { font-size: 11.5px; font-weight: 600; color: var(--ink); }
+  .project-title .hook { font-weight: 400; color: var(--body); }
+
+  ul { list-style: none; margin-top: 2px; }
+  li { padding-left: 11px; position: relative; margin-top: 1px; text-wrap: pretty; }
+  li::before { content: '•'; position: absolute; left: 0; color: var(--amber-text); }
+
+  .stack {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 0.01em;
+  }
+
+  /* earlier experience: compact rows */
+  .early { margin-top: 4px; break-inside: avoid; }
+  .early .what { font-size: 11px; }
+  .early .what strong { color: var(--ink); font-weight: 600; }
+
+  /* skills */
+  .skill-row { margin-top: 2px; break-inside: avoid; }
+  .skill-row .cat {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+  }
+
+  /* education */
+  .edu { margin-top: 3px; break-inside: avoid; }
+  .edu .what strong { color: var(--ink); font-weight: 600; }
+
+  :root{--sans:'Liberation Sans',Arial,sans-serif;--mono:'Liberation Mono',monospace}
+  body{font-size:10.4px;line-height:1.36}
+  .stack{font-size:8.5px} .row .dates{font-size:9px} h2{font-size:9.5px}
+  section{margin-top:7px} h2{margin-bottom:5px}
+  @page{margin:6mm 12mm 6mm}
+  ul{list-style:disc outside;padding-left:13px} li{position:static;padding-left:0}
+  li::before{content:none} li::marker{color:var(--amber-text)}
+  .row{display:table;width:100%} .row>h3,.row>.what{display:table-cell;vertical-align:baseline}
+  .row .dates{display:table-cell;text-align:right;padding-left:12px;vertical-align:baseline;width:1%}
+  .stack{color:#52525b}
+  h1 .dot{display:inline-block;width:.17em;height:.17em;border-radius:50%;background:#d97706;margin-left:.06em;vertical-align:baseline}
+</style>
+
+</head>
+<body>
+
+<header>
+  <h1>Kristijan Krešić<span class="dot" aria-hidden="true"></span></h1>
+  <p class="headline">Software engineer · React / Next.js / TypeScript · Laravel</p>
+  <p class="contact">Hvar, Croatia (CET) <span class="sep" aria-hidden="true">·</span> Available now <span class="sep" aria-hidden="true">·</span> Remote (EU / US-East overlap) <span class="sep" aria-hidden="true">·</span> Hybrid in Split or Zagreb <span class="sep" aria-hidden="true">·</span> EU citizen, no visa needed</p>
+  <p class="contact"><a href="mailto:kristijan.kresic.dev@gmail.com">kristijan.kresic.dev@gmail.com</a> <span class="sep" aria-hidden="true">·</span> <a href="https://github.com/kristijan-kresic-hvar">github.com/kristijan-kresic-hvar</a> <span class="sep" aria-hidden="true">·</span> <a href="https://www.linkedin.com/in/kkwebdev/">linkedin.com/in/kkwebdev</a></p>
+</header>
+
+<section aria-labelledby="summary">
+  <h2 id="summary">Summary</h2>
+  <p class="summary">Frontend-led full-stack engineer, 4+ years professional (building for the web since 2016). Built six client products in React / Next.js / TypeScript and React Native for North American clients in insurance, HIPAA healthcare, telehealth and IoT, most recently a public data portal on Next.js 16 / React 19. Owns the frontend end to end and works across the stack when the team needs it: Laravel controllers and migrations, REST integration over Django and Node.js backends, CMS and payments.</p>
+</section>
+
+<section aria-labelledby="experience">
+  <h2 id="experience">Experience</h2>
+
+  <div class="role">
+    <div class="row">
+      <h3 class="role-title">Frontend developer, Agilno</h3>
+      <span class="dates">Jan 2023 – Aug 2026</span>
+    </div>
+    <p class="role-desc">Product agency; embedded in six North American client teams · remote</p>
+
+  <div class="project">
+    <div class="row">
+      <h3 class="project-title">BioCirV Data Portal <span class="hook">· public biomass-discovery platform (<a href="https://biocirv.beamcircular.org">biocirv.beamcircular.org</a>)</span></h3>
+      <span class="dates">Feb 2026 – Jul 2026</span>
+    </div>
+    <ul role="list">
+      <li>Built the public discovery UI from scratch, responsive and accessible (semantic HTML, keyboard navigation): search with autocomplete, faceted filters, interactive maps, biomass profiles and Recharts dashboards over a Django REST API.</li>
+      <li>Designed the data layer (TanStack Query + URL-synced filter state) so every search is a shareable link and results stay cached across navigation.</li>
+      <li>Owned the frontend foundation two other developers built on: component system, typed forms (React Hook Form + Zod), Figma-to-code workflow, commit conventions and QA handoff. Reviewed their pull requests.</li>
+    </ul>
+    <p class="stack">Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · TanStack Query · Zod</p>
+  </div>
+  <div class="project">
+    <div class="row">
+      <h3 class="project-title">OnCallable <span class="hook">· marketplace connecting customers with service professionals (<a href="https://oncallable.com">oncallable.com</a>)</span></h3>
+      <span class="dates">Jan 2026 – Jul 2026</span>
+    </div>
+    <ul role="list">
+      <li>Moved a hard-coded marketing site onto Sanity in about two weeks; editors now ship pages, sections, popups, redirects and A/B tests themselves, with zero developer deploys for content.</li>
+      <li>Set up SEO and answer-engine optimisation with structured FAQ data (JSON-LD).</li>
+    </ul>
+    <p class="stack">Next.js 14 · TypeScript · Tailwind CSS · Sanity</p>
+  </div>
+  <div class="project">
+    <div class="row">
+      <h3 class="project-title">Suello <span class="hook">· app for a Bluetooth-connected smart planter, Toronto IoT startup (<a href="https://www.linkedin.com/company/suello/">suello on LinkedIn</a>)</span></h3>
+      <span class="dates">Apr 2025 – Nov 2025</span>
+    </div>
+    <ul role="list">
+      <li>Built the companion app from scratch in React Native: the Bluetooth Low Energy (BLE) pairing and device-communication layer with reconnects and retries, tested against a test device; authentication; onboarding with custom animations. The project ended before a hardware prototype was ready, so the app never ran on a real planter.</li>
+    </ul>
+    <p class="stack">React Native 0.78 · TypeScript</p>
+  </div>
+  <div class="project">
+    <div class="row">
+      <h3 class="project-title">Vetster <span class="hook">· pet-telehealth marketplace, Toronto (<a href="https://vetster.com">vetster.com</a>)</span></h3>
+      <span class="dates">Jul 2024 – Apr 2025</span>
+    </div>
+    <ul role="list">
+      <li>Shipped Vue.js features (vet onboarding, profile and account-settings screens) on a 24/7 video-consultation platform with 100k+ app users.</li>
+      <li>Backend: Laravel controllers and database migrations for user and vet profile data (profile fields, onboarding, account settings).</li>
+    </ul>
+    <p class="stack">Laravel · PHP · Vue.js · PostgreSQL</p>
+  </div>
+  <div class="project">
+    <div class="row">
+      <h3 class="project-title">Naitur <span class="hook">· platform for licensed psilocybin-therapy clinics (US, HIPAA · <a href="https://naitur.ai">naitur.ai</a>)</span></h3>
+      <span class="dates">Aug 2023 – Jul 2024</span>
+    </div>
+    <ul role="list">
+      <li>Shipped the responsive frontend for a US-regulated platform (100+ facilitators and 15+ clinics onboarded in its first week).</li>
+      <li>Built JWT magic-link authentication, multi-party e-signature flows, data tables, export and analytics on HIPAA-compliant infrastructure.</li>
+    </ul>
+    <p class="stack">React · TypeScript · REST API (Node.js backend)</p>
+  </div>
+  <div class="project">
+    <div class="row">
+      <h3 class="project-title">BuddyIns <span class="hook">· US long-term-care insurance platform (<a href="https://buddyins.com">buddyins.com</a>)</span></h3>
+      <span class="dates">Jan 2023 – Jul 2023</span>
+    </div>
+    <ul role="list">
+      <li>Built the Next.js frontend of the web app that replaced the company’s manual Excel process: authentication flows, PayPal subscription checkout, CRUD screens, data tables and CSV export.</li>
+    </ul>
+    <p class="stack">Next.js · React · Django REST API · PayPal API</p>
+  </div>
+  </div>
+</section>
+
+<section aria-labelledby="earlier">
+  <h2 id="earlier">Earlier Experience</h2>
+  <div class="early row"><span class="what"><strong>amondi GmbH</strong> (Zagreb, hybrid) · Frontend web developer: CMS-driven React apps (car-catcher.de, <a href="https://buildmycareer.de">buildmycareer.de</a>)</span><span class="dates">Apr 2022 – Nov 2022</span></div>
+  <div class="early row"><span class="what"><strong>Reroot</strong> (remote, contract) · Web developer: full redesign of the Agrivi marketing site, a farm-management SaaS (<a href="https://www.agrivi.com">agrivi.com</a> · WordPress, PHP, multilingual)</span><span class="dates">Jul 2020 – Mar 2021</span></div>
+  <div class="early row"><span class="what"><strong>Robinson Restaurant</strong> (Hvar · <a href="https://robinson-hvar.com">robinson-hvar.com</a>) · Freelance web developer: custom WordPress theme from scratch (PHP); the owner reported enquiries up by about 200% after launch</span><span class="dates">2019 – 2021</span></div>
+</section>
+
+<section aria-labelledby="skills">
+  <h2 id="skills">Skills</h2>
+  <p class="skill-row"><span class="cat">Frontend:</span> React, Next.js (App Router, SSR/SSG), TypeScript, JavaScript, Vue.js, Tailwind CSS, HTML5, CSS3, TanStack Query, React Hook Form, Zod, Recharts, Astro</p>
+  <p class="skill-row"><span class="cat">Backend:</span> Laravel / PHP (controllers, migrations), WordPress theme development (PHP), REST API integration (Django REST, Laravel, Node.js backends), PostgreSQL, MySQL, PayPal API, Sanity CMS</p>
+  <p class="skill-row"><span class="cat">Mobile:</span> React Native, BLE / Bluetooth Low Energy integrations</p>
+  <p class="skill-row"><span class="cat">Testing &amp; quality:</span> Vitest, Playwright (browser QA), accessibility (semantic HTML, keyboard navigation, Lighthouse a11y audits), web performance (Lighthouse, Core Web Vitals), CI/CD (GitHub Actions, Bitbucket Pipelines), ESLint, Prettier</p>
+  <p class="skill-row"><span class="cat">Tooling &amp; languages:</span> Git, Vercel, WordPress, Figma, Claude Code, Cursor · English (fluent), Croatian (native)</p>
+  <p class="skill-row"><span class="cat">Public code:</span> <a href="https://github.com/kristijan-kresic-hvar/kristijankresic.com">github.com/kristijan-kresic-hvar/kristijankresic.com</a> · Next.js 16, React 19, TypeScript, Tailwind CSS 4, Vitest, GitHub Actions CI</p>
+</section>
+
+<section aria-labelledby="education">
+  <h2 id="education">Education</h2>
+  <div class="edu row"><span class="what"><strong>Algebra Bernays University (Sveučilište Algebra), Zagreb</strong> · Certificate programme: PHP &amp; MySQL Backend Development</span><span class="dates">2017 – 2018</span></div>
+  <div class="edu row"><span class="what"><strong>Algebra Bernays University (Sveučilište Algebra), Zagreb</strong> · Certificate programme: Frontend Development &amp; Graphic Design</span><span class="dates">2016 – 2017</span></div>
+</section>
+
+</body>
+</html>

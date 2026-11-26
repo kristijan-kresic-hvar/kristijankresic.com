@@ -1,35 +1,49 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Script from 'next/script';
+import { Ending } from '@/components/ending';
 import { Nav } from '@/components/nav';
-import { Footer } from '@/components/footer';
+import { PageFade } from '@/components/page-fade';
+import { Reveals } from '@/components/reveals';
 import { PROFILE } from '@/content/profile';
 import './globals.css';
 
 const geist = Geist({ subsets: ['latin', 'latin-ext'], variable: '--font-geist', display: 'swap' });
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap' });
+// Mono only sets small data (frame numbers, markers), so it is not worth a preload ahead of the LCP.
+const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono', display: 'swap', preload: false });
+
+/** The site's Cloudflare Web Analytics token. Public by nature (it is in the page), and unset in development, so local visits are not counted. */
+const BEACON = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
+
+/**
+ * The site has one palette. Declaring it dark tells the browser to draw its own parts dark too (form
+ * controls, scrollbars, the menu of a select, the toolbar on phones) whatever the visitor's system is set to.
+ */
+export const viewport: Viewport = { colorScheme: 'dark', themeColor: '#0a0a0b' };
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://kristijankresic.com'),
   title: {
-    default: `${PROFILE.name} — Frontend engineer (React / Next.js / TypeScript)`,
-    template: `%s — ${PROFILE.name}`,
+    default: `${PROFILE.name} · Frontend engineer (React / Next.js / TypeScript)`,
+    template: `%s · ${PROFILE.name}`,
   },
   description:
-    'Frontend engineer with 4+ years shipping production React, Next.js, TypeScript and React Native products for North American clients. Based in Croatia, available now.',
+    'I’m a frontend engineer in Croatia, available now, with 4+ years shipping React, Next.js and TypeScript for North American clients. I build in React Native too.',
   openGraph: {
     type: 'website',
     siteName: PROFILE.name,
-    title: `${PROFILE.name} — Frontend engineer`,
-    description: '4+ years shipping production web and mobile products. React · Next.js · TypeScript. Available now.',
-    images: [{ url: '/images/og.png', width: 1200, height: 630, alt: `${PROFILE.name} — frontend engineer` }],
+    title: `${PROFILE.name} · Frontend engineer`,
+    description: 'I have spent 4+ years shipping production web apps with React, Next.js and TypeScript, and building in React Native. I am available now.',
+    images: [{ url: '/images/og.png', width: 1200, height: 630, alt: `${PROFILE.name}, frontend engineer` }],
   },
   twitter: { card: 'summary_large_image' },
-  alternates: { canonical: '/' },
+  // Already dark: asks the Dark Reader extension not to recolour it.
+  other: { 'darkreader-lock': '' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${geist.variable} ${geistMono.variable}`}>
       <body className="min-h-dvh flex flex-col">
         <a
           href="#main"
@@ -39,9 +53,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <Nav />
         <main id="main" className="flex-1">
-          {children}
+          <PageFade>{children}</PageFade>
         </main>
-        <Footer />
+        <Ending />
+        <Reveals />
+        {/* Cloudflare Web Analytics: page views and referrers, no cookies, so no consent banner. Off unless the build is given a token. */}
+        {BEACON && (
+          <Script
+            type="module"
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={JSON.stringify({ token: BEACON })}
+            strategy="lazyOnload"
+          />
+        )}
       </body>
     </html>
   );
