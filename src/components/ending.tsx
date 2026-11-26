@@ -44,7 +44,7 @@ export function Ending() {
                 <Download />
               </a>
             </div>
-            <p className="end-where mt-6 max-w-[62ch] text-sm text-text-body">
+            <p className="end-where mt-6 max-w-[62ch] text-sm text-text-body max-lg:max-w-[56ch]">
               Remote across the EU or with US-East overlap, or hybrid in Split or Zagreb. EU citizen, no visa needed.
             </p>
           </section>
@@ -55,11 +55,11 @@ export function Ending() {
             © {PROFILE.name}
             <span className="max-sm:hidden"> · </span>
             <br className="sm:hidden" />
-            <span className="whitespace-nowrap">
+            <span className="inline-block">
               Hvar, Croatia · <LocalTime />
             </span>
           </p>
-          <ul className="flex gap-x-6">
+          <ul className="flex flex-wrap gap-x-6 gap-y-2">
             <li>
               <a href={PROFILE.github} target="_blank" rel="noopener" className="link inline-flex items-center gap-1.5 text-text-secondary">
                 GitHub <ArrowUpRight />

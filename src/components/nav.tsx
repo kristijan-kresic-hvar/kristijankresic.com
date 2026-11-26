@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Container } from './container';
 import { PROFILE } from '@/content/profile';
 
@@ -28,16 +28,27 @@ export function glide(e: MouseEvent) {
 
 export function Nav() {
   const path = usePathname();
+  const bar = useRef<HTMLElement>(null);
   useEffect(() => {
     document.addEventListener('click', glide, true);
     return () => document.removeEventListener('click', glide, true);
   }, []);
+  useEffect(() => {
+    // The bar grows when its links wrap (a larger default text size): jumps and .from-top follow its
+    // real height. Without JavaScript the CSS value, the one-row height, stays.
+    const html = document.documentElement;
+    const ro = new ResizeObserver(() => {
+      if (bar.current) html.style.setProperty('--nav-h', `${bar.current.getBoundingClientRect().height}px`);
+    });
+    if (bar.current) ro.observe(bar.current);
+    return () => ro.disconnect();
+  }, []);
   const tone = 'text-text-body transition-colors duration-(--duration-instant) hover:text-text-primary';
   return (
-    <header className="site-nav sticky top-0 z-40 bg-bg-base/85 backdrop-blur-md">
-      <Container className="flex h-14 items-center justify-between gap-4 sm:h-16">
+    <header ref={bar} className="site-nav sticky top-0 z-40 bg-bg-base/85 backdrop-blur-md">
+      <Container className="flex min-h-14 items-center justify-between gap-4 sm:min-h-16">
         <Link href="/" className="font-semibold tracking-tight text-text-primary">
-          {PROFILE.name}
+          <span className="nav-name">{PROFILE.name}</span>
         </Link>
         <nav aria-label="Primary" className="flex items-center gap-4 text-sm sm:gap-7">
           {LINKS.map((l) =>

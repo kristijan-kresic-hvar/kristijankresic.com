@@ -27,8 +27,9 @@ describe('sweep sizes', () => {
     expect(heightsFor(768)[0]).toBeLessThan(768);
     expect(heightsFor(768)[2]).toBeGreaterThan(768);
   });
-  it('stresses three windows in each of six bands', () => {
-    expect(stressSizes()).toHaveLength(18);
+  it('stresses three windows in each of six bands, plus a short and a tall one at 640 and 768', () => {
+    expect(stressSizes()).toHaveLength(22);
+    for (const w of [640, 768]) expect(stressSizes().filter((s) => s.w === w)).toHaveLength(2);
   });
 });
 

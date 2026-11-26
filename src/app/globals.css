@@ -184,6 +184,8 @@ html {
 @media (min-width: 100.01rem) {
   html {
     font-size: min(0.375rem + 0.625vw, 1.375rem);
+    /* The nav's 4rem in em too: WebKit resolves rem in the root's own properties against 16px, not this grown size. */
+    scroll-padding-top: max(var(--nav-h), calc(4em + 1px));
   }
   :root {
     --container-page: 120rem;
@@ -236,6 +238,8 @@ body {
     color: var(--color-text-primary);
     text-wrap: balance;
     letter-spacing: var(--tracking-tight);
+    /* A word longer than the line breaks instead of running out of the window. */
+    overflow-wrap: break-word;
   }
 
   p {
@@ -627,15 +631,37 @@ body {
     --reach: -0.8125rem;
   }
 }
+/* When the row does not fit (a larger default text size, longer words): the name gives way first and
+   ends in an ellipsis, keeping at least 3rem, then the links wrap, right-aligned, and the bar grows
+   (nav.tsx keeps --nav-h at its real height). The name clips in a span, so the link's touch box does not. */
+.site-nav > div > a {
+  min-width: 0;
+}
+.nav-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.site-nav nav {
+  flex-shrink: 0;
+  max-width: calc(100% - 4rem);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 0.25rem;
+}
+.site-nav nav > a {
+  overflow-wrap: anywhere;
+}
+.site-nav .btn-primary {
+  white-space: normal;
+}
 /* Small phones: name, Work, About and the button on one line in 280px. The CV stays on the
    landing's first screen and in the ending. */
 @media (max-width: 23.43rem) {
   .site-nav > div,
   .site-nav nav {
     column-gap: 0.75rem;
-  }
-  .site-nav > div > a {
-    white-space: nowrap;
   }
   .site-nav nav > a:not(.btn-primary) {
     --reach: -0.375rem;
@@ -680,13 +706,13 @@ body {
   max-width: 24ch;
 }
 /* One line at every width: the address is 14.3em wide in Geist 600, so its size is capped at
-   1/14.3 of the sentence block (7cqi), less a few percent for hinting. */
+   1/14.3 of the sentence block (7cqi), less a few percent for hinting. Longer text wraps. */
 .end-mail {
   display: block;
   width: fit-content;
   margin-top: 0.12em;
   font-size: min(1em, 6.8cqi);
-  white-space: nowrap;
+  overflow-wrap: break-word;
   color: var(--color-text-primary);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -824,6 +850,7 @@ body {
 }
 .cf-send {
   margin-top: 1.25rem;
+  white-space: normal; /* a longer label wraps inside the button */
 }
 .cf-send[aria-disabled='true'] {
   cursor: progress;
@@ -854,7 +881,7 @@ body {
   }
   .end-details {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem 1rem;
     width: auto;
   }
@@ -862,9 +889,15 @@ body {
     grid-column: 1 / -1;
     justify-content: center;
     min-height: var(--tap);
+    white-space: normal;
   }
   .end-details > a {
     min-height: var(--tap);
+  }
+  /* A label longer than its half (a larger text size, a longer word) wraps inside it. */
+  .end-details > *,
+  .end-bar a {
+    overflow-wrap: anywhere;
   }
   .end-where,
   .cf-errors p,

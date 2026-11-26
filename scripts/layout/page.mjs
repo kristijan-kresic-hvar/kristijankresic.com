@@ -63,13 +63,16 @@ export function measure(o) {
     return v;
   };
   // The ancestors whose overflow clips this element, honouring that an absolute or fixed box
-  // escapes the overflow of ancestors that are not its containing block.
+  // escapes the overflow of ancestors that are not its containing block. `self`: for the text inside
+  // el, which el's own overflow clips too.
   const clipCache = new Map();
-  const clippers = (el) => {
-    if (clipCache.has(el)) return clipCache.get(el);
+  const clippers = (el, self) => {
+    const key = self ? 'self' : 'up';
+    if (!clipCache.has(el)) clipCache.set(el, {});
+    if (clipCache.get(el)[key]) return clipCache.get(el)[key];
     const list = [];
     let pos = cs(el).position;
-    for (let a = el.parentElement; a && a !== document.body && a !== de; a = a.parentElement) {
+    for (let a = self ? el : el.parentElement; a && a !== document.body && a !== de; a = a.parentElement) {
       const s = cs(a);
       const transformed = s.transform !== 'none' || s.filter !== 'none' || s.contain.includes('paint');
       const skip = (pos === 'absolute' && s.position === 'static' && !transformed) || (pos === 'fixed' && !transformed);
@@ -83,13 +86,13 @@ export function measure(o) {
       }
       if (s.position === 'absolute' || s.position === 'fixed') pos = s.position;
     }
-    clipCache.set(el, list);
+    clipCache.get(el)[key] = list;
     return list;
   };
   const scrolls = (v) => v === 'auto' || v === 'scroll';
-  const visiblePart = (r, el) => {
+  const visiblePart = (r, el, self) => {
     let v = r;
-    for (const c of clippers(el)) {
+    for (const c of clippers(el, self)) {
       const b = { left: c.x === 'visible' ? -1e9 : c.box.left, right: c.x === 'visible' ? 1e9 : c.box.right, top: c.y === 'visible' ? -1e9 : c.box.top, bottom: c.y === 'visible' ? 1e9 : c.box.bottom };
       v = v && intersect(v, b);
     }
@@ -109,7 +112,7 @@ export function measure(o) {
     range.selectNodeContents(t);
     const rects = [...range.getClientRects()].filter((r) => r.width > 0.5 && r.height > 0.5).map(rx);
     if (!rects.length) continue;
-    const shown = rects.map((r) => visiblePart(r, pe)).filter(Boolean);
+    const shown = rects.map((r) => visiblePart(r, pe, true)).filter(Boolean);
     texts.push({ t, pe, rects, shown, fs: parseFloat(cs(pe).fontSize) });
   }
 
@@ -137,7 +140,7 @@ export function measure(o) {
     // inside .hero). Glyphs may overhang their box a little.
     for (const x of texts) {
       let sx = false, sy = false;
-      for (const c of clippers(x.pe)) {
+      for (const c of clippers(x.pe, true)) {
         const box = c.box;
         let worst = null;
         for (const r of x.rects) {

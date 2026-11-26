@@ -37,6 +37,7 @@ export function stressSizes() {
   return [
     ...heightsFor(390).map((h) => t(390, h)), // phone
     t(568, 320), t(844, 390), t(932, 430), // phone on its side
+    t(640, heightsFor(640)[0]), t(640, heightsFor(640)[2]), t(768, heightsFor(768)[0]), t(768, heightsFor(768)[2]), // tight tablet rows
     ...heightsFor(820).map((h) => t(820, h)), // tablet, the short one sideways
     t(1023, 762), t(1180, 820), t(1366, 1024), // tablet on its side
     ...heightsFor(1280).map((h) => m(1280, h)), // desktop
